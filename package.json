@@ -1,0 +1,16 @@
+{
+  "name": "vite-plugin-import-build",
+  "version": "0.1.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^15.12.2",
+    "typescript": "^4.3.5",
+    "vite": "^2.4.4"
+  }
+}
