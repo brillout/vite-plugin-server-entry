@@ -42,7 +42,8 @@ function getPreamble(): string {
 //  - Cloudflare Workers needs the entire worker code to be bundled into a single file.
 //  - Vercel bundles serverless functions behind the scenes.
 
-// The path of following dependencies are normally determined dynamically at run-time; this file makes these dependencies discoverable at build-time so that bundlers are able to determine the entire dependency tree.`;
+// The path of following dependencies are normally determined dynamically at run-time; this file makes these dependencies discoverable at build-time so that bundlers are able to determine the entire dependency tree.
+`;
 }
 
 const configKey = "__vite-plugin-import-build:config";
@@ -54,7 +55,7 @@ declare global {
   }
 }
 function getPluginConfig(src: string): PluginConfig {
-  const pluginConfig = global[configKey] || { srcAll: [] };
+  const pluginConfig = global[configKey] = global[configKey] || { srcAll: [] };
   pluginConfig.srcAll.push(src);
   return pluginConfig;
 }
