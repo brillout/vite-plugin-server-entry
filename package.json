@@ -1,7 +1,7 @@
 {
   "name": "vite-plugin-import-build",
   "version": "0.1.0",
-  "description": "",
+  "description": "Make `dist/` paths statically analysable. E.g. for bundling for Cloudflare Workers.",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
