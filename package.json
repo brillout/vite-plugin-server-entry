@@ -4,7 +4,7 @@
   "description": "Make `dist/` paths statically analysable. E.g. for bundling for Cloudflare Workers.",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf dist/ && tsc",
     "prepublishOnly": "npm run build"
   },
   "license": "MIT",
