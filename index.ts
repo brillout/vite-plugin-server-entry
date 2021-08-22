@@ -8,7 +8,8 @@ type PluginConfig = {
   isInstalled?: true;
 };
 
-function importBuild(src: string): Plugin {
+// Return type `any` to avoid Plugin type mismatches when there are multiple Vite versions installed
+function importBuild(src: string): any {
   const pluginConfig = getPluginConfig(src);
   if (pluginConfig.isInstalled) {
     const randomId = Math.random().toString().slice(2);
@@ -19,7 +20,7 @@ function importBuild(src: string): Plugin {
   }
   pluginConfig.isInstalled = true;
   let ssr: boolean;
-  return {
+  const plugin: Plugin = {
     name: "vite-plugin-import-build",
     apply: "build",
     configResolved(config) {
@@ -34,7 +35,8 @@ function importBuild(src: string): Plugin {
         source,
       });
     },
-  } as Plugin;
+  }
+  return plugin;
 }
 
 function getPreamble(): string {
