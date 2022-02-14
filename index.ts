@@ -58,7 +58,9 @@ declare global {
 }
 function getPluginConfig(src: string): PluginConfig {
   const pluginConfig = global[configKey] = global[configKey] || { srcAll: [] };
-  pluginConfig.srcAll.push(src);
+  if (!pluginConfig.srcAll.includes(src)) {
+    pluginConfig.srcAll.push(src);
+  }
   return pluginConfig;
 }
 
