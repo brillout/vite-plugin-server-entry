@@ -1,12 +1,18 @@
 {
-  "name": "vite-plugin-import-build",
-  "version": "0.1.3",
-  "description": "Make `dist/` paths statically analysable. E.g. for bundling for Cloudflare Workers.",
-  "main": "dist/index.js",
+  "name": "vite-plugin-dist-importer",
+  "version": "0.1.1",
+  "description": "Automatically & statically import `dist/server/` assets",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./load": "./dist/load.js"
+  },
   "scripts": {
+    "dev": "tsc --watch",
     "build": "rm -rf dist/ && tsc",
     "prepublishOnly": "npm run build"
   },
+  "files": ["dist/", "*.d.ts"],
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^15.12.2",
