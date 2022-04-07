@@ -3,16 +3,12 @@
   "version": "0.1.1",
   "description": "Automatically & statically import `dist/server/` assets",
   "main": "./dist/index.js",
-  "exports": {
-    ".": "./dist/index.js",
-    "./load": "./dist/load.js"
-  },
   "scripts": {
     "dev": "tsc --watch",
     "build": "rm -rf dist/ && tsc",
     "prepublishOnly": "npm run build"
   },
-  "files": ["dist/", "*.d.ts"],
+  "files": ["dist/", "*.d.ts", "*.js"],
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^15.12.2",
