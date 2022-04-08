@@ -4,15 +4,19 @@
   "description": "Automatically & statically import `dist/server/` assets",
   "main": "./dist/index.js",
   "scripts": {
-    "dev": "tsc --watch",
-    "build": "rm -rf dist/ && tsc",
-    "prepublishOnly": "npm run build"
+    "dev": "npm run clean && unbuild --stub && npm run dev:fix-file-extension",
+    "dev:fix-file-extension": "rm dist/*.mjs && for f in dist/*.cjs; do mv \"$f\" \"${f%.cjs}.js\"; done",
+    "build": "npm run clean && tsc",
+    "prepublishOnly": "npm run build",
+    "clean": "rm -rf dist/"
   },
   "files": ["dist/", "*.d.ts", "*.js"],
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^15.12.2",
+    "jiti": "^1.13.0",
     "typescript": "^4.3.5",
+    "unbuild": "^0.7.2",
     "vite": "^2.4.4"
   }
 }
