@@ -2,7 +2,7 @@ export default distImporter
 export { distImporter }
 
 import type { Plugin, ResolvedConfig } from 'vite'
-import { /*applyDev, isRunningWithYarnPnp,*/ assert, isSSR, objectAssign, toPosixPath } from './utils'
+import { /*applyDev, isRunningWithYarnPnp,*/ assert, assertPosixPath, getSrcDir, isSSR, objectAssign } from './utils'
 import path from 'path'
 import { writeFileSync } from 'fs'
 const autoImporterFile = require.resolve('./autoImporter')
@@ -19,8 +19,14 @@ function distImporter(options: {
   let config: Config
   return {
     name: `vite-plugin-dist-importer:${options.projectName}`,
-    apply: 'build',
+    apply: (config, options) => {
+      if (!isSSR(config)) {
+        return false
+      }
+      return options.command === 'build'
+    },
     configResolved(config_: ConfigInit) {
+      assert(isSSR(config_))
       objectAssign(config_, {
         vitePluginDistImporter: config_.vitePluginDistImporter ?? {
           alreadyGenerated: false,
@@ -40,8 +46,8 @@ function distImporter(options: {
       resetAutoImporter()
     },
     generateBundle() {
+      assert(isSSR(config))
       if (config.vitePluginDistImporter.alreadyGenerated) return
-      if (!isSSR(config)) return
       config.vitePluginDistImporter.alreadyGenerated = true
 
       const source = config.vitePluginDistImporter.importerCodes.join('\n')
@@ -53,8 +59,20 @@ function distImporter(options: {
         source
       })
 
-      const DistImporterFile = path.posix.join(getDistPath(config), 'server', fileName)
-      writeFileSync(autoImporterFile, `require('${DistImporterFile}');\n`)
+      const distImporterFile = path.posix.join(getDistPath(config), 'server', fileName)
+
+      assert(config.root)
+      writeFileSync(
+        autoImporterFile,
+        [
+          "exports.status = 'SET';",
+          `exports.dirname = '${getSrcDir()}';`,
+          `exports.root = '${config.root}';`,
+          `exports.outDir = '${getOutDir(config)}';`,
+          `exports.load = () => { require('${distImporterFile}') };`,
+          ''
+        ].join('\n')
+      )
       /*
       if (activateAutoImporter(config)) {
       }
@@ -66,7 +84,7 @@ function distImporter(options: {
 function resetAutoImporter() {
   writeFileSync(
     autoImporterFile,
-    ['// I will be overwritten momentarily.', "exports.importerStatus = 'reseting';", ''].join('\n')
+    ['// I will be overwritten momentarily.', "exports.status = 'RESETING';", ''].join('\n')
   )
   /*
   try {
@@ -89,16 +107,21 @@ function activateAutoImporter(config: Config): boolean {
 
 function getDistPath(config: ResolvedConfig) {
   assert(isSSR(config))
-  const {
-    root,
-    build: { outDir }
-  } = config
-  assert(root)
-  assert(outDir.endsWith('/server'))
-  const sourceDir = toPosixPath(__dirname + (() => '')()) // trick to avoid `@vercel/ncc` to glob import
-  const rootRelative = path.posix.relative(sourceDir, root) // To `require()` an absolute path doesn't seem to work on Vercel
-  const distPath = path.posix.join(rootRelative, path.posix.join(outDir, '..'))
+  const { root } = config
+  assertPosixPath(root)
+  const rootRelative = path.posix.relative(getSrcDir(), root) // To `require()` an absolute path doesn't seem to work on Vercel
+  const distPath = path.posix.join(rootRelative, getOutDir(config))
   return distPath
+}
+
+function getOutDir(config: ResolvedConfig) {
+  const {
+    build: { outDir: outDirServer }
+  } = config
+  assert(outDirServer.endsWith('/server'))
+  assertPosixPath(outDirServer)
+  const outDir = path.posix.join(outDirServer, '..')
+  return outDir
 }
 
 // Return type `any` to avoid Plugin type mismatches when there are multiple Vite versions installed
