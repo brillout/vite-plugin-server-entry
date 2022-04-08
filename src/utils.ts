@@ -3,7 +3,7 @@ export function toPosixPath(p: string) {
 }
 
 export function assertPosixPath(filePath: string) {
-  assert(!filePath.includes('\\'), `Non-posix file path: \`${filePath}\``)
+  assert(!filePath.includes('\\'), `non-posix file path \`${filePath}\`.`)
 }
 
 export function getImporterDir() {
@@ -29,7 +29,7 @@ export function assert(condition: unknown, debugInfo?: unknown): asserts conditi
       '[vite-plugin-import-build][Bug] You stumbled upon a bug in the source code of vite-plugin-import-build.',
       'Reach out at https://github.com/brillout/vite-plugin-import-build/issues/new and include this error stack',
       '(the error stack is usually enough to fix the problem).',
-      debugStr && `(Debug info for the maintainers: \`${debugStr}\`.)`
+      debugStr && `(Debug info for the maintainers: ${debugStr})`
     ]
       .filter(Boolean)
       .join(' ')

@@ -4,8 +4,10 @@ import path from 'path'
 export { load }
 
 function load(opts: {
-  root: string
-  outDir: string
+  distPath: null | {
+    root: string
+    outDir: string
+  }
   assert: (condition: unknown, debugInfo?: unknown) => asserts condition
   assertUsage: (condition: unknown, msg: string) => asserts condition
 }) {
@@ -25,14 +27,17 @@ function load(opts: {
     {
       const { status } = moduleExports
       assert(['UNSET', 'RESETING', 'SET'].includes(status), { status })
+      assert(status === 'SET', { status })
     }
-    {
+    if (opts.distPath) {
       const outDirBuild = normalizePath(moduleExports.outDir)
-      const outDirCurrent = normalizePath(opts.outDir)
+      const outDirCurrent = normalizePath(opts.distPath.outDir)
       const sameOutDir = outDirCurrent === outDirBuild
-      const rootCurrent = normalizePath(opts.root)
+      const rootCurrent = normalizePath(opts.distPath.root)
       const rootBuild = normalizePath(moduleExports.root)
-      const sameRoot = path.posix.relative(getImporterDir(), rootCurrent) === path.posix.relative(moduleExports.importerDir, rootCurrent)
+      const sameRoot =
+        path.posix.relative(getImporterDir(), rootCurrent) ===
+        path.posix.relative(moduleExports.importerDir, rootCurrent)
       assertUsage(
         sameRoot && sameOutDir,
         [

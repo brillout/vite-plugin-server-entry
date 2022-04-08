@@ -2,7 +2,15 @@ export default distImporter
 export { distImporter }
 
 import type { Plugin, ResolvedConfig } from 'vite'
-import { /*applyDev, isRunningWithYarnPnp,*/ assert, assertPosixPath, getImporterDir, isSSR, objectAssign } from './utils'
+import {
+  // applyDev,
+  // isRunningWithYarnPnp,
+  assert,
+  assertPosixPath,
+  getImporterDir,
+  isSSR,
+  objectAssign
+} from './utils'
 import path from 'path'
 import { writeFileSync } from 'fs'
 const autoImporterFile = require.resolve('./autoImporter')
@@ -61,13 +69,14 @@ function distImporter(options: {
 
       const distImporterFile = path.posix.join(getDistPath(config), 'server', fileName)
 
-      assert(config.root)
+      const { root } = config
+      assertPosixPath(root)
       writeFileSync(
         autoImporterFile,
         [
           "exports.status = 'SET';",
           `exports.importerDir = '${getImporterDir()}';`,
-          `exports.root = '${config.root}';`,
+          `exports.root = '${root}';`,
           `exports.outDir = '${getOutDir(config)}';`,
           `exports.load = () => { require('${distImporterFile}') };`,
           ''
