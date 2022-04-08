@@ -2,7 +2,7 @@ export default distImporter
 export { distImporter }
 
 import type { Plugin, ResolvedConfig } from 'vite'
-import { /*applyDev, isRunningWithYarnPnp,*/ assert, assertPosixPath, getSrcDir, isSSR, objectAssign } from './utils'
+import { /*applyDev, isRunningWithYarnPnp,*/ assert, assertPosixPath, getImporterDir, isSSR, objectAssign } from './utils'
 import path from 'path'
 import { writeFileSync } from 'fs'
 const autoImporterFile = require.resolve('./autoImporter')
@@ -66,7 +66,7 @@ function distImporter(options: {
         autoImporterFile,
         [
           "exports.status = 'SET';",
-          `exports.dirname = '${getSrcDir()}';`,
+          `exports.importerDir = '${getImporterDir()}';`,
           `exports.root = '${config.root}';`,
           `exports.outDir = '${getOutDir(config)}';`,
           `exports.load = () => { require('${distImporterFile}') };`,
@@ -109,7 +109,7 @@ function getDistPath(config: ResolvedConfig) {
   assert(isSSR(config))
   const { root } = config
   assertPosixPath(root)
-  const rootRelative = path.posix.relative(getSrcDir(), root) // To `require()` an absolute path doesn't seem to work on Vercel
+  const rootRelative = path.posix.relative(getImporterDir(), root) // To `require()` an absolute path doesn't seem to work on Vercel
   const distPath = path.posix.join(rootRelative, getOutDir(config))
   return distPath
 }

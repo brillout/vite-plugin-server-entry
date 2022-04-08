@@ -1,5 +1,5 @@
-import { normalizePath } from 'vite'
-import { getSrcDir, rebasePath } from './utils'
+import { getImporterDir, normalizePath } from './utils'
+import path from 'path'
 
 export { load }
 
@@ -11,7 +11,7 @@ function load(opts: {
 }) {
   const moduleExports: {
     status: string
-    dirname: string
+    importerDir: string
     root: string
     outDir: string
     load: () => void
@@ -31,16 +31,16 @@ function load(opts: {
       const outDirCurrent = normalizePath(opts.outDir)
       const sameOutDir = outDirCurrent === outDirBuild
       const rootCurrent = normalizePath(opts.root)
-      const rootBuild = normalizePath(rebasePath(moduleExports.root, moduleExports.dirname, getSrcDir()))
-      const sameRoot = rootCurrent === rootBuild
+      const rootBuild = normalizePath(moduleExports.root)
+      const sameRoot = path.posix.relative(getImporterDir(), rootCurrent) === path.posix.relative(moduleExports.importerDir, rootCurrent)
       assertUsage(
         sameRoot && sameOutDir,
         [
           'Your build seem outdated; rebuild your app.',
           !sameOutDir
-            ? `(Your current \`outDir\` is '${outDirCurrent}' while your build has \`outDir === '${outDirBuild}'\`.)`
-            : `(Your current \`root\` is '${rootCurrent}' while your build has \`root === '${rootBuild}'\`.)`
-        ].join('\n')
+            ? `(Your current \`vite.config.js#build.outDir\` is '${outDirCurrent}' while your build has \`outDir === '${outDirBuild}'\`.)`
+            : `(Your current \`vite.config.js#root\` is '${rootCurrent}' while your build has \`root === '${rootBuild}'\`.)`
+        ].join(' ')
       )
     }
   }

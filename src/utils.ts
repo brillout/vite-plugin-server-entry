@@ -1,5 +1,3 @@
-import path from 'path'
-
 export function toPosixPath(p: string) {
   return p.split('\\').join('/')
 }
@@ -8,7 +6,7 @@ export function assertPosixPath(filePath: string) {
   assert(!filePath.includes('\\'), `Non-posix file path: \`${filePath}\``)
 }
 
-export function getSrcDir() {
+export function getImporterDir() {
   return toPosixPath(__dirname + (() => '')()) // trick to avoid `@vercel/ncc` to glob import
 }
 
@@ -21,15 +19,6 @@ export function normalizePath(p: string) {
   return pn
 }
 
-export function rebasePath(filePath: string, dirCurrent: string, dirNew: string) {
-  assertPosixPath(filePath)
-  assertPosixPath(dirCurrent)
-  assertPosixPath(dirNew)
-  assert(filePath.startsWith(dirCurrent), { filePath, dirCurrent })
-  // Playground: path.join('/foo/b', path.relative('/bar/a', '/bar/a/f.js'))
-  return path.posix.join(dirNew, path.posix.relative(dirCurrent, filePath))
-}
-
 export function assert(condition: unknown, debugInfo?: unknown): asserts condition {
   if (condition) return
 
@@ -40,7 +29,7 @@ export function assert(condition: unknown, debugInfo?: unknown): asserts conditi
       '[vite-plugin-import-build][Bug] You stumbled upon a bug in the source code of vite-plugin-import-build.',
       'Reach out at https://github.com/brillout/vite-plugin-import-build/issues/new and include this error stack',
       '(the error stack is usually enough to fix the problem).',
-      debugStr && `(Debug info for maintainer: \`${debugStr}\`.)`
+      debugStr && `(Debug info for the maintainers: \`${debugStr}\`.)`
     ]
       .filter(Boolean)
       .join(' ')
