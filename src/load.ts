@@ -37,7 +37,7 @@ function load(opts: {
       const rootBuild = normalizePath(moduleExports.root)
       const sameRoot =
         path.posix.relative(getImporterDir(), rootCurrent) ===
-        path.posix.relative(moduleExports.importerDir, rootCurrent)
+        path.posix.relative(moduleExports.importerDir, rootBuild)
       assertUsage(
         sameRoot && sameOutDir,
         [
