@@ -1,9 +1,9 @@
 import { getImporterDir, normalizePath } from './utils'
 import path from 'path'
 
-export { load }
+export { loadDistEntries }
 
-function load(options: {
+function loadDistEntries(options: {
   distPath: null | {
     root: string
     outDir: string
