@@ -3,7 +3,7 @@ import path from 'path'
 
 export { load }
 
-function load(opts: {
+function load(options: {
   distPath: null | {
     root: string
     outDir: string
@@ -11,51 +11,66 @@ function load(opts: {
   assert: (condition: unknown, debugInfo?: unknown) => asserts condition
   assertUsage: (condition: unknown, msg: string) => asserts condition
 }) {
-  const moduleExports: {
+  const importer: {
     status: string
     importerDir: string
     root: string
     outDir: string
     load: () => void
   } = require('./autoImporter')
-  assertStatus()
-  moduleExports.load()
+
+  if (importer.status === 'UNSET') {
+    loadWithoutImporter()
+  } else {
+    assert(importer.status === 'SET', { status: importer.status })
+    assertStatus()
+    importer.load()
+  }
 
   return
 
   function assertStatus() {
     {
-      const { status } = moduleExports
-      assert(['UNSET', 'RESETING', 'SET'].includes(status), { status })
-      assert(status === 'SET', { status })
+      const { status } = importer
+      assert(['UNSET', 'SET'].includes(status), { status })
     }
-    if (opts.distPath) {
-      const outDirBuild = normalizePath(moduleExports.outDir)
-      const outDirCurrent = normalizePath(opts.distPath.outDir)
+    if (options.distPath) {
+      const outDirBuild = normalizePath(importer.outDir)
+      const outDirCurrent = normalizePath(options.distPath.outDir)
       const sameOutDir = outDirCurrent === outDirBuild
-      const rootCurrent = normalizePath(opts.distPath.root)
-      const rootBuild = normalizePath(moduleExports.root)
+      const rootCurrent = normalizePath(options.distPath.root)
+      const rootBuild = normalizePath(importer.root)
       const sameRoot =
-        path.posix.relative(getImporterDir(), rootCurrent) ===
-        path.posix.relative(moduleExports.importerDir, rootBuild)
+        path.posix.relative(getImporterDir(), rootCurrent) === path.posix.relative(importer.importerDir, rootBuild)
       assertUsage(
         sameRoot && sameOutDir,
         [
-          'Your build seem outdated; rebuild your app.',
+          'Rebuild your app.',
           !sameOutDir
-            ? `(Your current \`vite.config.js#build.outDir\` is '${outDirCurrent}' while your build has \`outDir === '${outDirBuild}'\`.)`
-            : `(Your current \`vite.config.js#root\` is '${rootCurrent}' while your build has \`root === '${rootBuild}'\`.)`
+            ? `(Your app's \`vite.config.js#build.outDir\` is '${outDirCurrent}' while your build has \`outDir === '${outDirBuild}'\`.)`
+            : `(Your app's \`root\` is '${rootCurrent}' while your build has \`root === '${rootBuild}'\`.)`
         ].join(' ')
       )
     }
   }
 
+  function loadWithoutImporter() {
+    assertUsage(false, 'TODO')
+    /*
+  let root: string
+  const root = process.cwd()
+  const outDir = 'dist'
+
+  assertUsage()
+  */
+  }
+
   // Circumvent TS bug
   // https://github.com/microsoft/TypeScript/issues/36931
   function assert(condition: unknown, debugInfo?: unknown): asserts condition {
-    opts.assert(condition, debugInfo)
+    options.assert(condition, debugInfo)
   }
   function assertUsage(condition: unknown, msg: string): asserts condition {
-    opts.assertUsage(condition, msg)
+    options.assertUsage(condition, msg)
   }
 }

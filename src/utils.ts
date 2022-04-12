@@ -45,17 +45,11 @@ export function objectAssign<Obj, ObjAddendum>(obj: Obj, objAddendum: ObjAddendu
   Object.assign(obj, objAddendum)
 }
 
-export function isRunningWithYarnPnp() {
+export function isYarnPnP() {
   try {
     require('pnpapi')
     return true
   } catch {
     return false
   }
-}
-
-export function applyDev(_config: unknown, { command, mode }: { command: string; mode: string }): boolean {
-  assert(command)
-  assert(mode)
-  return command === 'serve' && mode === 'development'
 }

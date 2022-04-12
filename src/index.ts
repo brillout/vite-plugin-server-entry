@@ -2,15 +2,7 @@ export default distImporter
 export { distImporter }
 
 import type { Plugin, ResolvedConfig } from 'vite'
-import {
-  // applyDev,
-  // isRunningWithYarnPnp,
-  assert,
-  assertPosixPath,
-  getImporterDir,
-  isSSR,
-  objectAssign
-} from './utils'
+import { isYarnPnP, assert, assertPosixPath, getImporterDir, isSSR, objectAssign } from './utils'
 import path from 'path'
 import { writeFileSync } from 'fs'
 const autoImporterFile = require.resolve('./autoImporter')
@@ -44,17 +36,18 @@ function distImporter(options: {
       })
       config = config_
       config.vitePluginDistImporter.importerCodes.push(options.importerCode)
-      /*
-        if (options.disableAutoImporter !== undefined) {
-          config.vitePluginDistImporter.disableAutoImporter =
-            config.vitePluginDistImporter.disableAutoImporter || options.disableAutoImporter
-          assert([true, false].includes(config.vitePluginDistImporter.disableAutoImporter))
-        }
-        */
+      if (options.disableAutoImporter !== undefined) {
+        config.vitePluginDistImporter.disableAutoImporter =
+          config.vitePluginDistImporter.disableAutoImporter || options.disableAutoImporter
+        assert([true, false].includes(config.vitePluginDistImporter.disableAutoImporter))
+      }
+    },
+    buildStart() {
+      if (isDisabled()) return
       resetAutoImporter()
     },
     generateBundle() {
-      assert(isSSR(config))
+      if (isDisabled()) return
       if (config.vitePluginDistImporter.alreadyGenerated) return
       config.vitePluginDistImporter.alreadyGenerated = true
 
@@ -82,12 +75,14 @@ function distImporter(options: {
           ''
         ].join('\n')
       )
-      /*
-      if (activateAutoImporter(config)) {
-      }
-      */
     }
   } as Plugin
+
+  function isDisabled() {
+    const { disableAutoImporter } = config.vitePluginDistImporter
+    assert([true, false, null].includes(disableAutoImporter))
+    return disableAutoImporter ?? isYarnPnP()
+  }
 }
 
 function resetAutoImporter() {
@@ -95,24 +90,7 @@ function resetAutoImporter() {
     autoImporterFile,
     ['// I will be overwritten momentarily.', "exports.status = 'RESETING';", ''].join('\n')
   )
-  /*
-  try {
-  } catch(err) {
-    if(! isRunningWithYarnPnp() ) {
-      throw err
-    }
-  }
-  */
 }
-
-/*
-function activateAutoImporter(config: Config): boolean {
-  if (config.vitePluginDistImporter.disableAutoImporter === null) {
-    return isRunningWithYarnPnp()
-  }
-  return config.vitePluginDistImporter.disableAutoImporter
-}
-*/
 
 function getDistPath(config: ResolvedConfig) {
   assert(isSSR(config))
