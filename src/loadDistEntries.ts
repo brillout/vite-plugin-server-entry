@@ -1,15 +1,15 @@
-import { getImporterDir, normalizePath } from './utils'
+import { assertPosixPath, getImporterDir, isCloudflareWorkersAlike, normalizePath } from './utils'
+import { loadStaticConfig } from './viteConfigJson/loadStaticConfig'
+import { importBuildFileName } from './importBuildFileName'
 import path from 'path'
+import fs from 'fs'
 
 export { loadDistEntries }
 
 function loadDistEntries(options: {
-  distPath: null | {
-    root: string
-    outDir: string
-  }
   assert: (condition: unknown, debugInfo?: unknown) => asserts condition
   assertUsage: (condition: unknown, msg: string) => asserts condition
+  yarnDocLink: string
 }) {
   const importer: {
     status: string
@@ -19,50 +19,73 @@ function loadDistEntries(options: {
     load: () => void
   } = require('./autoImporter')
 
-  if (importer.status === 'UNSET') {
-    loadWithoutImporter()
-  } else {
-    assert(importer.status === 'SET', { status: importer.status })
-    assertStatus()
+  const configStatic = loadStaticConfig()
+  if (importer.status === 'SET') {
+    assertDistPath()
     importer.load()
+  } else if (importer.status === 'UNSET') {
+    // Yarn PnP or disabled
+    loadWithNodejs()
+  } else {
+    const { status } = importer
+    assert(false, { status })
   }
 
   return
 
-  function assertStatus() {
-    {
-      const { status } = importer
-      assert(['UNSET', 'SET'].includes(status), { status })
+  function assertDistPath() {
+    if (configStatic === null) {
+      assert(isCloudflareWorkersAlike())
+      // There is no way to check whether `autoImporter.js` is importing the `dist/` of another project
+      return
     }
-    if (options.distPath) {
-      const outDirBuild = normalizePath(importer.outDir)
-      const outDirCurrent = normalizePath(options.distPath.outDir)
-      const sameOutDir = outDirCurrent === outDirBuild
-      const rootCurrent = normalizePath(options.distPath.root)
-      const rootBuild = normalizePath(importer.root)
-      const sameRoot =
-        path.posix.relative(getImporterDir(), rootCurrent) === path.posix.relative(importer.importerDir, rootBuild)
-      assertUsage(
-        sameRoot && sameOutDir,
-        [
-          'Rebuild your app.',
-          !sameOutDir
-            ? `(Your app's \`vite.config.js#build.outDir\` is '${outDirCurrent}' while your build has \`outDir === '${outDirBuild}'\`.)`
-            : `(Your app's \`root\` is '${rootCurrent}' while your build has \`root === '${rootBuild}'\`.)`
-        ].join(' ')
-      )
-    }
+    const {
+      root,
+      build: { outDir }
+    } = configStatic
+    const outDirBuild = normalizePath(importer.outDir)
+    const outDirCurrent = normalizePath(outDir)
+    const sameOutDir = outDirCurrent === outDirBuild
+    const rootCurrent = normalizePath(root)
+    const rootBuild = normalizePath(importer.root)
+    const sameRoot =
+      path.posix.relative(getImporterDir(), rootCurrent) === path.posix.relative(importer.importerDir, rootBuild)
+    assertUsage(
+      sameRoot && sameOutDir,
+      [
+        'Rebuild your app.',
+        !sameOutDir
+          ? `(Your app's \`vite.config.js#build.outDir\` is ${outDirCurrent} while your build has \`outDir === '${outDirBuild}'\`.)`
+          : `(Your app's \`root\` is ${rootCurrent} while your build has \`root === '${rootBuild}'\`.)`
+      ].join(' ')
+    )
   }
 
-  function loadWithoutImporter() {
-    assertUsage(false, 'TODO')
-    /*
-  let root: string
-  const root = process.cwd()
-  const outDir = 'dist'
-
-  assertUsage()
-  */
+  function loadWithNodejs() {
+    assertUsage(
+      !isCloudflareWorkersAlike(),
+      `When using Yarn PnP and a serverless platform, such as Cloudflare Workers, the file \`${importBuildFileName}\` needs to be imported. See ${options.yarnDocLink} for more information.`
+    )
+    assert(configStatic)
+    const {
+      root,
+      build: { outDir }
+    } = configStatic
+    assertPosixPath(root)
+    assertPosixPath(outDir)
+    const filePath = path.posix.join(root, outDir, 'server', importBuildFileName)
+    const fileDir = path.posix.dirname(filePath)
+    try {
+      require.resolve(filePath)
+    } catch (err) {
+      assert(!fs.existsSync(fileDir), { filePath })
+      assertUsage(
+        false,
+        `You did not build your app. (The directory ${fileDir} is missing.) Make sure to build your app before running it for production.`
+      )
+    }
+    assert(filePath.endsWith('.cjs')) // Ensure ESM compability
+    require(filePath)
   }
 
   // Circumvent TS bug
