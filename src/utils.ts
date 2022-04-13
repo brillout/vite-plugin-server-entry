@@ -1,6 +1,3 @@
-import path from 'path'
-import fs from 'fs'
-
 export function toPosixPath(p: string) {
   return p.split('\\').join('/')
 }
@@ -11,15 +8,6 @@ export function assertPosixPath(filePath: string) {
 
 export function getImporterDir() {
   return toPosixPath(__dirname + (() => '')()) // trick to avoid `@vercel/ncc` to glob import
-}
-
-export function normalizePath(p: string) {
-  assertPosixPath(p)
-  let pn = p.split('/').filter(Boolean).join('/')
-  if (p.startsWith('/')) {
-    pn = '/' + pn
-  }
-  return pn
 }
 
 export function isCloudflareWorkersAlike() {
@@ -64,19 +52,5 @@ export function isYarnPnP() {
 export function getCwd() {
   // No `process.cwd()` in Cloudflare Worker
   if (typeof process == 'undefined' || !('cwd' in process)) return null
-  return process.cwd()
-}
-
-export function lookupFile(dir: string, fileNames: string[]): null | string {
-  for (const fileName of fileNames) {
-    const file = path.join(dir, fileName)
-    if (fs.existsSync(file) && fs.statSync(file).isFile()) {
-      return file
-    }
-  }
-  const parentDir = path.dirname(dir)
-  if (parentDir !== dir) {
-    return lookupFile(parentDir, fileNames)
-  }
-  return null
+  return toPosixPath(process.cwd())
 }
