@@ -4,7 +4,6 @@ export type { ConfigStatic }
 import { assert, getCwd, isCloudflareWorkersAlike, lookupFile, toPosixPath } from '../utils'
 import path from 'path'
 import fs from 'fs'
-import { jsonProps } from './jsonProps'
 
 type ConfigStatic = {
   configFile: null | string // vite.config.json
@@ -14,8 +13,7 @@ type ConfigStatic = {
   build: { outDir: string }
 } & Record<string, unknown>
 
-const outDirProp = jsonProps[0]
-assert(outDirProp.propPath === 'build.outDir')
+const outDirDefaultValue = 'dist'
 
 function loadStaticConfig(): null | ConfigStatic {
   const cwd = getCwd()
@@ -28,7 +26,7 @@ function loadStaticConfig(): null | ConfigStatic {
   const configFile = lookupFile(cwd, ['vite.config.json'])
   if (!configFile) {
     const { root, rootFile } = findRoot(cwd)
-    return { configFile: null, cwd, root, rootFile, build: { outDir: outDirProp.defaultValue } }
+    return { configFile: null, cwd, root, rootFile, build: { outDir: outDirDefaultValue } }
   }
 
   const jsonConfig: Record<string, unknown> = JSON.parse(fs.readFileSync(configFile, 'utf-8'))
@@ -44,7 +42,7 @@ function loadStaticConfig(): null | ConfigStatic {
     root = path.posix.join(root, jsonConfig.root)
   }
 
-  const outDir = (jsonConfig?.build as undefined | Record<string, unknown>)?.outDir ?? outDirProp.defaultValue
+  const outDir = (jsonConfig?.build as undefined | Record<string, unknown>)?.outDir ?? outDirDefaultValue
   if (typeof outDir !== 'string') {
     throw new Error('vite.config.json#build.outDir should be a string')
   }

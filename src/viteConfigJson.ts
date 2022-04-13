@@ -6,8 +6,7 @@ export { viteConfigJson }
 
 import type { Plugin, ResolvedConfig } from 'vite'
 import { ConfigStatic, loadStaticConfig } from './viteConfigJson/loadStaticConfig'
-import { assert, isObject, isYarnPnP, toPosixPath } from './utils'
-import { jsonProps } from './viteConfigJson/jsonProps'
+import { assert, assertPosixPath, isYarnPnP, toPosixPath } from './utils'
 import path from 'path'
 
 function viteConfigJson(options: {
@@ -60,22 +59,24 @@ function viteConfigJson(options: {
   // `build.outDir` should be defined in `vite.config.json` (if using Yarn PnP)
   function verifyConfig(config: ResolvedConfig) {
     if (isYarnPnP()) {
-      jsonProps.forEach(({ propPath, isDefaultValue }) => {
-        const configVal = getConfigVal(config, propPath)
-        assertUsage(
-          isDefaultValue(configVal),
-          `When using Yarn PnP, the Vite config \`${propPath}\` needs to be defined in \`vite.config.json\` instead of \`vite.config.js\`. See ${options.yarnDocLink} for more information.`
-        )
-      })
+      const { isDefaultValue } = analyzeOutDir(config)
+      assertUsage(
+        isDefaultValue,
+        `When using Yarn PnP, the config \`vite.config.js#build.outDir\` needs to be defined in \`vite.config.json\` instead of \`vite.config.js\`. See ${options.yarnDocLink} for more information.`
+      )
     }
   }
 
+  // Set `build.outDir`
   function setConfig(config: ResolvedConfig, configStatic: ConfigStatic) {
-    // `build.outDir`
-    jsonProps.forEach(({ propPath }) => {
-      const val = getConfigVal(configStatic, propPath)
-      setConfigVal(config, propPath, val)
-    })
+    const { outDirEnv } = analyzeOutDir(config)
+    let { outDir } = configStatic.build
+    outDir = normalizeOutDir(outDir)
+    assert(!outDir.endsWith('/'))
+    if (outDirEnv) {
+      outDir = outDir + '/' + outDirEnv
+    }
+    config.build.outDir = outDir
   }
 
   // Circumvent TS bug
@@ -90,31 +91,26 @@ function viteConfigJson(options: {
   */
 }
 
-function getConfigVal(config: Record<string, unknown>, propPath: string): unknown {
-  const [nextProp, ...rest] = propPath.split('.')
-  const configVal = config[nextProp]
-  if (rest.length === 0) {
-    return configVal
+function analyzeOutDir(config: ResolvedConfig) {
+  let { outDir } = config.build
+  assertPosixPath(outDir)
+  outDir = normalizeOutDir(outDir)
+  let outDirRoot: string
+  let outDirEnv: 'client' | 'server' | null
+  if (outDir.endsWith('/client')) {
+    outDirRoot = outDir.slice(0, -1 * '/client'.length)
+    outDirEnv = 'client'
+  } else if (outDir.endsWith('/server')) {
+    outDirRoot = outDir.slice(0, -1 * '/server'.length)
+    outDirEnv = 'server'
   } else {
-    if (!isObject(configVal)) {
-      return undefined
-    } else {
-      return getConfigVal(configVal, rest.join('.'))
-    }
+    outDirRoot = outDir
+    outDirEnv = null
   }
+  const isDefaultValue = outDirRoot === 'dist'
+  return { isDefaultValue, outDirEnv }
 }
-function setConfigVal(config: Record<string, unknown>, propPath: string, val: unknown): void {
-  const [nextProp, ...rest] = propPath.split('.')
-  if (rest.length === 0) {
-    config[nextProp] = val
-  } else {
-    const configVal = config[nextProp]
-    let nested: Record<string, unknown>
-    if (isObject(configVal)) {
-      nested = configVal
-    } else {
-      nested = config[nextProp] = {}
-    }
-    setConfigVal(nested, rest.join('.'), val)
-  }
+
+function normalizeOutDir(outDir: string) {
+  return outDir.split('/').filter(Boolean).join('/')
 }

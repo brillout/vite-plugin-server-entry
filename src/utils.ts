@@ -80,7 +80,3 @@ export function lookupFile(dir: string, fileNames: string[]): null | string {
   }
   return null
 }
-
-export function isObject(v: unknown): v is Record<string, unknown> {
-  return typeof v === 'object' && v !== null
-}
