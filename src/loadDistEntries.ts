@@ -32,7 +32,7 @@ function loadDistEntries(options: {
 
   function loadWithNodejs() {
     const root = getCwd()
-    const errMsg = `Cannot find production build. Import the \`${importBuildFileName}\` file, see ${options.importBuildDocLink}`
+    const errMsg = `Cannot find production build. Use \`${importBuildFileName}\`, see ${options.importBuildDocLink}`
     if (!root) {
       assert(isCloudflareWorkersAlike())
       assertUsage(false, errMsg)
