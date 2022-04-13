@@ -39,24 +39,16 @@ function loadDistEntries(options: {
       // There is no way to check whether `autoImporter.js` is importing the `dist/` of another project
       return
     }
-    const {
-      root,
-      build: { outDir }
-    } = configStatic
-    const outDirBuild = normalizePath(importer.outDir)
-    const outDirCurrent = normalizePath(outDir)
-    const sameOutDir = outDirCurrent === outDirBuild
+    const { root } = configStatic
     const rootCurrent = normalizePath(root)
     const rootBuild = normalizePath(importer.root)
     const sameRoot =
       path.posix.relative(getImporterDir(), rootCurrent) === path.posix.relative(importer.importerDir, rootBuild)
     assertUsage(
-      sameRoot && sameOutDir,
+      sameRoot,
       [
         'Rebuild your app.',
-        !sameOutDir
-          ? `(Your app's \`vite.config.js#build.outDir\` is ${outDirCurrent} while your build has \`outDir === '${outDirBuild}'\`.)`
-          : `(Your app's \`root\` is ${rootCurrent} while your build has \`root === '${rootBuild}'\`.)`
+        `(Your app's \`root\` is ${rootCurrent} while your build has \`root === '${rootBuild}'\`.)`
       ].join(' ')
     )
   }
