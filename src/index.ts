@@ -19,16 +19,13 @@ type Options = {
 
 function distImporter(options: Options): Plugin_ {
   let config: Config
+  let isForServerSide: boolean
   return {
     name: `vite-plugin-dist-importer:${options.projectName}`,
-    apply: (config, options) => {
-      if (!isSSR(config)) {
-        return false
-      }
-      return options.command === 'build'
-    },
+    apply: 'build',
     configResolved(config_: ConfigInit) {
-      assert(isSSR(config_))
+      isForServerSide = isSSR(config_)
+      if (!isForServerSide) return
       objectAssign(config_, {
         vitePluginDistImporter: config_.vitePluginDistImporter ?? {
           alreadyGenerated: false,
@@ -45,9 +42,13 @@ function distImporter(options: Options): Plugin_ {
       }
     },
     buildStart() {
+      assert([true, false].includes(isForServerSide === true))
+      if (!isForServerSide) return
       resetAutoImporter()
     },
     generateBundle() {
+      assert([true, false].includes(isForServerSide))
+      if (!isForServerSide) return
       if (config.vitePluginDistImporter.alreadyGenerated) return
       config.vitePluginDistImporter.alreadyGenerated = true
 
