@@ -8,11 +8,11 @@ import { writeFileSync } from 'fs'
 import { importBuildFileName } from './importBuildFileName'
 const autoImporterFile = require.resolve('./autoImporter')
 
-type PluginConfig = { alreadyGenerated: boolean; importerCodes: string[]; disableAutoImporter: null | boolean }
+type PluginConfig = { alreadyGenerated: boolean; importGetters: (() => string)[]; disableAutoImporter: null | boolean }
 type Config = ResolvedConfig & { vitePluginDistImporter: PluginConfig }
 type ConfigInit = ResolvedConfig & { vitePluginDistImporter?: PluginConfig }
 type Options = {
-  importerCode: string
+  getImporterCode: () => string
   disableAutoImporter?: boolean
   projectName: string
 }
@@ -30,11 +30,11 @@ function distImporter(options: Options): Plugin_ {
         vitePluginDistImporter: config_.vitePluginDistImporter ?? {
           alreadyGenerated: false,
           disableAutoImporter: null,
-          importerCodes: []
+          importGetters: []
         }
       })
       config = config_
-      config.vitePluginDistImporter.importerCodes.push(options.importerCode)
+      config.vitePluginDistImporter.importGetters.push(options.getImporterCode)
       if (options.disableAutoImporter !== undefined) {
         config.vitePluginDistImporter.disableAutoImporter =
           config.vitePluginDistImporter.disableAutoImporter || options.disableAutoImporter
@@ -52,7 +52,7 @@ function distImporter(options: Options): Plugin_ {
       if (config.vitePluginDistImporter.alreadyGenerated) return
       config.vitePluginDistImporter.alreadyGenerated = true
 
-      const source = config.vitePluginDistImporter.importerCodes.join('\n')
+      const source = config.vitePluginDistImporter.importGetters.map((getImporterCode) => getImporterCode()).join('\n')
 
       this.emitFile({
         fileName: importBuildFileName,
