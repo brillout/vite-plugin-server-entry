@@ -2,17 +2,23 @@ export default distImporter
 export { distImporter }
 
 import type { Plugin, ResolvedConfig } from 'vite'
+import type { NormalizedOutputOptions, OutputBundle } from 'rollup'
 import { isYarnPnP, assert, assertPosixPath, getImporterDir, isSSR, objectAssign, isAbsolutePath } from './utils'
 import path from 'path'
 import { writeFileSync } from 'fs'
 import { importBuildFileName } from './importBuildFileName'
 const autoImporterFile = require.resolve('./autoImporter')
 
-type PluginConfig = { alreadyGenerated: boolean; importGetters: (() => string)[]; disableAutoImporter: null | boolean }
+type PluginConfig = {
+  alreadyGenerated: boolean
+  importGetters: ImportGetter[]
+  disableAutoImporter: null | boolean
+}
 type Config = ResolvedConfig & { vitePluginDistImporter: PluginConfig }
 type ConfigInit = ResolvedConfig & { vitePluginDistImporter?: PluginConfig }
+type ImportGetter = (args: { rollup: { options: NormalizedOutputOptions; bundle: OutputBundle } }) => string
 type Options = {
-  getImporterCode: () => string
+  getImporterCode: ImportGetter
   disableAutoImporter?: boolean
   projectName: string
 }
@@ -46,13 +52,15 @@ function distImporter(options: Options): Plugin_ {
       if (!isForServerSide) return
       resetAutoImporter()
     },
-    generateBundle() {
+    generateBundle(options: NormalizedOutputOptions, bundle: OutputBundle) {
       assert([true, false].includes(isForServerSide))
       if (!isForServerSide) return
       if (config.vitePluginDistImporter.alreadyGenerated) return
       config.vitePluginDistImporter.alreadyGenerated = true
 
-      const source = config.vitePluginDistImporter.importGetters.map((getImporterCode) => getImporterCode()).join('\n')
+      const source = config.vitePluginDistImporter.importGetters
+        .map((getImporterCode) => getImporterCode({ rollup: { options, bundle } }))
+        .join('\n')
 
       this.emitFile({
         fileName: importBuildFileName,
