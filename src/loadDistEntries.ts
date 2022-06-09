@@ -1,60 +1,62 @@
-import { getCwd, isCloudflareWorkersAlike } from './utils'
+import { getCwd, isCloudflareWorkersAlike, assert } from './utils'
 import { importBuildFileName } from './importBuildFileName'
 import path from 'path'
 import fs from 'fs'
 
 export { loadDistEntries }
 
-function loadDistEntries(options: {
-  assert: (condition: unknown, debugInfo?: unknown) => asserts condition
-  assertUsage: (condition: unknown, msg: string) => asserts condition
-  importBuildDocLink: string
-}) {
+async function loadDistEntries() {
+  const autoImporterFilePath = require.resolve('./autoImporter')
+
   const importer: {
     status: string
     importerDir: string
     root: string
     outDir: string
     load: () => void
-  } = require('./autoImporter')
+  } = require(autoImporterFilePath)
 
   if (importer.status === 'SET') {
     importer.load()
+    return {
+      success: true,
+      entryFile: autoImporterFilePath,
+      importBuildFileName
+    }
   } else if (importer.status === 'UNSET') {
     // Yarn PnP or disabled
-    loadWithNodejs()
+    const { success, distImporterFilePath } = loadWithNodejs()
+    return {
+      success,
+      entryFile: distImporterFilePath,
+      importBuildFileName
+    }
   } else {
     const { status } = importer
     assert(false, { status })
   }
 
-  return
-
   function loadWithNodejs() {
     const root = getCwd()
-    const errMsg = `Cannot find production build. Use \`${importBuildFileName}\`, see ${options.importBuildDocLink}`
     if (!root) {
       assert(isCloudflareWorkersAlike())
-      assertUsage(false, errMsg)
+      return {
+        success: false,
+        distImporterFilePath: null
+      }
     }
-    const filePath = path.posix.join(root, 'dist', 'server', importBuildFileName)
-    const fileDir = path.posix.dirname(filePath)
+    const distImporterFilePath = path.posix.join(root, 'dist', 'server', importBuildFileName)
+    const fileDir = path.posix.dirname(distImporterFilePath)
+    let success: boolean
     try {
-      require.resolve(filePath)
+      require.resolve(distImporterFilePath)
+      success = true
     } catch (err) {
-      assert(!fs.existsSync(fileDir), { filePath })
-      assertUsage(false, errMsg)
+      success = false
+      assert(!fs.existsSync(fileDir), { distImporterFilePath })
     }
-    assert(filePath.endsWith('.cjs')) // Ensure ESM compability
-    require(filePath)
-  }
-
-  // Circumvent TS bug
-  // https://github.com/microsoft/TypeScript/issues/36931
-  function assert(condition: unknown, debugInfo?: unknown): asserts condition {
-    options.assert(condition, debugInfo)
-  }
-  function assertUsage(condition: unknown, msg: string): asserts condition {
-    options.assertUsage(condition, msg)
+    assert(distImporterFilePath.endsWith('.cjs')) // Ensure ESM compability
+    require(distImporterFilePath)
+    return { success, distImporterFilePath }
   }
 }
