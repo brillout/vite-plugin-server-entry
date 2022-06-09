@@ -6,21 +6,19 @@ import fs from 'fs'
 export { loadDistEntries }
 
 async function loadDistEntries() {
-  const autoImporterFilePath = require.resolve('./autoImporter')
-
   const importer: {
     status: string
     importerDir: string
     root: string
     outDir: string
     load: () => void
-  } = require(autoImporterFilePath)
+  } = require('./autoImporter')
 
   if (importer.status === 'SET') {
     importer.load()
     return {
       success: true,
-      entryFile: autoImporterFilePath,
+      entryFile: getImporterFilePath(),
       importBuildFileName
     }
   } else if (importer.status === 'UNSET') {
@@ -58,5 +56,14 @@ async function loadDistEntries() {
     assert(distImporterFilePath.endsWith('.cjs')) // Ensure ESM compability
     require(distImporterFilePath)
     return { success, distImporterFilePath }
+  }
+
+  function getImporterFilePath() {
+    let autoImporterFilePath: string | null = null
+    try {
+      autoImporterFilePath = require.resolve('./autoImporter')
+    } catch {}
+    assert(autoImporterFilePath === null || require(autoImporterFilePath) === importer)
+    return autoImporterFilePath
   }
 }
