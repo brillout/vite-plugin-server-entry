@@ -43,27 +43,50 @@ async function loadDistEntries() {
         distImporterFilePath: null
       }
     }
-    const distImporterFilePath = path.posix.join(root, 'dist', 'server', importBuildFileName)
-    const fileDir = path.posix.dirname(distImporterFilePath)
-    let success: boolean
+    const distImporterPathRelative = path.posix.join(root, 'dist', 'server', importBuildFileName)
+    const distImporterDir = path.posix.dirname(distImporterPathRelative)
+
+    let distImporterPath: string
     try {
-      require.resolve(distImporterFilePath)
-      success = true
+      distImporterPath = require.resolve(distImporterPathRelative)
     } catch (err) {
-      success = false
-      assert(!fs.existsSync(fileDir), { distImporterFilePath })
+      assert(!fs.existsSync(distImporterDir), { distImporterDir, distImporterPathRelative })
+      return {
+        success: false,
+        distImporterFilePath: null
+      }
     }
-    assert(distImporterFilePath.endsWith('.cjs')) // Ensure ESM compability
-    require(distImporterFilePath)
-    return { success, distImporterFilePath }
+
+    if (isWebpackResolve(distImporterPath)) {
+      return {
+        success: false,
+        distImporterFilePath: null
+      }
+    }
+
+    assert(distImporterPath.endsWith('.cjs')) // Ensure ESM compability
+    require(distImporterPath)
+    return { success: true, distImporterFilePath: distImporterPath }
   }
 
   function getImporterFilePath() {
     let autoImporterFilePath: string | null = null
+
     try {
       autoImporterFilePath = require.resolve('./autoImporter')
-    } catch {}
-    assert(autoImporterFilePath === null || require(autoImporterFilePath) === importer)
+    } catch {
+      return null
+    }
+
+    if (isWebpackResolve(autoImporterFilePath)) {
+      return null
+    }
+
+    assert(require(autoImporterFilePath) === importer)
     return autoImporterFilePath
   }
+}
+
+function isWebpackResolve(moduleResolve: string) {
+  return typeof moduleResolve === 'number'
 }
