@@ -7,7 +7,10 @@
   "scripts": {
     "dev": "tsc --watch",
     "build": "rm -rf dist/ && tsc",
-    "prepublishOnly": "npm run build"
+    "// === Release ===": "",
+    "prepublishOnly": "pnpm run build",
+    "postpublish": " git push && git push --tags",
+    "release": "npm version patch && npm publish"
   },
   "devDependencies": {
     "@types/node": "^15.12.2",
