@@ -3,7 +3,7 @@ export { distImporter }
 
 import type { Plugin, ResolvedConfig } from 'vite'
 import type { EmitFile, NormalizedOutputOptions, OutputBundle } from 'rollup'
-import { isYarnPnP, assert, assertPosixPath, getImporterDir, isSSR, objectAssign, isAbsolutePath } from './utils'
+import { isYarnPnP, assert, assertPosixPath, getImporterDir, isSSR, isAbsolutePath, hasDefinedProp } from './utils'
 import path from 'path'
 import { writeFileSync } from 'fs'
 import { importBuildFileName } from './importBuildFileName'
@@ -44,19 +44,18 @@ function distImporter(options: Options): Plugin_ {
 
   function resolveConfig(config: ConfigPristine): Config {
     assert(isSSR(config))
-    objectAssign(config, {
-      vitePluginDistImporter: config.vitePluginDistImporter ?? {
-        alreadyGenerated: false,
-        disableAutoImporter: null,
-        importGetters: []
-      }
-    })
+    config.vitePluginDistImporter = config.vitePluginDistImporter ?? {
+      alreadyGenerated: false,
+      disableAutoImporter: null,
+      importGetters: []
+    }
     config.vitePluginDistImporter.importGetters.push(options.getImporterCode)
     if (options.disableAutoImporter !== undefined) {
       config.vitePluginDistImporter.disableAutoImporter =
         config.vitePluginDistImporter.disableAutoImporter || options.disableAutoImporter
       assert([true, false].includes(config.vitePluginDistImporter.disableAutoImporter))
     }
+    assert(hasDefinedProp(config, 'vitePluginDistImporter'))
     return config
   }
 

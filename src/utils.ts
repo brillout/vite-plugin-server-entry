@@ -1,3 +1,5 @@
+export * from './utils/hasDefinedProp'
+
 export function toPosixPath(p: string) {
   return p.split('\\').join('/')
 }
@@ -33,11 +35,6 @@ export function assert(condition: unknown, debugInfo?: unknown): asserts conditi
 
 export function isSSR(config: { build?: { ssr?: boolean | string } }): boolean {
   return !!config?.build?.ssr
-}
-
-// Same as `Object.assign()` but with type inference
-export function objectAssign<Obj, ObjAddendum>(obj: Obj, objAddendum: ObjAddendum): asserts obj is Obj & ObjAddendum {
-  Object.assign(obj, objAddendum)
 }
 
 export function isYarnPnP() {
