@@ -1,4 +1,4 @@
-Automatically import `dist/server/` assets.
+Automatically import `dist/server/`.
 
 The import paths are statically analyzable, enabling bundlers to discover the entire dependency tree. (Which is needed for serverless services such as Cloudflare Workers, Vercel, etc.)
 

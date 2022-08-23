@@ -2,12 +2,13 @@ export default importBuildPlugin
 export { importBuildPlugin }
 
 import type { Plugin, ResolvedConfig } from 'vite'
-import type { EmitFile, NormalizedOutputOptions, OutputBundle } from 'rollup'
-import { isYarnPnP, assert, assertPosixPath, getImporterDir, isSSR, isAbsolutePath, hasDefinedProp } from './utils'
+import type { EmitFile } from 'rollup'
+import { isYarnPnP, assert, assertPosixPath, viteIsSSR, isAbsolutePath, toPosixPath, hasDefinedProp } from './utils'
 import path from 'path'
 import { writeFileSync } from 'fs'
-import { importBuildFileName } from './importBuildFileName'
-const autoImporterFile = require.resolve('./autoImporter')
+import { importBuildFileName } from '../shared/importBuildFileName'
+import { findBuildEntry, RollupOptions, RollupBundle } from './findBuildEntry'
+const autoImporterFilePath = require.resolve('../autoImporter')
 const configVersion = '0.2' // SemVer major of `npm info vite-plugin-import-build`
 
 type PluginConfig = {
@@ -18,8 +19,7 @@ type PluginConfig = {
 }
 type Config = ResolvedConfig & { vitePluginDistImporter: PluginConfig }
 type ConfigPristine = ResolvedConfig & { vitePluginDistImporter?: PluginConfig }
-type RollupInfo = { options: NormalizedOutputOptions; bundle: OutputBundle }
-type GetImporterCode = (args: { rollup: RollupInfo }) => string
+type GetImporterCode = (args: { findBuildEntry: (entryName: string) => string }) => string
 type Library = {
   libraryName: string
   getImporterCode: GetImporterCode
@@ -33,53 +33,60 @@ function importBuildPlugin(options: {
   let config: Config
   return {
     name: `vite-plugin-import-build:${options.libraryName}`,
-    apply: (config, env) => env.command === 'build' && isSSR(config),
+    apply: (config, env) => env.command === 'build' && viteIsSSR(config),
     configResolved(config_: ConfigPristine) {
       config = resolveConfig(config_)
     },
     buildStart() {
       resetAutoImporter()
     },
-    generateBundle(options: NormalizedOutputOptions, bundle: OutputBundle) {
+    generateBundle(rollupOptions, rollupBundle) {
       const emitFile = this.emitFile.bind(this)
-      const rollup = { options, bundle }
-      generateImporter(emitFile, rollup)
+      generateImporter(emitFile, rollupOptions, rollupBundle)
     }
   } as Plugin
 
   function resolveConfig(config: ConfigPristine): Config {
-    assert(isSSR(config))
+    assert(viteIsSSR(config))
     config.vitePluginDistImporter = config.vitePluginDistImporter ?? {
+      libraries: [],
       importerAlreadyGenerated: false,
       disableAutoImporter: null,
-      configVersion,
-      libraries: []
+      configVersion
     }
+
     if (config.vitePluginDistImporter.configVersion !== configVersion) {
       const otherLibrary = config.vitePluginDistImporter.libraries[0]
       assert(otherLibrary)
       assert(otherLibrary.libraryName !== options.libraryName)
       throw new Error(`Conflict between ${options.libraryName} and ${otherLibrary.libraryName}`)
     }
+
     config.vitePluginDistImporter.libraries.push({
       getImporterCode: options.getImporterCode,
       libraryName: options.libraryName
     })
+
     if (options.disableAutoImporter !== undefined) {
       config.vitePluginDistImporter.disableAutoImporter =
         config.vitePluginDistImporter.disableAutoImporter || options.disableAutoImporter
       assert([true, false].includes(config.vitePluginDistImporter.disableAutoImporter))
     }
+
     assert(hasDefinedProp(config, 'vitePluginDistImporter'))
     return config
   }
 
-  function generateImporter(emitFile: EmitFile, rollup: RollupInfo) {
+  function generateImporter(emitFile: EmitFile, rollupOptions: RollupOptions, rollupBundle: RollupBundle) {
     if (config.vitePluginDistImporter.importerAlreadyGenerated) return
     config.vitePluginDistImporter.importerAlreadyGenerated = true
 
     const source = config.vitePluginDistImporter.libraries
-      .map(({ getImporterCode }) => getImporterCode({ rollup }))
+      .map(({ getImporterCode }) =>
+        getImporterCode({
+          findBuildEntry: (entryName: string) => findBuildEntry(entryName, rollupOptions, rollupBundle, config)
+        })
+      )
       .join('\n')
 
     emitFile({
@@ -97,13 +104,13 @@ function importBuildPlugin(options: {
     const { root } = config
     assertPosixPath(root)
     writeFileSync(
-      autoImporterFile,
+      autoImporterFilePath,
       ["exports.status = 'SET';", `exports.load = () => { require('${distImporterFile}') };`, ''].join('\n')
     )
   }
   function resetAutoImporter() {
     try {
-      writeFileSync(autoImporterFile, ["exports.status = 'UNSET';", ''].join('\n'))
+      writeFileSync(autoImporterFilePath, ["exports.status = 'UNSET';", ''].join('\n'))
     } catch {}
   }
 
@@ -115,7 +122,7 @@ function importBuildPlugin(options: {
 }
 
 function getDistPathRelative(config: ResolvedConfig) {
-  assert(isSSR(config))
+  assert(viteIsSSR(config))
   const { root } = config
   assertPosixPath(root)
   const rootRelative = path.posix.relative(getImporterDir(), root) // To `require()` an absolute path doesn't seem to work on Vercel
@@ -136,6 +143,11 @@ function getOutDir(config: ResolvedConfig) {
   assertPosixPath(outDirServer)
   const outDir = path.posix.join(outDirServer, '..')
   return outDir
+}
+
+function getImporterDir() {
+  const currentDir = toPosixPath(__dirname + (() => '')()) // trick to avoid `@vercel/ncc` to glob import
+  return path.posix.resolve(currentDir, '..')
 }
 
 type Plugin_ = any

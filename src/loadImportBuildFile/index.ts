@@ -2,7 +2,7 @@ export { loadImportBuildFile }
 export { importBuildFileName }
 
 import { getCwd, isCloudflareWorkersAlike, assert } from './utils'
-import { importBuildFileName } from './importBuildFileName'
+import { importBuildFileName } from '../shared/importBuildFileName'
 import path from 'path'
 import fs from 'fs'
 
@@ -13,7 +13,7 @@ async function loadImportBuildFile() {
     root: string
     outDir: string
     load: () => void
-  } = require('./autoImporter')
+  } = require('../autoImporter')
 
   if (importer.status === 'SET') {
     importer.load()
@@ -72,7 +72,7 @@ async function loadImportBuildFile() {
     let autoImporterFilePath: string | null = null
 
     try {
-      autoImporterFilePath = require.resolve('./autoImporter')
+      autoImporterFilePath = require.resolve('../autoImporter')
     } catch {
       return null
     }
