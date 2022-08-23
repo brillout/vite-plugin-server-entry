@@ -125,13 +125,17 @@ function getDistPathRelative(config: ResolvedConfig) {
   assert(viteIsSSR(config))
   const { root } = config
   assertPosixPath(root)
-  const rootRelative = path.posix.relative(getImporterDir(), root) // To `require()` an absolute path doesn't seem to work on Vercel
+  const importerDir = getImporterDir()
+  const rootRelative = path.posix.relative(importerDir, root) // To `require()` an absolute path doesn't seem to work on Vercel
   let outDir = getOutDir(config)
   if (isAbsolutePath(outDir)) {
     outDir = path.posix.relative(root, outDir)
     assert(!isAbsolutePath(outDir))
   }
   const distPathRelative = path.posix.join(rootRelative, outDir)
+  console.log(
+    `root: ${root}, importerDir: ${importerDir}, rootRelative: ${rootRelative}, outDir: ${outDir}, distPathRelative: ${distPathRelative}`
+  )
   return distPathRelative
 }
 
@@ -147,7 +151,7 @@ function getOutDir(config: ResolvedConfig) {
 
 function getImporterDir() {
   const currentDir = toPosixPath(__dirname + (() => '')()) // trick to avoid `@vercel/ncc` to glob import
-  return path.posix.resolve(currentDir, '..')
+  return path.posix.join(currentDir, '..')
 }
 
 type Plugin_ = any
