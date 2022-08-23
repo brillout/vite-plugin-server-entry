@@ -1,5 +1,5 @@
-export default distImporter
-export { distImporter }
+export default importBuildPlugin
+export { importBuildPlugin }
 
 import type { Plugin, ResolvedConfig } from 'vite'
 import type { EmitFile, NormalizedOutputOptions, OutputBundle } from 'rollup'
@@ -8,26 +8,31 @@ import path from 'path'
 import { writeFileSync } from 'fs'
 import { importBuildFileName } from './importBuildFileName'
 const autoImporterFile = require.resolve('./autoImporter')
+const configVersion = '0.2' // SemVer major of `npm info vite-plugin-dist-importer`
 
 type PluginConfig = {
-  alreadyGenerated: boolean
-  importGetters: ImportGetter[]
+  libraries: Library[]
+  importerAlreadyGenerated: boolean
+  configVersion: string
   disableAutoImporter: null | boolean
 }
 type Config = ResolvedConfig & { vitePluginDistImporter: PluginConfig }
 type ConfigPristine = ResolvedConfig & { vitePluginDistImporter?: PluginConfig }
 type RollupInfo = { options: NormalizedOutputOptions; bundle: OutputBundle }
-type ImportGetter = (args: { rollup: RollupInfo }) => string
-type Options = {
-  getImporterCode: ImportGetter
-  disableAutoImporter?: boolean
-  projectName: string
+type GetImporterCode = (args: { rollup: RollupInfo }) => string
+type Library = {
+  libraryName: string
+  getImporterCode: GetImporterCode
 }
 
-function distImporter(options: Options): Plugin_ {
+function importBuildPlugin(options: {
+  getImporterCode: GetImporterCode
+  disableAutoImporter?: boolean
+  libraryName: string
+}): Plugin_ {
   let config: Config
   return {
-    name: `vite-plugin-dist-importer:${options.projectName}`,
+    name: `vite-plugin-dist-importer:${options.libraryName}`,
     apply: (config, env) => env.command === 'build' && isSSR(config),
     configResolved(config_: ConfigPristine) {
       config = resolveConfig(config_)
@@ -45,11 +50,21 @@ function distImporter(options: Options): Plugin_ {
   function resolveConfig(config: ConfigPristine): Config {
     assert(isSSR(config))
     config.vitePluginDistImporter = config.vitePluginDistImporter ?? {
-      alreadyGenerated: false,
+      importerAlreadyGenerated: false,
       disableAutoImporter: null,
-      importGetters: []
+      configVersion,
+      libraries: []
     }
-    config.vitePluginDistImporter.importGetters.push(options.getImporterCode)
+    if (config.vitePluginDistImporter.configVersion !== configVersion) {
+      const otherLibrary = config.vitePluginDistImporter.libraries[0]
+      assert(otherLibrary)
+      assert(otherLibrary.libraryName !== options.libraryName)
+      throw new Error(`Conflict between ${options.libraryName} and ${otherLibrary.libraryName}`)
+    }
+    config.vitePluginDistImporter.libraries.push({
+      getImporterCode: options.getImporterCode,
+      libraryName: options.libraryName
+    })
     if (options.disableAutoImporter !== undefined) {
       config.vitePluginDistImporter.disableAutoImporter =
         config.vitePluginDistImporter.disableAutoImporter || options.disableAutoImporter
@@ -60,11 +75,11 @@ function distImporter(options: Options): Plugin_ {
   }
 
   function generateImporter(emitFile: EmitFile, rollup: RollupInfo) {
-    if (config.vitePluginDistImporter.alreadyGenerated) return
-    config.vitePluginDistImporter.alreadyGenerated = true
+    if (config.vitePluginDistImporter.importerAlreadyGenerated) return
+    config.vitePluginDistImporter.importerAlreadyGenerated = true
 
-    const source = config.vitePluginDistImporter.importGetters
-      .map((getImporterCode) => getImporterCode({ rollup }))
+    const source = config.vitePluginDistImporter.libraries
+      .map(({ getImporterCode }) => getImporterCode({ rollup }))
       .join('\n')
 
     emitFile({

@@ -1,11 +1,12 @@
+export { loadImportBuildFile }
+export { importBuildFileName }
+
 import { getCwd, isCloudflareWorkersAlike, assert } from './utils'
 import { importBuildFileName } from './importBuildFileName'
 import path from 'path'
 import fs from 'fs'
 
-export { loadDistEntries }
-
-async function loadDistEntries() {
+async function loadImportBuildFile() {
   const importer: {
     status: string
     importerDir: string
@@ -19,7 +20,6 @@ async function loadDistEntries() {
     return {
       success: true,
       entryFile: getImporterFilePath(),
-      importBuildFileName
     }
   } else if (importer.status === 'UNSET') {
     // Yarn PnP or disabled
@@ -27,7 +27,6 @@ async function loadDistEntries() {
     return {
       success,
       entryFile: distImporterFilePath,
-      importBuildFileName
     }
   } else {
     const { status } = importer
