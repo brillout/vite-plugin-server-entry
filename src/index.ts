@@ -2,7 +2,7 @@ export default distImporter
 export { distImporter }
 
 import type { Plugin, ResolvedConfig } from 'vite'
-import type { NormalizedOutputOptions, OutputBundle } from 'rollup'
+import type { EmitFile, NormalizedOutputOptions, OutputBundle } from 'rollup'
 import { isYarnPnP, assert, assertPosixPath, getImporterDir, isSSR, objectAssign, isAbsolutePath } from './utils'
 import path from 'path'
 import { writeFileSync } from 'fs'
@@ -15,8 +15,9 @@ type PluginConfig = {
   disableAutoImporter: null | boolean
 }
 type Config = ResolvedConfig & { vitePluginDistImporter: PluginConfig }
-type ConfigInit = ResolvedConfig & { vitePluginDistImporter?: PluginConfig }
-type ImportGetter = (args: { rollup: { options: NormalizedOutputOptions; bundle: OutputBundle } }) => string
+type ConfigPristine = ResolvedConfig & { vitePluginDistImporter?: PluginConfig }
+type RollupInfo = { options: NormalizedOutputOptions; bundle: OutputBundle }
+type ImportGetter = (args: { rollup: RollupInfo }) => string
 type Options = {
   getImporterCode: ImportGetter
   disableAutoImporter?: boolean
@@ -28,43 +29,53 @@ function distImporter(options: Options): Plugin_ {
   return {
     name: `vite-plugin-dist-importer:${options.projectName}`,
     apply: (config, env) => env.command === 'build' && isSSR(config),
-    configResolved(config_: ConfigInit) {
-      assert(isSSR(config_))
-      objectAssign(config_, {
-        vitePluginDistImporter: config_.vitePluginDistImporter ?? {
-          alreadyGenerated: false,
-          disableAutoImporter: null,
-          importGetters: []
-        }
-      })
-      config = config_
-      config.vitePluginDistImporter.importGetters.push(options.getImporterCode)
-      if (options.disableAutoImporter !== undefined) {
-        config.vitePluginDistImporter.disableAutoImporter =
-          config.vitePluginDistImporter.disableAutoImporter || options.disableAutoImporter
-        assert([true, false].includes(config.vitePluginDistImporter.disableAutoImporter))
-      }
+    configResolved(config_: ConfigPristine) {
+      config = resolveConfig(config_)
     },
     buildStart() {
       resetAutoImporter()
     },
     generateBundle(options: NormalizedOutputOptions, bundle: OutputBundle) {
-      if (config.vitePluginDistImporter.alreadyGenerated) return
-      config.vitePluginDistImporter.alreadyGenerated = true
-
-      const source = config.vitePluginDistImporter.importGetters
-        .map((getImporterCode) => getImporterCode({ rollup: { options, bundle } }))
-        .join('\n')
-
-      this.emitFile({
-        fileName: importBuildFileName,
-        type: 'asset',
-        source
-      })
-
-      setAutoImporter()
+      const emitFile = this.emitFile.bind(this)
+      const rollup = { options, bundle }
+      generateImporter(emitFile, rollup)
     }
   } as Plugin
+
+  function resolveConfig(config: ConfigPristine): Config {
+    assert(isSSR(config))
+    objectAssign(config, {
+      vitePluginDistImporter: config.vitePluginDistImporter ?? {
+        alreadyGenerated: false,
+        disableAutoImporter: null,
+        importGetters: []
+      }
+    })
+    config.vitePluginDistImporter.importGetters.push(options.getImporterCode)
+    if (options.disableAutoImporter !== undefined) {
+      config.vitePluginDistImporter.disableAutoImporter =
+        config.vitePluginDistImporter.disableAutoImporter || options.disableAutoImporter
+      assert([true, false].includes(config.vitePluginDistImporter.disableAutoImporter))
+    }
+    return config
+  }
+
+  function generateImporter(emitFile: EmitFile, rollup: RollupInfo) {
+    if (config.vitePluginDistImporter.alreadyGenerated) return
+    config.vitePluginDistImporter.alreadyGenerated = true
+
+    const source = config.vitePluginDistImporter.importGetters
+      .map((getImporterCode) => getImporterCode({ rollup }))
+      .join('\n')
+
+    emitFile({
+      fileName: importBuildFileName,
+      type: 'asset',
+      source
+    })
+
+    setAutoImporter()
+  }
 
   function setAutoImporter() {
     if (autoImporterIsDisabled()) return
