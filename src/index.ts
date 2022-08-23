@@ -8,13 +8,13 @@ import path from 'path'
 import { writeFileSync } from 'fs'
 import { importBuildFileName } from './importBuildFileName'
 const autoImporterFile = require.resolve('./autoImporter')
-const configVersion = '0.2' // SemVer major of `npm info vite-plugin-dist-importer`
+const configVersion = '0.2' // SemVer major of `npm info vite-plugin-import-build`
 
 type PluginConfig = {
   libraries: Library[]
   importerAlreadyGenerated: boolean
-  configVersion: string
   disableAutoImporter: null | boolean
+  configVersion: string
 }
 type Config = ResolvedConfig & { vitePluginDistImporter: PluginConfig }
 type ConfigPristine = ResolvedConfig & { vitePluginDistImporter?: PluginConfig }
@@ -32,7 +32,7 @@ function importBuildPlugin(options: {
 }): Plugin_ {
   let config: Config
   return {
-    name: `vite-plugin-dist-importer:${options.libraryName}`,
+    name: `vite-plugin-import-build:${options.libraryName}`,
     apply: (config, env) => env.command === 'build' && isSSR(config),
     configResolved(config_: ConfigPristine) {
       config = resolveConfig(config_)
