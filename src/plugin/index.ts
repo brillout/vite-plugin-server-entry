@@ -133,11 +133,7 @@ function getDistPathRelative(config: ResolvedConfig) {
     assert(!isAbsolutePath(outDir))
   }
   const distPathRelative = path.posix.join(rootRelative, outDir)
-  /*
-  console.log(
-    `root: ${root}, importerDir: ${importerDir}, rootRelative: ${rootRelative}, outDir: ${outDir}, distPathRelative: ${distPathRelative}`
-  )
-  //*/
+  // console.log(`root: ${root}, importerDir: ${importerDir}, rootRelative: ${rootRelative}, outDir: ${outDir}, distPathRelative: ${distPathRelative}`)
   return distPathRelative
 }
 
