@@ -1,6 +1,6 @@
 {
   "name": "@brillout/vite-plugin-import-build",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "dependencies": {},
   "scripts": {
     "dev": "tsc --watch",
