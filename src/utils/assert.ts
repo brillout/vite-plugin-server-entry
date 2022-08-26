@@ -1,3 +1,6 @@
+const name = '@brillout/vite-plugin-import-build'
+const repo = 'https://github.com/brillout/vite-plugin-import-build/issues/new'
+
 export function assert(condition: unknown, debugInfo?: unknown): asserts condition {
   if (condition) return
 
@@ -5,8 +8,8 @@ export function assert(condition: unknown, debugInfo?: unknown): asserts conditi
 
   throw new Error(
     [
-      '[vite-plugin-import-build][Bug] You stumbled upon a bug in the source code of vite-plugin-import-build.',
-      'Reach out at https://github.com/brillout/vite-plugin-import-build/issues/new and include this error stack',
+      `[${name}][Bug] You stumbled upon a bug in the source code of ${name}.`,
+      `Reach out at ${repo} and include this error stack`,
       '(the error stack is usually enough to fix the problem).',
       debugStr && `(Debug info for the maintainers: ${debugStr})`
     ]

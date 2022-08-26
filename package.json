@@ -1,16 +1,13 @@
 {
-  "name": "vite-plugin-import-build",
-  "version": "0.2.3",
-  "description": "Automatically import `dist/server/`",
+  "name": "@brillout/vite-plugin-import-build",
+  "version": "0.0.0",
   "dependencies": {},
-  "main": "./index.js",
   "scripts": {
     "dev": "tsc --watch",
     "build": "rm -rf dist/ && tsc",
     "// === Release ===": "",
     "prepublishOnly": "pnpm run build",
-    "postpublish": " git push && git push --tags",
-    "release": "npm version patch && npm publish"
+    "release": "npm version patch && npm publish && git push && git push --tags"
   },
   "devDependencies": {
     "@types/node": "^15.12.2",
@@ -24,5 +21,8 @@
     "*.js"
   ],
   "license": "MIT",
-  "repository": "https://github.com/brillout/vite-plugin-import-build"
+  "repository": "https://github.com/brillout/vite-plugin-import-build",
+  "publishConfig": {
+    "access": "public"
+  }
 }

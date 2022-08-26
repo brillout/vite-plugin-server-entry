@@ -1,9 +1,6 @@
-Automatically import `dist/server/`.
+Automatically load the server-side build entries living at `dist/server/`.
 
-The import paths are statically analyzable, enabling bundlers to discover the entire dependency tree. (Which is needed for serverless services such as Cloudflare Workers, Vercel, etc.)
+- In a way that is statically analyzable. So that bundlers are able to discover the entire dependency tree. (Which is needed for serverless services such as Cloudflare Workers, Vercel, etc.)
+- Supports Yarn PnP.
 
-Supports Yarn PnP.
-
-For more information, create a new GitHub ticket.
-
-It's currently used by [`vite-plugin-ssr`](https://vite-plugin-ssr.com/) and [Telefunc](https://telefunc.com/).
+Do not use for now, as it's currently meant to be used only by [vite-plugin-ssr](https://vite-plugin-ssr.com/) and [Telefunc](https://telefunc.com/). Reach out on GitHub or Discord, if you want to use it.

@@ -31,7 +31,7 @@ function importBuild(options: {
 }): Plugin_ {
   let config: Config
   return {
-    name: `vite-plugin-import-build:${options.libraryName}`,
+    name: `@brillout/vite-plugin-import-build:${options.libraryName}`,
     apply: (config, env) => env.command === 'build' && viteIsSSR(config),
     configResolved(config_: ConfigPristine) {
       config = resolveConfig(config_)
@@ -58,7 +58,9 @@ function importBuild(options: {
       const otherLibrary = config.vitePluginDistImporter.libraries[0]
       assert(otherLibrary)
       assert(otherLibrary.libraryName !== options.libraryName)
-      throw new Error(`Conflict between ${options.libraryName} and ${otherLibrary.libraryName}`)
+      throw new Error(
+        `Conflict between ${options.libraryName} and ${otherLibrary.libraryName}. Updating both to their latest version will likely solve the problem.`
+      )
     }
 
     config.vitePluginDistImporter.libraries.push({
