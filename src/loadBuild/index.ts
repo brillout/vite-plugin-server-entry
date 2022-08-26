@@ -1,4 +1,4 @@
-export { loadImportBuildFile }
+export { loadBuild }
 export { importBuildFileName }
 
 import { getCwd, isCloudflareWorkersAlike, assert } from './utils'
@@ -6,7 +6,7 @@ import { importBuildFileName } from '../shared/importBuildFileName'
 import path from 'path'
 import fs from 'fs'
 
-async function loadImportBuildFile() {
+async function loadBuild() {
   const importer: {
     status: string
     importerDir: string

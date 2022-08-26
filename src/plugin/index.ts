@@ -1,5 +1,4 @@
-export default importBuildPlugin
-export { importBuildPlugin }
+export { importBuild }
 
 import type { Plugin, ResolvedConfig } from 'vite'
 import type { EmitFile } from 'rollup'
@@ -9,13 +8,13 @@ import { writeFileSync } from 'fs'
 import { importBuildFileName } from '../shared/importBuildFileName'
 import { findBuildEntry, RollupOptions, RollupBundle } from './findBuildEntry'
 const autoImporterFilePath = require.resolve('../autoImporter')
-const configVersion = '0.2' // SemVer major of `npm info vite-plugin-import-build`
+const configVersion = 1
 
 type PluginConfig = {
   libraries: Library[]
   importerAlreadyGenerated: boolean
   disableAutoImporter: null | boolean
-  configVersion: string
+  configVersion: number
 }
 type Config = ResolvedConfig & { vitePluginDistImporter: PluginConfig }
 type ConfigPristine = ResolvedConfig & { vitePluginDistImporter?: PluginConfig }
@@ -25,7 +24,7 @@ type Library = {
   getImporterCode: GetImporterCode
 }
 
-function importBuildPlugin(options: {
+function importBuild(options: {
   getImporterCode: GetImporterCode
   disableAutoImporter?: boolean
   libraryName: string
