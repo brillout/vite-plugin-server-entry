@@ -6,7 +6,7 @@ import { isYarnPnP, assert, assertPosixPath, viteIsSSR, isAbsolutePath, toPosixP
 import path from 'path'
 import { writeFileSync } from 'fs'
 import { importBuildFileName } from '../shared/importBuildFileName'
-import { findBuildEntry, RollupOptions, RollupBundle } from './findBuildEntry'
+import { findBuildEntry, RollupBundle } from './findBuildEntry'
 const autoImporterFilePath = require.resolve('../autoImporter')
 const configVersion = 1
 
@@ -39,9 +39,9 @@ function importBuild(options: {
     buildStart() {
       resetAutoImporter()
     },
-    generateBundle(rollupOptions, rollupBundle) {
+    generateBundle(_rollupOptions, rollupBundle) {
       const emitFile = this.emitFile.bind(this)
-      generateImporter(emitFile, rollupOptions, rollupBundle)
+      generateImporter(emitFile, rollupBundle)
     }
   } as Plugin
 
@@ -78,14 +78,14 @@ function importBuild(options: {
     return config
   }
 
-  function generateImporter(emitFile: EmitFile, rollupOptions: RollupOptions, rollupBundle: RollupBundle) {
+  function generateImporter(emitFile: EmitFile, rollupBundle: RollupBundle) {
     if (config.vitePluginDistImporter.importerAlreadyGenerated) return
     config.vitePluginDistImporter.importerAlreadyGenerated = true
 
     const source = config.vitePluginDistImporter.libraries
       .map(({ getImporterCode }) =>
         getImporterCode({
-          findBuildEntry: (entryName: string) => findBuildEntry(entryName, rollupOptions, rollupBundle, config)
+          findBuildEntry: (entryName: string) => findBuildEntry(entryName, rollupBundle)
         })
       )
       .join('\n')

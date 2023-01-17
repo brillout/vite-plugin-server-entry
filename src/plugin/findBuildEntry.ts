@@ -1,44 +1,26 @@
 export { findBuildEntry }
-export type { RollupOptions, RollupBundle }
+export type { RollupBundle }
 
-import { assert, assertPosixPath, viteIsSSR, rollupIsEsm } from './utils'
+import { assert } from './utils'
 
-// Subset of: `import type { NormalizedOutputOptions } from 'rollup'` (to avoid mismatch upon different Rollup versions)
-type RollupOptions = { entryFileNames: string | ((chunkInfo: any) => string); format: string }
-// Subset of: `import type { OutputBundle } from 'rollup'` (to avoid mismatch upon different Rollup versions)
+// Subset of: `import type { OutputBundle } from 'rollup'`. (We use a subset to avoid mismatch upon different Rollup versions.)
 type RollupBundle = Record<string, unknown>
-// Subset of: `import type { ResolvedConfig } from 'vite'` (to avoid mismatch upon different Vite versions)
-type ViteConfig = {
-  build: { outDir: string; ssr: boolean | string }
-}
 
-function findBuildEntry(
-  entryName: string,
-  rollupOptions: RollupOptions,
-  rollupBundle: RollupBundle,
-  config: ViteConfig
-) {
-  assert(viteIsSSR(config))
-  const fileExt = getFileExt(rollupOptions)
-  assert(fileExt !== 'mjs' || rollupIsEsm(rollupOptions))
-  const entryFileName = `${entryName}.${fileExt}`
-  assertEntryExistence(entryFileName, rollupBundle, config)
-  return entryFileName
-}
-
-function assertEntryExistence(entryFileName: string, rollupBundle: RollupBundle, config: ViteConfig) {
-  const bundleFiles = Object.keys(rollupBundle)
-  const { outDir } = config.build
-  assertPosixPath(outDir)
-  if (!bundleFiles.includes(entryFileName)) {
+function findBuildEntry(entryName: string, rollupBundle: RollupBundle) {
+  let entryFound: undefined | string
+  const entries = Object.keys(rollupBundle)
+  for (const entry of entries) {
+    assert(!entryName.includes('.'))
+    if (entryName === entry.split('.')[0]) {
+      assert(!entryFound)
+      entryFound = entry
+    }
+  }
+  if (!entryFound) {
+    const entriesStr = entries.map((e) => `'${e}'`).join(', ')
     throw new Error(
-      `\`${outDir}/${entryFileName}\` is missing: make sure your Rollup config doesn't change the name of the file \`${entryFileName}\``
+      `Cannot find build entry '${entryName}'. Make sure your Rollup config doesn't change the entry name '${entryName}'. (Found entries: [${entriesStr}].)`
     )
   }
-}
-
-function getFileExt(rollupOptions: RollupOptions): 'js' | 'mjs' {
-  const { entryFileNames } = rollupOptions
-  const fileExt = typeof entryFileNames === 'string' && entryFileNames.endsWith('.mjs') ? 'mjs' : 'js'
-  return fileExt
+  return entryFound
 }
