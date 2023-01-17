@@ -1,4 +1,4 @@
-Automatically load the server-side build living at `dist/server/`.
+Automatically load the server-side build living at `config.build.outDir` (e.g. `dist/server/`).
 
 - In a way that is statically analyzable. So that bundlers are able to discover the entire dependency tree. (Which is needed for serverless services such as Cloudflare Workers, Vercel, etc.)
 - Supports Yarn PnP.

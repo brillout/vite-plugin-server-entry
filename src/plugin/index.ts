@@ -82,6 +82,7 @@ function importBuild(options: {
     if (config.vitePluginDistImporter.importerAlreadyGenerated) return
     config.vitePluginDistImporter.importerAlreadyGenerated = true
 
+    assert(viteIsSSR(config)) // rollupBundle should be the server-side one
     const source = config.vitePluginDistImporter.libraries
       .map(({ getImporterCode }) =>
         getImporterCode({
@@ -101,7 +102,7 @@ function importBuild(options: {
 
   function setAutoImporter() {
     if (autoImporterIsDisabled()) return
-    const distImporterFile = path.posix.join(getDistPathRelative(config), 'server', importBuildFileName)
+    const distImporterFile = path.posix.join(getDistPathRelative(config), importBuildFileName)
     const { root } = config
     assertPosixPath(root)
     writeFileSync(
@@ -128,7 +129,8 @@ function getDistPathRelative(config: ResolvedConfig) {
   assertPosixPath(root)
   const importerDir = getImporterDir()
   const rootRelative = path.posix.relative(importerDir, root) // To `require()` an absolute path doesn't seem to work on Vercel
-  let outDir = getOutDir(config)
+  let { outDir } = config.build
+  assertPosixPath(outDir)
   if (isAbsolutePath(outDir)) {
     outDir = path.posix.relative(root, outDir)
     assert(!isAbsolutePath(outDir))
@@ -136,16 +138,6 @@ function getDistPathRelative(config: ResolvedConfig) {
   const distPathRelative = path.posix.join(rootRelative, outDir)
   // console.log(`root: ${root}, importerDir: ${importerDir}, rootRelative: ${rootRelative}, outDir: ${outDir}, distPathRelative: ${distPathRelative}`)
   return distPathRelative
-}
-
-function getOutDir(config: ResolvedConfig) {
-  const {
-    build: { outDir: outDirServer }
-  } = config
-  assert(outDirServer.endsWith('/server'))
-  assertPosixPath(outDirServer)
-  const outDir = path.posix.join(outDirServer, '..')
-  return outDir
 }
 
 function getImporterDir() {

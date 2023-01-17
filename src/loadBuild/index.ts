@@ -19,14 +19,14 @@ async function loadBuild() {
     importer.load()
     return {
       success: true,
-      entryFile: getImporterFilePath(),
+      entryFile: getImporterFilePath()
     }
   } else if (importer.status === 'UNSET') {
     // Yarn PnP or disabled
     const { success, distImporterFilePath } = loadWithNodejs()
     return {
       success,
-      entryFile: distImporterFilePath,
+      entryFile: distImporterFilePath
     }
   } else {
     const { status } = importer
@@ -42,9 +42,10 @@ async function loadBuild() {
         distImporterFilePath: null
       }
     }
+
+    // The runtime doesn't have access to config.build.outDir so we try and shoot in the dark
     const distImporterPathRelative = path.posix.join(root, 'dist', 'server', importBuildFileName)
     const distImporterDir = path.posix.dirname(distImporterPathRelative)
-
     let distImporterPath: string
     try {
       distImporterPath = require.resolve(distImporterPathRelative)
