@@ -30,7 +30,6 @@ function assertEntryExistence(entryFileName: string, rollupBundle: RollupBundle,
   const bundleFiles = Object.keys(rollupBundle)
   const { outDir } = config.build
   assertPosixPath(outDir)
-  assert(outDir.endsWith('/server'), { outDir })
   if (!bundleFiles.includes(entryFileName)) {
     throw new Error(
       `\`${outDir}/${entryFileName}\` is missing: make sure your Rollup config doesn't change the name of the file \`${entryFileName}\``
