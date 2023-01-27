@@ -10,6 +10,7 @@ function findBuildEntry(entryName: string, rollupBundle: RollupBundle) {
   let entryFound: undefined | string
   const entries = Object.keys(rollupBundle)
   for (const entry of entries) {
+    if (entry.endsWith('.map')) continue // https://github.com/brillout/vite-plugin-ssr/issues/612
     assert(!entryName.includes('.'))
     if (entryName === entry.split('.')[0]) {
       assert(!entryFound)
