@@ -30,16 +30,21 @@ function importBuild(options: {
   libraryName: string
 }): Plugin_ {
   let config: Config
+  let isSSR = false
   return {
     name: `@brillout/vite-plugin-import-build:${options.libraryName}`,
-    apply: (config, env) => env.command === 'build' && viteIsSSR(config),
+    apply: (_config, env) => env.command === 'build',
     configResolved(config_: ConfigPristine) {
+      isSSR = viteIsSSR(config_)
+      if (!isSSR) return
       config = resolveConfig(config_)
     },
     buildStart() {
+      if (!isSSR) return
       resetAutoImporter()
     },
     generateBundle(_rollupOptions, rollupBundle) {
+      if (!isSSR) return
       const emitFile = this.emitFile.bind(this)
       generateImporter(emitFile, rollupBundle)
     }
