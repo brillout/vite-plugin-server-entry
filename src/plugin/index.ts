@@ -135,7 +135,8 @@ function getDistPathRelative(config: ResolvedConfig) {
   const importerDir = getImporterDir()
   const rootRelative = path.posix.relative(importerDir, root) // To `require()` an absolute path doesn't seem to work on Vercel
   let { outDir } = config.build
-  assertPosixPath(outDir)
+  // SvelteKit doesn't set config.build.outDir to a posix path
+  outDir = toPosixPath(outDir)
   if (isAbsolutePath(outDir)) {
     outDir = path.posix.relative(root, outDir)
     assert(!isAbsolutePath(outDir))
