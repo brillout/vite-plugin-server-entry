@@ -99,11 +99,22 @@ function isWebpackResolve(moduleResolve: string) {
 // Critical dependency: the request of a dependency is an expression
 // ```
 // The fact that Next.js transpiles this file is a Telefunc flaw that can/should be fixed. We still need this workaround for users who use wbepack to bundle their VPS app's server code.
+// __non_webpack_require__ trick: https://github.com/webpack/webpack/issues/196#issuecomment-261573140
+// If __non_webpack_require__ doesn't turn out to be reliable then use @brillout/import
 function requireResolve_(id: string) {
-  const res = ((global as any)['req' + 'uire'] as typeof require).resolve
-  return res(id)
+  if (typeof '__non_webpack_require__' === 'undefined') {
+    const __non_webpack_require__ = require
+    return __non_webpack_require__.resolve(id)
+  }
+  return __non_webpack_require__!.resolve(id)
 }
 function require_(id: string) {
-  const req = (global as any)['req' + 'uire'] as typeof require
-  return req(id)
+  if (typeof '__non_webpack_require__' === 'undefined') {
+    const __non_webpack_require__ = require
+    return __non_webpack_require__(id)
+  }
+  return __non_webpack_require__!(id)
+}
+declare global {
+  var __non_webpack_require__: undefined | typeof require
 }
