@@ -102,18 +102,18 @@ function isWebpackResolve(moduleResolve: string) {
 // __non_webpack_require__ trick: https://github.com/webpack/webpack/issues/196#issuecomment-261573140
 // If __non_webpack_require__ doesn't turn out to be reliable then use @brillout/import
 function requireResolve_(id: string) {
-  if (typeof '__non_webpack_require__' === 'undefined') {
+  if (typeof __non_webpack_require__ === 'undefined') {
     const __non_webpack_require__ = require
     return __non_webpack_require__.resolve(id)
   }
-  return __non_webpack_require__!.resolve(id)
+  return __non_webpack_require__.resolve(id)
 }
 function require_(id: string) {
-  if (typeof '__non_webpack_require__' === 'undefined') {
+  if (typeof __non_webpack_require__ === 'undefined') {
     const __non_webpack_require__ = require
     return __non_webpack_require__(id)
   }
-  return __non_webpack_require__!(id)
+  return __non_webpack_require__(id)
 }
 declare global {
   var __non_webpack_require__: undefined | typeof require
