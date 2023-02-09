@@ -91,12 +91,19 @@ function isWebpackResolve(moduleResolve: string) {
   return typeof moduleResolve === 'number'
 }
 
-// Attempt to workaround "Critical dependency: the request of a dependency is an expression": https://github.com/brillout/telefunc/issues/61#issuecomment-1424058439
+// Workaround Next.js's (webpack?) static analysis warnings:
+// ```
+// Critical dependency: require function is used in a way in which dependencies cannot be statically extracted
+// ```
+// ```
+// Critical dependency: the request of a dependency is an expression
+// ```
+// The fact that Next.js transpiles this file is a Telefunc flaw that can/should be fixed. We still need this workaround for users who use wbepack to bundle their VPS app's server code.
 function requireResolve_(id: string) {
-  const res = require.resolve
+  const res = (global as any)['req' + 'uire.resolve'] as typeof require.resolve
   return res(id)
 }
 function require_(id: string) {
-  const req = require
+  const req = (global as any)['req' + 'uire'] as typeof require
   return req(id)
 }
