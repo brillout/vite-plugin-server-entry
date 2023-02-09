@@ -48,7 +48,7 @@ async function loadBuild() {
     const distImporterDir = path.posix.dirname(distImporterPathRelative)
     let distImporterPath: string
     try {
-      distImporterPath = require.resolve(distImporterPathRelative)
+      distImporterPath = requireResolve_(distImporterPathRelative)
     } catch (err) {
       assert(!fs.existsSync(distImporterDir), { distImporterDir, distImporterPathRelative })
       return {
@@ -65,7 +65,7 @@ async function loadBuild() {
     }
 
     assert(distImporterPath.endsWith('.cjs')) // Ensure ESM compability
-    require(distImporterPath)
+    require_(distImporterPath)
     return { success: true, distImporterFilePath: distImporterPath }
   }
 
@@ -73,7 +73,7 @@ async function loadBuild() {
     let autoImporterFilePath: string | null = null
 
     try {
-      autoImporterFilePath = require.resolve('../autoImporter')
+      autoImporterFilePath = requireResolve_('../autoImporter')
     } catch {
       return null
     }
@@ -82,11 +82,21 @@ async function loadBuild() {
       return null
     }
 
-    assert(require(autoImporterFilePath) === importer)
+    assert(require_(autoImporterFilePath) === importer)
     return autoImporterFilePath
   }
 }
 
 function isWebpackResolve(moduleResolve: string) {
   return typeof moduleResolve === 'number'
+}
+
+// Attempt to workaround "Critical dependency: the request of a dependency is an expression": https://github.com/brillout/telefunc/issues/61#issuecomment-1424058439
+function requireResolve_(id: string) {
+  const res = require.resolve
+  return res(id)
+}
+function require_(id: string) {
+  const req = require
+  return req(id)
 }
