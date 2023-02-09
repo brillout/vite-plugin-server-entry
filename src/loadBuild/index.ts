@@ -5,8 +5,9 @@ import { getCwd, isCloudflareWorkersAlike, assert } from './utils'
 import { importBuildFileName } from '../shared/importBuildFileName'
 import path from 'path'
 import fs from 'fs'
+import { import_ } from '@brillout/import'
 
-async function loadBuild() {
+async function loadBuild(): Promise<{ success: boolean; entryFile: null | string }> {
   const importer: {
     status: string
     importerDir: string
@@ -19,11 +20,11 @@ async function loadBuild() {
     importer.load()
     return {
       success: true,
-      entryFile: getImporterFilePath()
+      entryFile: await getImporterFilePath()
     }
   } else if (importer.status === 'UNSET') {
     // Yarn PnP or disabled
-    const { success, distImporterFilePath } = loadWithNodejs()
+    const { success, distImporterFilePath } = await loadWithNodejs()
     return {
       success,
       entryFile: distImporterFilePath
@@ -33,7 +34,7 @@ async function loadBuild() {
     assert(false, { status })
   }
 
-  function loadWithNodejs() {
+  async function loadWithNodejs() {
     const root = getCwd()
     if (!root) {
       assert(isCloudflareWorkersAlike())
@@ -48,7 +49,7 @@ async function loadBuild() {
     const distImporterDir = path.posix.dirname(distImporterPathRelative)
     let distImporterPath: string
     try {
-      distImporterPath = requireResolve_(distImporterPathRelative)
+      distImporterPath = await requireResolve_(distImporterPathRelative)
     } catch (err) {
       assert(!fs.existsSync(distImporterDir), { distImporterDir, distImporterPathRelative })
       return {
@@ -65,15 +66,15 @@ async function loadBuild() {
     }
 
     assert(distImporterPath.endsWith('.cjs')) // Ensure ESM compability
-    require_(distImporterPath)
+    await require_(distImporterPath)
     return { success: true, distImporterFilePath: distImporterPath }
   }
 
-  function getImporterFilePath() {
+  async function getImporterFilePath() {
     let autoImporterFilePath: string | null = null
 
     try {
-      autoImporterFilePath = requireResolve_('../autoImporter')
+      autoImporterFilePath = require.resolve('../autoImporter')
     } catch {
       return null
     }
@@ -82,7 +83,7 @@ async function loadBuild() {
       return null
     }
 
-    assert(require_(autoImporterFilePath) === importer)
+    assert((await require_(autoImporterFilePath)) === importer)
     return autoImporterFilePath
   }
 }
@@ -91,30 +92,32 @@ function isWebpackResolve(moduleResolve: string) {
   return typeof moduleResolve === 'number'
 }
 
-// Workaround Next.js's (webpack?) static analysis warnings:
+// Workaround for webpack static analysis warnings: (Some users use webpack to bundle their VPS app's server code.)
 // ```
 // Critical dependency: require function is used in a way in which dependencies cannot be statically extracted
-// ```
-// ```
 // Critical dependency: the request of a dependency is an expression
 // ```
-// The fact that Next.js transpiles this file is a Telefunc flaw that can/should be fixed. We still need this workaround for users who use wbepack to bundle their VPS app's server code.
-// __non_webpack_require__ trick: https://github.com/webpack/webpack/issues/196#issuecomment-261573140
-// If __non_webpack_require__ doesn't turn out to be reliable then use @brillout/import
-function requireResolve_(id: string) {
-  if (typeof __non_webpack_require__ === 'undefined') {
-    const __non_webpack_require__ = require
-    return __non_webpack_require__.resolve(id)
+// Just `console.log(require)` already triggers the warnings, so the following seems to be the only way (using eval() shows a warning when using esbuild).
+async function requireResolve_(id: string) {
+  const req = await getRequire()
+  return req.resolve(id)
+}
+async function require_(id: string) {
+  const req = await getRequire()
+  return req(id)
+}
+var req: undefined | typeof require
+async function getRequire() {
+  if (!req) {
+    const { createRequire } = (await import_('module')) as typeof import('module')
+    req = createRequire(__filename)
   }
-  return __non_webpack_require__.resolve(id)
+  return req
 }
-function require_(id: string) {
-  if (typeof __non_webpack_require__ === 'undefined') {
-    const __non_webpack_require__ = require
-    return __non_webpack_require__(id)
-  }
-  return __non_webpack_require__(id)
-}
-declare global {
-  var __non_webpack_require__: undefined | typeof require
-}
+/* Debug:
+;(async () => {
+  console.log('test webpack static analysis suppression trick')
+  console.log(await requireResolve_('path'))
+  console.log(await require('path'))
+})()
+//*/
