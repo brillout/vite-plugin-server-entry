@@ -100,7 +100,7 @@ function isWebpackResolve(moduleResolve: string) {
 // ```
 // The fact that Next.js transpiles this file is a Telefunc flaw that can/should be fixed. We still need this workaround for users who use wbepack to bundle their VPS app's server code.
 function requireResolve_(id: string) {
-  const res = (global as any)['req' + 'uire.resolve'] as typeof require.resolve
+  const res = ((global as any)['req' + 'uire'] as typeof require).resolve
   return res(id)
 }
 function require_(id: string) {
