@@ -3,8 +3,6 @@ export { importBuildFileName }
 
 import { getCwd, isCloudflareWorkersAlike, assert } from './utils'
 import { importBuildFileName } from '../shared/importBuildFileName'
-import path from 'path'
-import fs from 'fs'
 import { import_ } from '@brillout/import'
 
 async function loadBuild(): Promise<boolean> {
@@ -31,6 +29,9 @@ async function loadWithNodejs(): Promise<boolean> {
     assert(isCloudflareWorkersAlike())
     return false
   }
+
+  const path = (await import_('path')) as typeof import('path')
+  const fs = (await import_('fs')) as typeof import('fs')
 
   // The runtime doesn't have access to config.build.outDir so we try and shoot in the dark
   const distImporterPathRelative = path.posix.join(root, 'dist', 'server', importBuildFileName)
