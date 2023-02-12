@@ -23,23 +23,6 @@ async function loadBuild(): Promise<boolean> {
   } else {
     assert(false)
   }
-
-  async function getImporterFilePath() {
-    let autoImporterFilePath: string | null = null
-
-    try {
-      autoImporterFilePath = require.resolve('../autoImporter')
-    } catch {
-      return null
-    }
-
-    if (isWebpackResolve(autoImporterFilePath)) {
-      return null
-    }
-
-    assert((await require_(autoImporterFilePath)) === importer)
-    return autoImporterFilePath
-  }
 }
 
 async function loadWithNodejs(): Promise<boolean> {
