@@ -30,21 +30,21 @@ function importBuild(options: {
   libraryName: string
 }): Plugin_ {
   let config: Config
-  let isSSR = false
+  let isServerSide = false
   return {
     name: `@brillout/vite-plugin-import-build:${options.libraryName}`,
     apply: (_config, env) => env.command === 'build',
     configResolved(config_: ConfigPristine) {
-      isSSR = viteIsSSR(config_)
-      if (!isSSR) return
+      isServerSide = viteIsSSR(config_)
+      if (!isServerSide) return
       config = resolveConfig(config_)
     },
     buildStart() {
-      if (!isSSR) return
+      if (!isServerSide) return
       resetAutoImporter()
     },
     generateBundle(_rollupOptions, rollupBundle) {
-      if (!isSSR) return
+      if (!isServerSide) return
       const emitFile = this.emitFile.bind(this)
       generateImporter(emitFile, rollupBundle)
     }
@@ -107,12 +107,16 @@ function importBuild(options: {
 
   function setAutoImporter() {
     if (autoImporterIsDisabled()) return
-    const distImporterFile = path.posix.join(getDistPathRelative(config), importBuildFileName)
+    const distImportBuildPathRelative = path.posix.join(getDistServerPathRelative(config), importBuildFileName)
     const { root } = config
     assertPosixPath(root)
     writeFileSync(
       autoImporterFilePath,
-      ["exports.status = 'SET';", `exports.load = () => { require('${distImporterFile}') };`, ''].join('\n')
+      [
+        "exports.status = 'SET';",
+        `exports.loadImportBuild = () => { require('${distImportBuildPathRelative}') };`,
+        ''
+      ].join('\n')
     )
   }
   function resetAutoImporter() {
@@ -128,7 +132,7 @@ function importBuild(options: {
   }
 }
 
-function getDistPathRelative(config: ResolvedConfig) {
+function getDistServerPathRelative(config: ResolvedConfig) {
   assert(viteIsSSR(config))
   const { root } = config
   assertPosixPath(root)

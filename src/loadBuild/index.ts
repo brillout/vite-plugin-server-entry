@@ -10,14 +10,11 @@ import { import_ } from '@brillout/import'
 async function loadBuild(): Promise<{ success: boolean; entryFile: null | string }> {
   const importer: {
     status: string
-    importerDir: string
-    root: string
-    outDir: string
-    load: () => void
+    loadImportBuild: () => void
   } = require('../autoImporter')
 
   if (importer.status === 'SET') {
-    importer.load()
+    importer.loadImportBuild()
     return {
       success: true,
       entryFile: await getImporterFilePath()
