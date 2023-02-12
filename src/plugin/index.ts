@@ -2,7 +2,16 @@ export { importBuild }
 
 import type { Plugin, ResolvedConfig } from 'vite'
 import type { EmitFile } from 'rollup'
-import { isYarnPnP, assert, assertPosixPath, viteIsSSR, isAbsolutePath, toPosixPath, hasDefinedProp } from './utils'
+import {
+  isYarnPnP,
+  assert,
+  assertPosixPath,
+  viteIsSSR,
+  isAbsolutePath,
+  toPosixPath,
+  hasDefinedProp,
+  projectInfo
+} from './utils'
 import path from 'path'
 import { writeFileSync } from 'fs'
 import { importBuildFileName } from '../shared/importBuildFileName'
@@ -21,6 +30,7 @@ type ConfigPristine = ResolvedConfig & { vitePluginDistImporter?: PluginConfig }
 type GetImporterCode = (args: { findBuildEntry: (entryName: string) => string }) => string
 type Library = {
   libraryName: string
+  vitePluginImportBuildVersion?: string // can be undefined when set by an older vite-plugin-import-build version
   getImporterCode: GetImporterCode
 }
 
@@ -70,7 +80,8 @@ function importBuild(options: {
 
     config.vitePluginDistImporter.libraries.push({
       getImporterCode: options.getImporterCode,
-      libraryName: options.libraryName
+      libraryName: options.libraryName,
+      vitePluginImportBuildVersion: projectInfo.projectVersion
     })
 
     if (options.disableAutoImporter !== undefined) {
@@ -84,6 +95,8 @@ function importBuild(options: {
   }
 
   function generateImporter(emitFile: EmitFile, rollupBundle: RollupBundle) {
+    // Let the newest vite-plugin-import-build version generate autoImporter.js
+    if (isUsingOlderVitePluginImportBuildVersion(config)) return
     if (config.vitePluginDistImporter.importerAlreadyGenerated) return
     config.vitePluginDistImporter.importerAlreadyGenerated = true
 
@@ -115,7 +128,7 @@ function importBuild(options: {
       [
         "exports.status = 'SET';",
         `exports.loadImportBuild = () => { require('${distImportBuildPathRelative}') };`,
-        // Support old version @brillout/vite-plugin-import-build@0.1.12, which isneeded e.g. if user uses Telefunc version using 0.1.12 while using a VPS version using 0.2.0
+        // Support old version vite-plugin-import-build@0.1.12, which isneeded e.g. if user uses Telefunc version using 0.1.12 while using a VPS version using 0.2.0
         `exports.load = exports.loadImportBuild;`,
         ''
       ].join('\n')
@@ -132,6 +145,30 @@ function importBuild(options: {
     assert([true, false, null].includes(disableAutoImporter))
     return disableAutoImporter ?? isYarnPnP()
   }
+}
+
+function isUsingOlderVitePluginImportBuildVersion(config: Config): boolean {
+  return config.vitePluginDistImporter.libraries.some((library) => {
+    if (!library.vitePluginImportBuildVersion) return false
+    return isHigherVersion(library.vitePluginImportBuildVersion, projectInfo.projectVersion)
+  })
+}
+
+function isHigherVersion(semver1: string, semver2: string): boolean {
+  const semver1Parts = parseSemver(semver1)
+  const semver2Parts = parseSemver(semver2)
+  for (let i = 0; i <= semver1Parts.length - 1; i++) {
+    if (semver1Parts[i] === semver2Parts[i]) continue
+    return semver1Parts[i] > semver2Parts[i]
+  }
+  return false
+}
+
+function parseSemver(semver: string): number[] {
+  assert(/^[0-9\.]+$/.test(semver))
+  const parts = semver.split('.')
+  assert(parts.length === 3)
+  return parts.map((n) => parseInt(n, 10))
 }
 
 function getDistServerPathRelative(config: ResolvedConfig) {
