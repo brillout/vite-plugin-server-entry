@@ -1,6 +1,24 @@
-Automatically load the server-side build living at `config.build.outDir` (e.g. `dist/server/`).
+Automatically loads your server build. (I.e. automatically loads your server files built at `dist/server/`, or `${build.outDir}/server` if you use [`vite.config.js#build.outDir`](https://vitejs.dev/config/build-options.html#build-outdir).)
 
-- In a way that is statically analyzable. So that bundlers are able to discover the entire dependency tree. (Which is needed for serverless services such as Cloudflare Workers, Vercel, etc.)
-- Supports Yarn PnP.
+It does so in an universal and portable way. (I.e. works with every known environment such as Edge Deployments and Yarn PnP.)
 
-Do not use for your own project, as it's currently meant to be used only by [vite-plugin-ssr](https://vite-plugin-ssr.com/) and [Telefunc](https://telefunc.com/).
+
+## `importBuid.cjs`
+
+Usually, `@brillout/vite-plugin-import-build` does everything automagically and you don't have to do anything.
+
+But, in some environments, you need to help `@brillout/vite-plugin-import-build` by adding the following to your server code:
+
+```js
+// server.js
+
+// Load server files built at dist/server/
+import './path/to/dist/server/importBuild.cjs'
+
+// Your server code (e.g. Express.js, Vercel Serverless/Edge, Cloudflare Worker, ...)
+// ...
+```
+
+If you use [`vite.config.js` > `build.outDir`](https://vitejs.dev/config/build-options.html#build-outdir), then replace the path `./path/to/dist/server/importBuild.cjs` with the path of your custom location `./path/to/${build.outDir}/server/importBuild.cjs`.
+
+See https://github.com/brillout/vite-plugin-import-build/issues/4 to learn more about `importBuild.cjs` and why/when you need to import it manually.

@@ -1,6 +1,10 @@
-export function isYarnPnP() {
+export { isYarnPnP }
+
+import { import_ } from '@brillout/import'
+
+async function isYarnPnP(): Promise<boolean> {
   try {
-    require('pnpapi')
+    await import_('pnpapi')
     return true
   } catch {
     return false

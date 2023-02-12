@@ -1,10 +1,12 @@
 export { assert }
+export { assertUsage }
 
 import { createErrorWithCleanStackTrace } from './createErrorWithCleanStackTrace'
 import { projectInfo } from './projectInfo'
 
 const errorPrefix = `[${projectInfo.npmPackageName}@${projectInfo.projectVersion}]`
 const internalErrorPrefix = `${errorPrefix}[Bug]`
+const usageErrorPrefix = `${errorPrefix}[Wrong Usage]`
 
 const numberOfStackTraceLinesToRemove = 2
 
@@ -34,4 +36,13 @@ function assert(condition: unknown, debugInfo?: unknown): asserts condition {
     numberOfStackTraceLinesToRemove
   )
   throw internalError
+}
+
+function assertUsage(condition: unknown, errorMessage: string): asserts condition {
+  if (condition) {
+    return
+  }
+  const errMsg = `${usageErrorPrefix}${errorMessage}`
+  const usageError = createErrorWithCleanStackTrace(errMsg, numberOfStackTraceLinesToRemove)
+  throw usageError
 }

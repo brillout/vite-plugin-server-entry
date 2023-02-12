@@ -53,10 +53,10 @@ function importBuild(options: {
       if (!isServerSide) return
       resetAutoImporter()
     },
-    generateBundle(_rollupOptions, rollupBundle) {
+    async generateBundle(_rollupOptions, rollupBundle) {
       if (!isServerSide) return
       const emitFile = this.emitFile.bind(this)
-      generateImporter(emitFile, rollupBundle)
+      await generateImporter(emitFile, rollupBundle)
     }
   } as Plugin
 
@@ -94,7 +94,7 @@ function importBuild(options: {
     return config
   }
 
-  function generateImporter(emitFile: EmitFile, rollupBundle: RollupBundle) {
+  async function generateImporter(emitFile: EmitFile, rollupBundle: RollupBundle) {
     // Let the newest vite-plugin-import-build version generate autoImporter.js
     if (isUsingOlderVitePluginImportBuildVersion(config)) return
     if (config.vitePluginDistImporter.importerAlreadyGenerated) return
@@ -115,19 +115,27 @@ function importBuild(options: {
       source
     })
 
-    setAutoImporter()
+    await setAutoImporter()
   }
 
-  function setAutoImporter() {
-    if (autoImporterIsDisabled()) return
-    const distImportBuildPathRelative = path.posix.join(getDistServerPathRelative(config), importBuildFileName)
+  async function setAutoImporter() {
+    if (await autoImporterIsDisabled()) return
+    const { distServerPathRelative, distServerPathAbsolute } = getDistServerPathRelative(config)
+    const importBuildFilePathRelative = path.posix.join(distServerPathRelative, importBuildFileName)
+    const importBuildFilePathAbsolute = path.posix.join(distServerPathAbsolute, importBuildFileName)
     const { root } = config
     assertPosixPath(root)
     writeFileSync(
       autoImporterFilePath,
       [
         "exports.status = 'SET';",
-        `exports.loadImportBuild = () => { require('${distImportBuildPathRelative}') };`,
+        `exports.loadImportBuild = () => { require('${importBuildFilePathRelative}') };`,
+        'exports.paths = {',
+        `  importBuildFilePathRelative: '${importBuildFilePathRelative}',`,
+        `  importBuildFilePathResolved: () => require.resolve('${importBuildFilePathRelative}'),`,
+        `  importBuildFilePathOriginal: '${importBuildFilePathAbsolute}',`,
+        `  autoImporterFilePathOriginal: '${autoImporterFilePath}',`,
+        '};',
         // Support old version vite-plugin-import-build@0.1.12, which isneeded e.g. if user uses Telefunc version using 0.1.12 while using a VPS version using 0.2.0
         `exports.load = exports.loadImportBuild;`,
         ''
@@ -140,10 +148,10 @@ function importBuild(options: {
     } catch {}
   }
 
-  function autoImporterIsDisabled() {
+  async function autoImporterIsDisabled() {
     const { disableAutoImporter } = config.vitePluginDistImporter
     assert([true, false, null].includes(disableAutoImporter))
-    return disableAutoImporter ?? isYarnPnP()
+    return disableAutoImporter ?? (await isYarnPnP())
   }
 }
 
@@ -175,6 +183,7 @@ function getDistServerPathRelative(config: ResolvedConfig) {
   assert(viteIsSSR(config))
   const { root } = config
   assertPosixPath(root)
+  assert(path.posix.isAbsolute(root))
   const importerDir = getImporterDir()
   const rootRelative = path.posix.relative(importerDir, root) // To `require()` an absolute path doesn't seem to work on Vercel
   let { outDir } = config.build
@@ -184,9 +193,19 @@ function getDistServerPathRelative(config: ResolvedConfig) {
     outDir = path.posix.relative(root, outDir)
     assert(!isAbsolutePath(outDir))
   }
-  const distPathRelative = path.posix.join(rootRelative, outDir)
-  // console.log(`root: ${root}, importerDir: ${importerDir}, rootRelative: ${rootRelative}, outDir: ${outDir}, distPathRelative: ${distPathRelative}`)
-  return distPathRelative
+  const distServerPathRelative = path.posix.join(rootRelative, outDir)
+  const distServerPathAbsolute = path.posix.join(root, outDir)
+  /*
+  console.log(
+    `importerDir: ${importerDir}`,
+    `root: ${root}`,
+    `rootRelative: ${rootRelative}`,
+    `outDir: ${outDir}`,
+    `distServerPathRelative: ${distServerPathRelative}`,
+    `distServerPathAbsolute: ${distServerPathAbsolute}`
+  )
+  //*/
+  return { distServerPathRelative, distServerPathAbsolute }
 }
 
 function getImporterDir() {

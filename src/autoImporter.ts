@@ -1,4 +1,2 @@
-/* This file will be replaced with:
-require(`${root}/${outDir}/importDist.cjs`)
-*/
+// This file will be replaced
 export const status = 'UNSET'
