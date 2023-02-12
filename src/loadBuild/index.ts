@@ -27,44 +27,7 @@ async function loadBuild(): Promise<{ success: boolean; entryFile: null | string
       entryFile: distImporterFilePath
     }
   } else {
-    const { status } = importer
-    assert(false, { status })
-  }
-
-  async function loadWithNodejs() {
-    const root = getCwd()
-    if (!root) {
-      assert(isCloudflareWorkersAlike())
-      return {
-        success: false,
-        distImporterFilePath: null
-      }
-    }
-
-    // The runtime doesn't have access to config.build.outDir so we try and shoot in the dark
-    const distImporterPathRelative = path.posix.join(root, 'dist', 'server', importBuildFileName)
-    const distImporterDir = path.posix.dirname(distImporterPathRelative)
-    let distImporterPath: string
-    try {
-      distImporterPath = await requireResolve_(distImporterPathRelative)
-    } catch (err) {
-      assert(!fs.existsSync(distImporterDir), { distImporterDir, distImporterPathRelative })
-      return {
-        success: false,
-        distImporterFilePath: null
-      }
-    }
-
-    if (isWebpackResolve(distImporterPath)) {
-      return {
-        success: false,
-        distImporterFilePath: null
-      }
-    }
-
-    assert(distImporterPath.endsWith('.cjs')) // Ensure ESM compability
-    await require_(distImporterPath)
-    return { success: true, distImporterFilePath: distImporterPath }
+    assert(false)
   }
 
   async function getImporterFilePath() {
@@ -84,6 +47,43 @@ async function loadBuild(): Promise<{ success: boolean; entryFile: null | string
     return autoImporterFilePath
   }
 }
+
+async function loadWithNodejs() {
+  const root = getCwd()
+  if (!root) {
+    assert(isCloudflareWorkersAlike())
+    return {
+      success: false,
+      distImporterFilePath: null
+    }
+  }
+
+  // The runtime doesn't have access to config.build.outDir so we try and shoot in the dark
+  const distImporterPathRelative = path.posix.join(root, 'dist', 'server', importBuildFileName)
+  const distImporterDir = path.posix.dirname(distImporterPathRelative)
+  let distImporterPath: string
+  try {
+    distImporterPath = await requireResolve_(distImporterPathRelative)
+  } catch (err) {
+    assert(!fs.existsSync(distImporterDir), { distImporterDir, distImporterPathRelative })
+    return {
+      success: false,
+      distImporterFilePath: null
+    }
+  }
+
+  if (isWebpackResolve(distImporterPath)) {
+    return {
+      success: false,
+      distImporterFilePath: null
+    }
+  }
+
+  assert(distImporterPath.endsWith('.cjs')) // Ensure ESM compability
+  await require_(distImporterPath)
+  return { success: true, distImporterFilePath: distImporterPath }
+}
+
 
 function isWebpackResolve(moduleResolve: string) {
   return typeof moduleResolve === 'number'
