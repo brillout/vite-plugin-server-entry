@@ -115,6 +115,8 @@ function importBuild(options: {
       [
         "exports.status = 'SET';",
         `exports.loadImportBuild = () => { require('${distImportBuildPathRelative}') };`,
+        // Support old version @brillout/vite-plugin-import-build@0.1.12, which isneeded e.g. if user uses Telefunc version using 0.1.12 while using a VPS version using 0.2.0
+        `exports.load = exports.loadImportBuild;`,
         ''
       ].join('\n')
     )
