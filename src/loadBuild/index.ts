@@ -7,25 +7,19 @@ import path from 'path'
 import fs from 'fs'
 import { import_ } from '@brillout/import'
 
-async function loadBuild(): Promise<{ success: boolean; entryFile: null | string }> {
+async function loadBuild(): Promise<boolean> {
   const importer: {
     status: string
-    load: () => void
+    loadImportBuild: () => void
   } = require('../autoImporter')
 
   if (importer.status === 'SET') {
-    importer.load()
-    return {
-      success: true,
-      entryFile: await getImporterFilePath()
-    }
+    importer.loadImportBuild()
+    return true
   } else if (importer.status === 'UNSET') {
     // Yarn PnP or disabled
-    const { success, distImporterFilePath } = await loadWithNodejs()
-    return {
-      success,
-      entryFile: distImporterFilePath
-    }
+    const success = await loadWithNodejs()
+    return success
   } else {
     assert(false)
   }
@@ -48,14 +42,11 @@ async function loadBuild(): Promise<{ success: boolean; entryFile: null | string
   }
 }
 
-async function loadWithNodejs() {
+async function loadWithNodejs(): Promise<boolean> {
   const root = getCwd()
   if (!root) {
     assert(isCloudflareWorkersAlike())
-    return {
-      success: false,
-      distImporterFilePath: null
-    }
+    return false
   }
 
   // The runtime doesn't have access to config.build.outDir so we try and shoot in the dark
@@ -66,24 +57,17 @@ async function loadWithNodejs() {
     distImporterPath = await requireResolve_(distImporterPathRelative)
   } catch (err) {
     assert(!fs.existsSync(distImporterDir), { distImporterDir, distImporterPathRelative })
-    return {
-      success: false,
-      distImporterFilePath: null
-    }
+    return false
   }
 
   if (isWebpackResolve(distImporterPath)) {
-    return {
-      success: false,
-      distImporterFilePath: null
-    }
+    return false
   }
 
   assert(distImporterPath.endsWith('.cjs')) // Ensure ESM compability
   await require_(distImporterPath)
-  return { success: true, distImporterFilePath: distImporterPath }
+  return true
 }
-
 
 function isWebpackResolve(moduleResolve: string) {
   return typeof moduleResolve === 'number'
