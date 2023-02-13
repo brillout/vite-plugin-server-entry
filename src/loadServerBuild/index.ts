@@ -56,8 +56,14 @@ async function loadWithNodejs(): Promise<boolean> {
   const cwd = getCwd()
   if (!cwd) return false
 
-  const path: typeof import('path') = await import_('path')
-  const fs: typeof import('fs') = await import_('fs')
+  let path: typeof import('path')
+  let fs: typeof import('fs')
+  try {
+    path = await import_('path')
+    fs = await import_('fs')
+  } catch {
+    return false
+  }
 
   // The runtime doesn't have access to config.build.outDir so we try and shoot in the dark
   const distImporterPathRelative = path.posix.join(cwd, 'dist', 'server', importBuildFileName)
