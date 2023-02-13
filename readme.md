@@ -18,7 +18,7 @@ import './path/to/dist/server/importBuild.cjs'
 // ...
 ```
 
-If you use [`vite.config.js` > `build.outDir`](https://vitejs.dev/config/build-options.html#build-outdir), then replace the path `./path/to/dist/server/importBuild.cjs` with the path of your custom location `./path/to/${build.outDir}/server/importBuild.cjs`.
+If you use [`vite.config.js` > `build.outDir`](https://vitejs.dev/config/build-options.html#build-outdir) replace `./path/to/dist/server/importBuild.cjs` with `./path/to/${build.outDir}/server/importBuild.cjs`.
 
 > **If you get following error, even though you're building your app _after_ installing your app's dependencies and you aren't using Yarn PnP, then [open a new issue](https://github.com/brillout/vite-plugin-import-build/issues/new) &ndash; it's likely a bug that should be fixed.**
 >
