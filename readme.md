@@ -20,4 +20,12 @@ import './path/to/dist/server/importBuild.cjs'
 
 If you use [`vite.config.js` > `build.outDir`](https://vitejs.dev/config/build-options.html#build-outdir), then replace the path `./path/to/dist/server/importBuild.cjs` with the path of your custom location `./path/to/${build.outDir}/server/importBuild.cjs`.
 
+> **If you get following error, even though you're building your app _after_ installing your app's dependencies and you aren't using Yarn PnP, then [open a new issue](https://github.com/brillout/vite-plugin-import-build/issues/new) &ndash; it's likely a bug that should be fixed.**
+>
+> ```
+> Error: [@brillout/vite-plugin-import-build][Wrong Usage] Cannot find server build.
+> (Re-)build your app (`$ vite build`) and try again. Note that you need the
+> build your app (`$ vite build`) *after* installing your dependencies (`$ npm install`).
+> ```
+
 See https://github.com/brillout/vite-plugin-import-build/issues/4 to learn more about `importBuild.cjs` and why/when you need to import it manually.
