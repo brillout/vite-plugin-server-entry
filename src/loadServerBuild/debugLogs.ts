@@ -1,38 +1,43 @@
 import { getCwd } from './utils'
 import type { Importer } from './Importer'
+import { projectInfo } from '../utils/projectInfo'
 
 const DEBUG = false
 
-export function debugLogs(importer: Importer) {
+export function debugLogs(importer: Importer): undefined | void {
   if (!DEBUG) return
   try {
-    console.log('process.platform', JSON.stringify(process.platform))
+    log('process.platform', JSON.stringify(process.platform))
   } catch {
-    console.log('process.platform', 'FAILED')
+    log('process.platform', 'undefined')
   }
   // https://stackoverflow.com/questions/4224606/how-to-check-whether-a-script-is-running-under-node-js/35813135#35813135
   try {
-    console.log('process.release', JSON.stringify(process.release))
+    log('process.release', JSON.stringify(process.release))
   } catch {
-    console.log('process.release', 'FAILED')
+    log('process.release', 'undefined')
   }
   // https://github.com/cloudflare/workers-sdk/issues/1481 - Feature Request: Detect whether code is being run in Cloudflare Workers (or Node.js)
   try {
-    console.log('navigator', JSON.stringify(navigator))
+    log('navigator', JSON.stringify(navigator))
   } catch {
-    console.log('navigator', 'FAILED')
+    log('navigator', 'undefined')
   }
-  console.log('cwd', getCwd())
-  console.log('importer.status', importer.status)
+  log('cwd', getCwd())
+  log('importer.status', importer.status)
   if (importer.status === 'SET') {
-    console.log('importer.paths.autoImporterFilePathOriginal', importer.paths.autoImporterFilePathOriginal)
-    console.log('importer.paths.importBuildFilePathOriginal', importer.paths.importBuildFilePathOriginal)
-    console.log('importer.paths.importBuildFilePathRelative', importer.paths.importBuildFilePathRelative)
+    log('importer.paths.autoImporterFilePathOriginal', importer.paths.autoImporterFilePathOriginal)
+    log('importer.paths.importBuildFilePathOriginal', importer.paths.importBuildFilePathOriginal)
+    log('importer.paths.importBuildFilePathRelative', importer.paths.importBuildFilePathRelative)
     try {
-      console.log('importer.paths.importBuildFilePathResolved()', importer.paths.importBuildFilePathResolved())
+      log('importer.paths.importBuildFilePathResolved()', importer.paths.importBuildFilePathResolved())
     } catch (err) {
-      console.log('importer.paths.importBuildFilePathResolved() error:', err)
-      console.log('importer.paths.importBuildFilePathResolved()', 'FAILED')
+      log('importer.paths.importBuildFilePathResolved() error:', err)
+      log('importer.paths.importBuildFilePathResolved()', 'ERRORED')
     }
   }
+}
+
+function log(...msgs: unknown[]) {
+  console.log(`[${projectInfo.projectName}][DEBUG]`, ...msgs)
 }
