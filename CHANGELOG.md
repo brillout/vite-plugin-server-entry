@@ -1,3 +1,12 @@
+## [0.2.4](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.3...v0.2.4) (2023-02-13)
+
+
+### Bug Fixes
+
+* improve debug logs ([6bd1957](https://github.com/brillout/vite-plugin-import-build/commit/6bd195704e8d6381b9895d9d2c6eec8de70d0ae6))
+
+
+
 ## [0.2.3](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.2...v0.2.3) (2023-02-13)
 
 
