@@ -1,3 +1,16 @@
+## [0.2.2](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.1...v0.2.2) (2023-02-13)
+
+
+### Bug Fixes
+
+* add further debug log ([6db45ed](https://github.com/brillout/vite-plugin-import-build/commit/6db45edb42b42508b4d141849a7e0423e1d55b06))
+* don't assume existence of fs and path modules if process.cwd() is defined ([86ac290](https://github.com/brillout/vite-plugin-import-build/commit/86ac290f0343e3267c61fa488f5de3cfe79f6ddf))
+* handle edge environemtns returning a bogus process.cwd() ([37be3e1](https://github.com/brillout/vite-plugin-import-build/commit/37be3e10aaee9cf3013a2e6be681a2c58a430733))
+* simplify isYarnPnP() ([a9f7589](https://github.com/brillout/vite-plugin-import-build/commit/a9f75891950a89410d4bebbbfe384add7243cf66))
+* typo ([798c788](https://github.com/brillout/vite-plugin-import-build/commit/798c7883ceca6cad961bda0ba7dcaf0f62f1cda6))
+
+
+
 ## [0.2.1](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.0...v0.2.1) (2023-02-13)
 
 
