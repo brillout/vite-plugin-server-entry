@@ -14,11 +14,7 @@ import {
 import { importBuildFileName } from '../shared/importBuildFileName'
 import { import_ } from '@brillout/import'
 
-//*
 const DEBUG = false
-/*/
-const DEBUG = true
-//*/
 
 type Importer =
   | { status: 'UNSET' }
@@ -70,7 +66,8 @@ function assertImporterFilePath(paths: ImporterPaths) {
   let importerFilePath: string
   try {
     importerFilePath = paths.importBuildFilePathResolved()
-  } catch {
+  } catch (err) {
+    if (DEBUG) console.log('err', err)
     assert(isNodeJS())
     assertUsage(false, userHint)
   }
@@ -82,6 +79,7 @@ function assertImporterFilePath(paths: ImporterPaths) {
 function debugLogs(importer: Importer) {
   if (!DEBUG) return
   console.log('Is Edge Deployment?', isCloudflareWorkersAlike())
+  console.log('cwd', getCwd())
   console.log('importer.status', importer.status)
   if (importer.status === 'SET') {
     console.log('importer.paths.autoImporterFilePathOriginal', importer.paths.autoImporterFilePathOriginal)
