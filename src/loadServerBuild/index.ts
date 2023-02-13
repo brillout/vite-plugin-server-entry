@@ -41,10 +41,11 @@ function assertImporterFilePath(paths: ImporterPaths) {
   let importBuildFilePath: string
   try {
     importBuildFilePath = paths.importBuildFilePathResolved()
-  } catch (err: any) {
+  } catch (err) {
+    assert(err instanceof Error)
     // Cloudflare Workers returns a bogus cwd value of '/' while its node compat layer defines require() but not require.resolve() => `TypeError: __require.resolve is not a function`
-    if (err.construtor === TypeError && err.message.includes('is not a function')) return
-    assert(err.code === 'MODULE_NOT_FOUND')
+    if (err.constructor === TypeError && err.message.includes('is not a function')) return
+    assert((err as any as Record<string, unknown>).code === 'MODULE_NOT_FOUND')
     assertUsage(false, userHint)
   }
   importBuildFilePath = toPosixPath(importBuildFilePath)
