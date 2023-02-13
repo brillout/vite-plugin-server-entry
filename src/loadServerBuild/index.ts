@@ -34,22 +34,22 @@ async function loadServerBuild(): Promise<void | undefined> {
 function assertImporterFilePath(paths: ImporterPaths) {
   const cwd = getCwd()
 
-  // For edge environments, the server code is usually bunlded right after `$ vite build`, so it's unlikley that importerFilePath doesn't/didn't belong to cwd
+  // For edge environments, the server code is usually bunlded right after `$ vite build`, so it's unlikley that the resolved importBuildFilePath doesn't belong to cwd
   if (!cwd) return
 
-  // importerFilePath may not belong to cwd if e.g. vite-plugin-ssr is linked and therefore autoImporter.js is potentially shared between multiple projects
-  let importerFilePath: string
+  // importBuildFilePath may not belong to cwd if e.g. vite-plugin-ssr is linked and therefore autoImporter.js is potentially shared between multiple projects
+  let importBuildFilePath: string
   try {
-    importerFilePath = paths.importBuildFilePathResolved()
+    importBuildFilePath = paths.importBuildFilePathResolved()
   } catch (err: any) {
     // Cloudflare Workers returns a bogus cwd value of '/' while its node compat layer defines require() but not require.resolve() => `TypeError: __require.resolve is not a function`
     if (err.construtor === TypeError && err.message.includes('is not a function')) return
     assert(err.code === 'MODULE_NOT_FOUND')
     assertUsage(false, userHint)
   }
-  importerFilePath = toPosixPath(importerFilePath)
+  importBuildFilePath = toPosixPath(importBuildFilePath)
   assertPosixPath(cwd)
-  assertUsage(importerFilePath.startsWith(cwd), userHint)
+  assertUsage(importBuildFilePath.startsWith(cwd), userHint)
 }
 
 async function loadWithNodejs(): Promise<boolean> {
