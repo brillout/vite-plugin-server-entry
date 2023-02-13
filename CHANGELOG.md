@@ -1,3 +1,12 @@
+## [0.2.1](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.0...v0.2.1) (2023-02-13)
+
+
+### Bug Fixes
+
+* fix path.isAbsolute assertion on windows ([bf15854](https://github.com/brillout/vite-plugin-import-build/commit/bf1585400410169543847d7daf25b1696b5a80b6))
+
+
+
 # [0.2.0](https://github.com/brillout/vite-plugin-import-build/compare/v0.1.12...v0.2.0) (2023-02-13)
 
 
