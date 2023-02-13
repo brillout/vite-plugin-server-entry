@@ -115,11 +115,11 @@ function importBuild(options: {
       source
     })
 
-    await setAutoImporter()
+    setAutoImporter()
   }
 
-  async function setAutoImporter() {
-    if (await autoImporterIsDisabled()) return
+  function setAutoImporter() {
+    if (autoImporterIsDisabled()) return
     const { distServerPathRelative, distServerPathAbsolute } = getDistServerPathRelative(config)
     const importBuildFilePathRelative = path.posix.join(distServerPathRelative, importBuildFileName)
     const importBuildFilePathAbsolute = path.posix.join(distServerPathAbsolute, importBuildFileName)
@@ -148,10 +148,10 @@ function importBuild(options: {
     } catch {}
   }
 
-  async function autoImporterIsDisabled() {
+  function autoImporterIsDisabled() {
     const { disableAutoImporter } = config.vitePluginDistImporter
     assert([true, false, null].includes(disableAutoImporter))
-    return disableAutoImporter ?? (await isYarnPnP())
+    return disableAutoImporter ?? isYarnPnP()
   }
 }
 
