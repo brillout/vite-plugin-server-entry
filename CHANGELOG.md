@@ -1,3 +1,12 @@
+## [0.2.5](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.4...v0.2.5) (2023-02-13)
+
+
+### Bug Fixes
+
+* impl config.vitePluginImportBuild._disableAutoImporter ([e033423](https://github.com/brillout/vite-plugin-import-build/commit/e0334230d5379fb92f536e8839c5f8536df56a0d))
+
+
+
 ## [0.2.4](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.3...v0.2.4) (2023-02-13)
 
 
