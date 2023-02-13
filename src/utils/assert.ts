@@ -1,12 +1,13 @@
 export { assert }
 export { assertUsage }
+export { logLabel }
 
 import { createErrorWithCleanStackTrace } from './createErrorWithCleanStackTrace'
 import { projectInfo } from './projectInfo'
 
-const errorPrefix = `[${projectInfo.npmPackageName}@${projectInfo.projectVersion}]`
-const internalErrorPrefix = `${errorPrefix}[Bug]`
-const usageErrorPrefix = `${errorPrefix}[Wrong Usage]`
+const logLabel = `[${projectInfo.npmPackageName}@${projectInfo.projectVersion}]` as const
+const internalErrorPrefix = `${logLabel}[Bug]` as const
+const usageErrorPrefix = `${logLabel}[Wrong Usage]` as const
 
 const numberOfStackTraceLinesToRemove = 2
 

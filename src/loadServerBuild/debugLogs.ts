@@ -1,4 +1,4 @@
-import { getCwd, projectInfo } from './utils'
+import { getCwd, logLabel } from './utils'
 import type { Importer } from './Importer'
 
 const DEBUG = false
@@ -38,5 +38,5 @@ export function debugLogs(importer: Importer): undefined | void {
 }
 
 function log(...msgs: unknown[]) {
-  console.log(`[${projectInfo.projectName}][DEBUG]`, ...msgs)
+  console.log(`${logLabel}[DEBUG]`, ...msgs)
 }
