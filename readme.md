@@ -3,7 +3,7 @@ Automatically load your server build (i.e. your server files built at `dist/serv
 It does so in an universal and portable way. (I.e. it works with every known environment such as Edge Deployments and Yarn PnP.)
 
 
-## `importBuid.cjs`
+## `importBuild.cjs`
 
 Usually, `@brillout/vite-plugin-import-build` does everything automagically and you don't have to do anything.
 
