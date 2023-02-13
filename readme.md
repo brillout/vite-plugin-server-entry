@@ -1,6 +1,6 @@
 Automatically load your server build (i.e. your server files built at `dist/server/`, or `${build.outDir}/server` if you use [`vite.config.js` > `build.outDir`](https://vitejs.dev/config/build-options.html#build-outdir)).
-It does so in an universal and portable way. (I.e. it works with every known environment such as Edge Deployments and Yarn PnP.)
 
+It does so in an universal and portable way. (I.e. it works with every known environment such as Edge Deployments and Yarn PnP.)
 
 ## `importBuild.cjs`
 
