@@ -1,6 +1,5 @@
-import { getCwd } from './utils'
+import { getCwd, projectInfo } from './utils'
 import type { Importer } from './Importer'
-import { projectInfo } from '../utils/projectInfo'
 
 const DEBUG = false
 
