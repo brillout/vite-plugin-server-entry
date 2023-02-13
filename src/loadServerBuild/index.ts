@@ -53,14 +53,6 @@ async function loadServerBuild(): Promise<void | undefined> {
     // Yarn PnP or disabled
     assert(importer.status === 'UNSET')
     const success = await loadWithNodejs()
-    /* TODO: remove
-    if (!success && (await isYarnPnP())) {
-      assertUsage(
-        false,
-        `You seem to be using Yarn PnP while also using a custom build directory \`vite.config.js#build.outDir\`, you therefore need to use \`${importBuildFileName}\`, see https://github.com/brillout/vite-plugin-import-build#importbuild-cjs`
-      )
-    }
-    */
     // We don't implement assertUsage() for importBuild.cjs because we assume that vite-plugin-ssr and Telefunc don't try to loadServerBuild() if the users imports importBuild.cjs
     // We don't implement assertUsage() for disableAutoImporter because I don't remember who uses it (maybe Joel's vite-plugin-vercel?)
     assertUsage(success, userHint)
@@ -111,14 +103,9 @@ async function loadWithNodejs(): Promise<boolean> {
     return false
   }
 
-  let path: typeof import('path')
-  let fs: typeof import('fs')
-  try {
-    path = await import_('path')
-    fs = await import_('fs')
-  } catch {
-    return false
-  }
+  assert(isNodeJS())
+  const path: typeof import('path') = await import_('path')
+  const fs: typeof import('fs') = await import_('fs')
 
   // The runtime doesn't have access to config.build.outDir so we try and shoot in the dark
   const distImporterPathRelative = path.posix.join(cwd, 'dist', 'server', importBuildFileName)
@@ -126,17 +113,18 @@ async function loadWithNodejs(): Promise<boolean> {
   let distImporterPath: string
   try {
     distImporterPath = await requireResolve(distImporterPathRelative, __filename)
-  } catch (err) {
+  } catch {
     assert(!fs.existsSync(distImporterDir), { distImporterDir, distImporterPathRelative })
     return false
   }
 
-  // webpack couldn't have properly resolved distImporterPath
+  // webpack couldn't have properly resolved distImporterPath (since there is not static import statement)
   if (isWebpackResolve(distImporterPath)) {
     return false
   }
 
-  assert(distImporterPath.endsWith('.cjs')) // Ensure ESM compability
+  // Ensure ESM compability
+  assert(distImporterPath.endsWith('.cjs'))
   await import_(distImporterPath)
   return true
 }
