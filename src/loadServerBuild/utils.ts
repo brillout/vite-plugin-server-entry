@@ -1,6 +1,4 @@
 export * from '../utils/assert'
 export * from '../utils/getCwd'
-export * from '../utils/isCloudflareWorkersAlike'
 export * from '../utils/filesystemPathHandling'
 export * from '../utils/require'
-export * from '../utils/isNodeJS'
