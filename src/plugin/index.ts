@@ -183,7 +183,7 @@ function getDistServerPathRelative(config: ResolvedConfig) {
   assert(viteIsSSR(config))
   const { root } = config
   assertPosixPath(root)
-  assert(path.posix.isAbsolute(root))
+  assert(isAbsolutePath(root))
   const importerDir = getImporterDir()
   const rootRelative = path.posix.relative(importerDir, root) // To `require()` an absolute path doesn't seem to work on Vercel
   let { outDir } = config.build
