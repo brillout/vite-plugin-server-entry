@@ -17,6 +17,7 @@ import { writeFileSync } from 'fs'
 import { importBuildFileName } from '../shared/importBuildFileName'
 import { findBuildEntry, RollupBundle } from './findBuildEntry'
 const autoImporterFilePath = require.resolve('../autoImporter')
+// TODO: rename config.vitePluginDistImporter => config.vitePluginImportBuild upon next configVersion
 const configVersion = 1
 
 type PluginConfig = {
@@ -25,8 +26,15 @@ type PluginConfig = {
   disableAutoImporter: null | boolean
   configVersion: number
 }
+// We can't rename config.vitePluginDistImporter without updating configVersion
 type Config = ResolvedConfig & { vitePluginDistImporter: PluginConfig }
-type ConfigPristine = ResolvedConfig & { vitePluginDistImporter?: PluginConfig }
+type ConfigPristine = ResolvedConfig & {
+  vitePluginDistImporter?: PluginConfig
+  vitePluginImportBuild?: {
+    // Only for https://github.com/brillout/vite-plugin-ssr/tree/main/test/disableAutoImporter
+    _disableAutoImporter: boolean
+  }
+}
 type GetImporterCode = (args: { findBuildEntry: (entryName: string) => string }) => string
 type Library = {
   libraryName: string
@@ -65,7 +73,7 @@ function importBuild(options: {
     config.vitePluginDistImporter = config.vitePluginDistImporter ?? {
       libraries: [],
       importerAlreadyGenerated: false,
-      disableAutoImporter: null,
+      disableAutoImporter: config.vitePluginImportBuild?._disableAutoImporter ?? null,
       configVersion
     }
 
