@@ -9,8 +9,7 @@ But, in some environments, you need to help `@brillout/vite-plugin-import-build`
 ```js
 // server.js
 
-// Load server files built at dist/server/
-// https://github.com/brillout/vite-plugin-import-build#importbuildcjs
+// Load server files built at dist/server/, see https://github.com/brillout/vite-plugin-import-build#importbuildcjs
 import './path/to/dist/server/importBuild.cjs'
 
 // Your server code (e.g. Express.js, Vercel Serverless/Edge, Cloudflare Worker, ...)
