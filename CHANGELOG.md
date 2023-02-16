@@ -1,3 +1,12 @@
+## [0.2.6](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.5...v0.2.6) (2023-02-16)
+
+
+### Bug Fixes
+
+* properly generate source code containing windows paths (fix [#5](https://github.com/brillout/vite-plugin-import-build/issues/5)) ([29ab74e](https://github.com/brillout/vite-plugin-import-build/commit/29ab74eeddcbc72fd3a604f6576af7757dadf46d))
+
+
+
 ## [0.2.5](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.4...v0.2.5) (2023-02-13)
 
 
