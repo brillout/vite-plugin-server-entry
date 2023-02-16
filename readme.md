@@ -1,7 +1,5 @@
 Automatically loads your server build. (Your server files built at `dist/server/` &ndash; or `${build.outDir}/server` if you use [`vite.config.js` > `build.outDir`](https://vitejs.dev/config/build-options.html#build-outdir)).
 
-It does so in an universal and portable way: it works with every known environment (with any deploy environment such as Edge Deployments, with any package manageer such Yarn PnP, and with any bundler such as webpack and esbuild).
-
 ## `importBuild.cjs`
 
 Usually, `@brillout/vite-plugin-import-build` does everything automagically and you don't have to do anything.
