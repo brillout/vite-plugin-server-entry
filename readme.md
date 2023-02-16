@@ -1,6 +1,6 @@
-Automatically load your server build (i.e. your server files built at `dist/server/`, or `${build.outDir}/server` if you use [`vite.config.js` > `build.outDir`](https://vitejs.dev/config/build-options.html#build-outdir)).
+Automatically loads your server build. (Your server files built at `dist/server/` &ndash; or `${build.outDir}/server` if you use [`vite.config.js` > `build.outDir`](https://vitejs.dev/config/build-options.html#build-outdir)).
 
-It does so in an universal and portable way. (I.e. it works with every known environment such as Edge Deployments and Yarn PnP.)
+It does so in an universal and portable way: it works with every known environment (with any deploy environment such as Edge Deployments, with any package manageer such Yarn PnP, and with any bundler such as webpack and esbuild).
 
 ## `importBuild.cjs`
 
@@ -21,7 +21,7 @@ import './path/to/dist/server/importBuild.cjs'
 
 If you use [`vite.config.js` > `build.outDir`](https://vitejs.dev/config/build-options.html#build-outdir) replace `./path/to/dist/server/importBuild.cjs` with `./path/to/${build.outDir}/server/importBuild.cjs`.
 
-> **If you get following error, even though you're building your app _after_ installing your app's dependencies and you aren't using Yarn PnP, then [open a new issue](https://github.com/brillout/vite-plugin-import-build/issues/new) &ndash; it's likely a bug that should be fixed.**
+> ⚠️ **If you get following error, even though 1) you're building your app _after_ installing your app's dependencies and 2) you aren't using Yarn PnP, then [open a new issue](https://github.com/brillout/vite-plugin-import-build/issues/new) &ndash; it's likely a bug that should be fixed.**
 >
 > ```
 > Error: [@brillout/vite-plugin-import-build][Wrong Usage] Cannot find server build.
