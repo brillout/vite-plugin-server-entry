@@ -7,7 +7,7 @@ import type { Importer, ImporterPaths } from './Importer'
 import { debugLogs } from './debugLogs'
 
 const userHint =
-  'Cannot find server build. (Re-)build your app (`$ vite build`) and try again. Note that you need the build your app (`$ vite build`) *after* installing your dependencies (`$ npm install`). Alternatively, manually import your server build, see https://github.com/brillout/vite-plugin-import-build#importbuildcjs'
+  'Cannot find server build. (Re-)build your app (`$ vite build`) and try again. If you still get this error, then you may need to manually import your server build, see https://github.com/brillout/vite-plugin-import-build#importbuildcjs'
 
 async function loadServerBuild(): Promise<void | undefined> {
   const importer: Importer = require('../autoImporter')
