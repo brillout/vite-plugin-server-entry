@@ -1,9 +1,11 @@
+export { debugLogs1 }
+
 import { getCwd, logLabel } from './utils'
-import type { Importer } from './Importer'
+import type { Importer } from '../loadServerBuild/Importer'
 
 const DEBUG = false
 
-export function debugLogs(importer: Importer): undefined | void {
+function debugLogs1(importer: Importer): undefined | void {
   if (!DEBUG) return
   try {
     log('process.platform', JSON.stringify(process.platform))
