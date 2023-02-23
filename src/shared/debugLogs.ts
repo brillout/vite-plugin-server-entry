@@ -4,7 +4,7 @@ export { debugLogs2 }
 import { getCwd, logLabel } from './utils'
 import type { Importer } from '../loadServerBuild/Importer'
 
-const DEBUG = true
+const DEBUG = false
 
 function debugLogs1(importer: Importer): undefined | void {
   if (!DEBUG) return
