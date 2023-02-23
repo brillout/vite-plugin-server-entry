@@ -139,10 +139,10 @@ function importBuild(options: {
         "exports.status = 'SET';",
         `exports.loadImportBuild = () => { require(${JSON.stringify(importBuildFilePathRelative)}) };`,
         'exports.paths = {',
-        `  importBuildFilePathRelative: ${JSON.stringify(importBuildFilePathRelative)},`,
-        `  importBuildFilePathResolved: () => require.resolve(${JSON.stringify(importBuildFilePathRelative)}),`,
-        `  importBuildFilePathOriginal: ${JSON.stringify(importBuildFilePathAbsolute)},`,
         `  autoImporterFilePathOriginal: ${JSON.stringify(autoImporterFilePath)},`,
+        `  importBuildFilePathRelative: ${JSON.stringify(importBuildFilePathRelative)},`,
+        `  importBuildFilePathOriginal: ${JSON.stringify(importBuildFilePathAbsolute)},`,
+        `  importBuildFilePathResolved: () => require.resolve(${JSON.stringify(importBuildFilePathRelative)}),`,
         '};',
         // Support old vite-plugin-import-build@0.1.12 version, which is needed e.g. if user uses a Telefunc version using 0.1.12 while using a VPS version using 0.2.0
         `exports.load = exports.loadImportBuild;`,
