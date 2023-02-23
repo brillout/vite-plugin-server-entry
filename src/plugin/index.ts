@@ -140,6 +140,7 @@ function importBuild(options: {
         `exports.loadImportBuild = () => { require(${JSON.stringify(importBuildFilePathRelative)}) };`,
         'exports.paths = {',
         `  autoImporterFilePathOriginal: ${JSON.stringify(autoImporterFilePath)},`,
+        '  autoImporterFileDirActual: __dirname,',
         `  importBuildFilePathRelative: ${JSON.stringify(importBuildFilePathRelative)},`,
         `  importBuildFilePathOriginal: ${JSON.stringify(importBuildFilePathAbsolute)},`,
         `  importBuildFilePathResolved: () => require.resolve(${JSON.stringify(importBuildFilePathRelative)}),`,

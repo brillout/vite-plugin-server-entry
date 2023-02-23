@@ -7,6 +7,7 @@ export type Importer =
     }
 export type ImporterPaths = {
   autoImporterFilePathOriginal: string
+  autoImporterFileDirActual: string
   importBuildFilePathRelative: string
   importBuildFilePathOriginal: string
   importBuildFilePathResolved: () => string

@@ -26,6 +26,7 @@ export function debugLogs(importer: Importer): undefined | void {
   log('importer.status', importer.status)
   if (importer.status === 'SET') {
     log('importer.paths.autoImporterFilePathOriginal', importer.paths.autoImporterFilePathOriginal)
+    log('importer.paths.autoImporterFileDirActual', importer.paths.autoImporterFileDirActual)
     log('importer.paths.importBuildFilePathRelative', importer.paths.importBuildFilePathRelative)
     log('importer.paths.importBuildFilePathOriginal', importer.paths.importBuildFilePathOriginal)
     try {
