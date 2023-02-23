@@ -1,4 +1,5 @@
 export { debugLogs1 }
+export { debugLogs2 }
 
 import { getCwd, logLabel } from './utils'
 import type { Importer } from '../loadServerBuild/Importer'
@@ -7,6 +8,7 @@ const DEBUG = false
 
 function debugLogs1(importer: Importer): undefined | void {
   if (!DEBUG) return
+  log('DEBUG_LOGS_RUNTIME')
   try {
     log('process.platform', JSON.stringify(process.platform))
   } catch {
@@ -38,6 +40,14 @@ function debugLogs1(importer: Importer): undefined | void {
       log('importer.paths.importBuildFilePathResolved()', 'ERRORED')
     }
   }
+}
+
+function debugLogs2(paths: Record<string, string>): undefined | void {
+  if (!DEBUG) return
+  log('DEBUG_LOGS_BUILD_TIME')
+  Object.entries(paths).forEach(([key, val]) => {
+    log(key, val)
+  })
 }
 
 function log(...msgs: unknown[]) {
