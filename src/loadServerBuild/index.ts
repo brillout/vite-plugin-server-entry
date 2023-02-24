@@ -18,7 +18,6 @@ async function loadServerBuild(): Promise<void | undefined> {
       importer.loadImportBuild()
       success = true
     } catch (err) {
-      assert((err as any as Record<string, unknown>).code === 'MODULE_NOT_FOUND')
       requireError = err
     }
     if (isImportBuildOutsideOfCwd(importer.paths)) {
@@ -54,13 +53,7 @@ function isImportBuildOutsideOfCwd(paths: ImporterPaths): boolean | null {
   let importBuildFilePath: string
   try {
     importBuildFilePath = paths.importBuildFilePathResolved()
-  } catch (err) {
-    assert(err instanceof Error)
-    assert(
-      (err as any as Record<string, unknown>).code === 'MODULE_NOT_FOUND' ||
-        // Cloudflare Workers returns a bogus cwd value of '/' while its node compat layer defines require() but not require.resolve() => `TypeError: __require.resolve is not a function`
-        (err.constructor === TypeError && err.message.includes('is not a function'))
-    )
+  } catch {
     return null
   }
   importBuildFilePath = toPosixPath(importBuildFilePath)
