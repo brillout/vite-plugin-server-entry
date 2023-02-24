@@ -1,3 +1,17 @@
+## [0.2.8](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.7...v0.2.8) (2023-02-24)
+
+
+### Bug Fixes
+
+* add build logs to debug logs ([9a61ef3](https://github.com/brillout/vite-plugin-import-build/commit/9a61ef37003ffddbcb4fe28f0e0ea66e0bafb465))
+* add require() error to debug logs ([415746c](https://github.com/brillout/vite-plugin-import-build/commit/415746c5f89874aca9853026363a8d3244422d50))
+* further add debug logs ([bdbd76f](https://github.com/brillout/vite-plugin-import-build/commit/bdbd76f7136d5c3325b131972f30bbe731c34d97))
+* gracefully handle unsupported environments ([f1689e7](https://github.com/brillout/vite-plugin-import-build/commit/f1689e7c934b7c00d2aa3258c37e1c98e7c00595))
+* minor improvements to debug logs ([f66bdd4](https://github.com/brillout/vite-plugin-import-build/commit/f66bdd470ff006571c4cc77f04b6bb80847e2715))
+* tolerate unknown require/resolve errors ([d10a8b5](https://github.com/brillout/vite-plugin-import-build/commit/d10a8b50c0b1ec504cc132600c85c5223f346d3f))
+
+
+
 ## [0.2.7](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.6...v0.2.7) (2023-02-17)
 
 
