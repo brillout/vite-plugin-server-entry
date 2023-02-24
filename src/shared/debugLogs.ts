@@ -1,12 +1,12 @@
-export { debugLogs1 }
-export { debugLogs2 }
+export { debugLogsRuntime }
+export { debugLogsBuildtime }
 
 import { getCwd, logLabel } from './utils'
 import type { Importer } from '../loadServerBuild/Importer'
 
 const DEBUG = false
 
-function debugLogs1(importer: Importer): undefined | void {
+function debugLogsRuntime(importer: Importer): undefined | void {
   if (!DEBUG) return
   log('DEBUG_LOGS_RUNTIME [begin]')
   try {
@@ -43,7 +43,7 @@ function debugLogs1(importer: Importer): undefined | void {
   log('DEBUG_LOGS_RUNTIME [end]')
 }
 
-function debugLogs2(paths: Record<string, string>): undefined | void {
+function debugLogsBuildtime(paths: Record<string, string>): undefined | void {
   if (!DEBUG) return
   log('DEBUG_LOGS_BUILD_TIME [begin]')
   Object.entries(paths).forEach(([key, val]) => {

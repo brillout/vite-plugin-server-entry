@@ -4,7 +4,7 @@ import { getCwd, assert, assertUsage, toPosixPath, assertPosixPath, requireResol
 import { importBuildFileName } from '../shared/importBuildFileName'
 import { import_ } from '@brillout/import'
 import type { Importer, ImporterPaths } from './Importer'
-import { debugLogs1 } from '../shared/debugLogs'
+import { debugLogsRuntime } from '../shared/debugLogs'
 
 const userHint =
   'Cannot find server build. (Re-)build your app (`$ vite build`) and try again. If you still get this error, then you may need to manually import your server build, see https://github.com/brillout/vite-plugin-import-build#importbuildcjs'
@@ -12,7 +12,7 @@ const userHint =
 async function loadServerBuild(): Promise<void | undefined> {
   const importer: Importer = require('../autoImporter')
 
-  debugLogs1(importer)
+  debugLogsRuntime(importer)
 
   if (importer.status === 'SET') {
     assertImporterFilePath(importer.paths)

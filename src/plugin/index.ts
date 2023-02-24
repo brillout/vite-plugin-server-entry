@@ -16,7 +16,7 @@ import path from 'path'
 import { writeFileSync } from 'fs'
 import { importBuildFileName } from '../shared/importBuildFileName'
 import { findBuildEntry, RollupBundle } from './findBuildEntry'
-import { debugLogs2 } from '../shared/debugLogs'
+import { debugLogsBuildtime } from '../shared/debugLogs'
 const autoImporterFilePath = require.resolve('../autoImporter')
 // TODO: rename config.vitePluginDistImporter => config.vitePluginImportBuild upon next configVersion
 const configVersion = 1
@@ -205,7 +205,7 @@ function getDistServerPathRelative(config: ResolvedConfig) {
   }
   const distServerPathRelative = path.posix.join(rootRelative, outDir)
   const distServerPathAbsolute = path.posix.join(root, outDir)
-  debugLogs2({ importerDir, root, rootRelative, outDir, distServerPathRelative, distServerPathAbsolute })
+  debugLogsBuildtime({ importerDir, root, rootRelative, outDir, distServerPathRelative, distServerPathAbsolute })
   return { distServerPathRelative, distServerPathAbsolute }
 }
 
