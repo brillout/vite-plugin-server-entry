@@ -8,7 +8,7 @@ const DEBUG = false
 
 function debugLogs1(importer: Importer): undefined | void {
   if (!DEBUG) return
-  log('DEBUG_LOGS_RUNTIME')
+  log('DEBUG_LOGS_RUNTIME [begin]')
   try {
     log('process.platform', JSON.stringify(process.platform))
   } catch {
@@ -40,14 +40,16 @@ function debugLogs1(importer: Importer): undefined | void {
       log('importer.paths.importBuildFilePathResolved()', 'ERRORED')
     }
   }
+  log('DEBUG_LOGS_RUNTIME [end]')
 }
 
 function debugLogs2(paths: Record<string, string>): undefined | void {
   if (!DEBUG) return
-  log('DEBUG_LOGS_BUILD_TIME')
+  log('DEBUG_LOGS_BUILD_TIME [begin]')
   Object.entries(paths).forEach(([key, val]) => {
     log(key, val)
   })
+  log('DEBUG_LOGS_BUILD_TIME [end]')
 }
 
 function log(...msgs: unknown[]) {
