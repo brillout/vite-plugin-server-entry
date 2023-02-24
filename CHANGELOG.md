@@ -1,3 +1,12 @@
+## [0.2.10](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.9...v0.2.10) (2023-02-24)
+
+
+### Bug Fixes
+
+* deprecate older data versions ([0f054f7](https://github.com/brillout/vite-plugin-import-build/commit/0f054f7f94fe26ed7db01f192cf80aa844848a42))
+
+
+
 ## [0.2.9](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.8...v0.2.9) (2023-02-24)
 
 
