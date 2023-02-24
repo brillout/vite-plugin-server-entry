@@ -1,3 +1,12 @@
+## [0.2.9](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.8...v0.2.9) (2023-02-24)
+
+
+### Bug Fixes
+
+* gracefully handle undefined __dirname ([c1ed669](https://github.com/brillout/vite-plugin-import-build/commit/c1ed669aa828a5fdb486fa98e3ea670c6b78cbb0))
+
+
+
 ## [0.2.8](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.7...v0.2.8) (2023-02-24)
 
 
