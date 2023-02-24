@@ -166,7 +166,7 @@ function setAutoImporter(config: Config) {
       `exports.loadImportBuild = () => { require(${JSON.stringify(importBuildFilePathRelative)}) };`,
       'exports.paths = {',
       `  autoImporterFilePathOriginal: ${JSON.stringify(autoImporterFilePath)},`,
-      '  autoImporterFileDirActual: __dirname,',
+      '  autoImporterFileDirActual: (() => { try { return __dirname } catch { return null } })(),',
       `  importBuildFilePathRelative: ${JSON.stringify(importBuildFilePathRelative)},`,
       `  importBuildFilePathOriginal: ${JSON.stringify(importBuildFilePathAbsolute)},`,
       `  importBuildFilePathResolved: () => require.resolve(${JSON.stringify(importBuildFilePathRelative)}),`,
