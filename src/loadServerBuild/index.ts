@@ -4,7 +4,7 @@ import { getCwd, assert, assertUsage, toPosixPath, assertPosixPath, requireResol
 import { importBuildFileName } from '../shared/importBuildFileName'
 import { import_ } from '@brillout/import'
 import type { Importer, ImporterPaths } from './Importer'
-import { debugLogsRuntime } from '../shared/debugLogs'
+import { debugLogsRuntimePost, debugLogsRuntimePre } from '../shared/debugLogs'
 
 const userHint =
   'Cannot find server build. (Re-)build your app (`$ vite build`) and try again. If you still get this error, then you may need to manually import your server build, see https://github.com/brillout/vite-plugin-import-build#importbuildcjs'
@@ -12,23 +12,30 @@ const userHint =
 async function loadServerBuild(): Promise<void | undefined> {
   const importer: Importer = require('../autoImporter')
 
-  debugLogsRuntime(importer)
+  debugLogsRuntimePre(importer)
 
+  let success = false
+  let requireError: unknown
   if (importer.status === 'SET') {
     assertImporterFilePath(importer.paths)
     try {
       importer.loadImportBuild()
-    } catch {
-      assertUsage(false, userHint)
+      success = true
+    } catch (err) {
+      requireError = err
     }
   } else {
     // Yarn PnP or disabled
     assert(importer.status === 'UNSET')
-    const success = await loadWithNodejs()
-    // We don't implement assertUsage() for importBuild.cjs because we assume that vite-plugin-ssr and Telefunc don't try to loadServerBuild() if the users imports importBuild.cjs
-    // We don't implement assertUsage() for disableAutoImporter because I don't remember who uses it (maybe Joel's vite-plugin-vercel?)
-    assertUsage(success, userHint)
+    success = await loadWithNodejs()
   }
+
+  // We don't handle the following cases:
+  //  - When the user directly imports importBuild.cjs, because we assume that vite-plugin-ssr and Telefunc don't call loadServerBuild() in that case
+  //  - When disableAutoImporter is true, because I think no ones uses? (I don't remember why I implemented it - maybe for Joel's vite-plugin-vercel?)
+
+  debugLogsRuntimePost({ success, requireError })
+  assertUsage(success, userHint)
 }
 
 function assertImporterFilePath(paths: ImporterPaths) {

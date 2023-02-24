@@ -1,4 +1,5 @@
-export { debugLogsRuntime }
+export { debugLogsRuntimePre }
+export { debugLogsRuntimePost }
 export { debugLogsBuildtime }
 
 import { getCwd, logLabel } from './utils'
@@ -6,7 +7,7 @@ import type { Importer } from '../loadServerBuild/Importer'
 
 const DEBUG = false
 
-function debugLogsRuntime(importer: Importer): undefined | void {
+function debugLogsRuntimePre(importer: Importer): undefined | void {
   if (!DEBUG) return
   log('DEBUG_LOGS_RUNTIME [begin]')
   try {
@@ -40,6 +41,17 @@ function debugLogsRuntime(importer: Importer): undefined | void {
       log('importer.paths.importBuildFilePathResolved()', 'ERRORED')
     }
   }
+}
+
+function debugLogsRuntimePost({
+  success,
+  requireError
+}: {
+  success: boolean
+  requireError: unknown
+}): undefined | void {
+  log('requireError', requireError)
+  log('success', success)
   log('DEBUG_LOGS_RUNTIME [end]')
 }
 
