@@ -6,9 +6,6 @@ import { import_ } from '@brillout/import'
 import type { Importer, ImporterPaths } from './Importer'
 import { debugLogsRuntimePost, debugLogsRuntimePre } from '../shared/debugLogs'
 
-const userHint =
-  'Cannot find server build. (Re-)build your app (`$ vite build`) and try again. If you still get this error, then you may need to manually import your server build, see https://github.com/brillout/vite-plugin-import-build#importbuildcjs'
-
 async function loadServerBuild(): Promise<void | undefined> {
   const importer: Importer = require('../autoImporter')
 
@@ -17,47 +14,58 @@ async function loadServerBuild(): Promise<void | undefined> {
   let success = false
   let requireError: unknown
   if (importer.status === 'SET') {
-    assertImporterFilePath(importer.paths)
     try {
       importer.loadImportBuild()
       success = true
     } catch (err) {
+      assert((err as any as Record<string, unknown>).code === 'MODULE_NOT_FOUND')
       requireError = err
+    }
+    if (isImportBuildOutsideOfCwd(importer.paths)) {
+      success = false
     }
   } else {
     // Yarn PnP or disabled
     assert(importer.status === 'UNSET')
+  }
+
+  if (!success) {
     success = await loadWithNodejs()
   }
 
   // We don't handle the following cases:
   //  - When the user directly imports importBuild.cjs, because we assume that vite-plugin-ssr and Telefunc don't call loadServerBuild() in that case
-  //  - When disableAutoImporter is true, because I think no ones uses? (I don't remember why I implemented it - maybe for Joel's vite-plugin-vercel?)
+  //  - When disableAutoImporter is true, because I think no user uses disableAutoImporter? (I don't remember why I implemented it - maybe for Joel's vite-plugin-vercel?)
 
   debugLogsRuntimePost({ success, requireError })
-  assertUsage(success, userHint)
+  assertUsage(
+    success,
+    'Cannot find/import server build. (Re-)build your app (`$ vite build`) and try again. If you still get this error, then you may need to manually import your server build, see https://github.com/brillout/vite-plugin-import-build#importbuildcjs'
+  )
 }
 
-function assertImporterFilePath(paths: ImporterPaths) {
+// `${build.outDir}/dist/importBuild.cjs` may not belong to process.cwd() if e.g. vite-plugin-ssr is linked => autoImporter.js can potentially be shared between multiple projects
+function isImportBuildOutsideOfCwd(paths: ImporterPaths): boolean | null {
   const cwd = getCwd()
 
-  // For edge environments, the server code is usually bunlded right after `$ vite build`, so it's unlikley that the resolved importBuildFilePath doesn't belong to cwd
-  if (!cwd) return
+  // We cannot check edge environments. Upon edge deployment the server code is usually bundled right after `$ vite build`, so it's unlikley that the resolved importBuildFilePath doesn't belong to cwd
+  if (!cwd) return null
 
-  // importBuildFilePath may not belong to cwd if e.g. vite-plugin-ssr is linked and therefore autoImporter.js is potentially shared between multiple projects
   let importBuildFilePath: string
   try {
     importBuildFilePath = paths.importBuildFilePathResolved()
   } catch (err) {
     assert(err instanceof Error)
-    // Cloudflare Workers returns a bogus cwd value of '/' while its node compat layer defines require() but not require.resolve() => `TypeError: __require.resolve is not a function`
-    if (err.constructor === TypeError && err.message.includes('is not a function')) return
-    assert((err as any as Record<string, unknown>).code === 'MODULE_NOT_FOUND')
-    assertUsage(false, userHint)
+    assert(
+      (err as any as Record<string, unknown>).code === 'MODULE_NOT_FOUND' ||
+        // Cloudflare Workers returns a bogus cwd value of '/' while its node compat layer defines require() but not require.resolve() => `TypeError: __require.resolve is not a function`
+        (err.constructor === TypeError && err.message.includes('is not a function'))
+    )
+    return null
   }
   importBuildFilePath = toPosixPath(importBuildFilePath)
   assertPosixPath(cwd)
-  assertUsage(importBuildFilePath.startsWith(cwd), userHint)
+  return !importBuildFilePath.startsWith(cwd)
 }
 
 async function loadWithNodejs(): Promise<boolean> {
