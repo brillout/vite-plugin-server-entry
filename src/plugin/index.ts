@@ -38,21 +38,12 @@ type ConfigUnprocessed = ResolvedConfig & {
   }
   // Private
   _vitePluginImportBuild?: Data
-  // We have to support older versions that set config.vitePluginDistImporter instead of config._vitePluginImportBuild
-  vitePluginDistImporter?: DataOldVersion
 }
 type GetImporterCode = (args: { findBuildEntry: (entryName: string) => string }) => string
 type Library = {
   libraryName: string
   vitePluginImportBuildVersion?: string // can be undefined when set by an older vite-plugin-import-build version
   getImporterCode: GetImporterCode
-}
-
-type DataOldVersion = {
-  libraries: Library[]
-  importerAlreadyGenerated: boolean
-  disableAutoImporter: null | boolean
-  configVersion: number
 }
 
 function importBuild(options: Options): Plugin_ {
@@ -68,6 +59,7 @@ function importBuild(options: Options): Plugin_ {
     },
     buildStart() {
       if (!isServerSide) return
+      assertOnlyNewerVersions(config)
       resetAutoImporter()
     },
     async generateBundle(_rollupOptions, rollupBundle) {
@@ -85,22 +77,6 @@ function resolveConfig(configUnprocessed: ConfigUnprocessed, options: Options): 
     importerAlreadyGenerated: false,
     configVersion,
     disableAutoImporter: false
-  }
-
-  if (configUnprocessed.vitePluginDistImporter) {
-    /* TODO/update-configVersion: deprecate and remove DataOldVersion and config.vitePluginDistImporter (NOTE that we don't need to bump configVersion to deprecate older @brillout/vite-plugin-import-build versions that set config.vitePluginDistImporter )
-    const lib = configUnprocessed.vitePluginDistImporter.libraries[0]
-    assert(lib)
-    // We purposely use `throw new Error()` instead of assertUsage()
-    throw new Error(`Update ${lib.libraryName} to its latest version and try again`)
-    /*/
-    const data2 = configUnprocessed.vitePluginDistImporter
-    assert(data2.importerAlreadyGenerated === false)
-    assert(data2.disableAutoImporter === null)
-    assert(data2.libraries.length > 0)
-    assert(data2.configVersion === 1)
-    data.libraries.push(...data.libraries)
-    //*/
   }
 
   assert(data.configVersion === 1)
@@ -234,6 +210,17 @@ function getDistServerPathRelative(config: ResolvedConfig) {
 function getImporterDir() {
   const currentDir = toPosixPath(__dirname + (() => '')()) // trick to avoid `@vercel/ncc` to glob import
   return path.posix.join(currentDir, '..')
+}
+
+function assertOnlyNewerVersions(config: Config) {
+  if (!('vitePluginDistImporter' in config)) {
+    return
+  }
+  const dataOld: any = (config as Record<string, any>).vitePluginDistImporter
+  const libName = dataOld.libraries[0]!.libraryName
+  assert(libName)
+  // We purposely use `throw new Error()` instead of assertUsage()
+  throw new Error(`update ${libName} to its latest version and try again`)
 }
 
 // Avoid multiple Vite versions mismatch
