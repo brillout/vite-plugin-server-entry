@@ -47,3 +47,15 @@ function assertUsage(condition: unknown, errorMessage: string): asserts conditio
   const usageError = createErrorWithCleanStackTrace(errMsg, numberOfStackTraceLinesToRemove)
   throw usageError
 }
+
+/*
+export { assertWarning }
+const warningPrefix = `${logLabel}[Warning]` as const
+function assertWarning(condition: unknown, errorMessage: string): void {
+  if (condition) {
+    return
+  }
+  const msg = `${warningPrefix} ${errorMessage}`
+  console.warn(msg)
+}
+*/
