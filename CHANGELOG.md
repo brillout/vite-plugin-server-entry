@@ -1,3 +1,13 @@
+## [0.2.11](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.10...v0.2.11) (2023-02-25)
+
+
+### Bug Fixes
+
+* show debug logs only if DEBUG is enabled ([362021d](https://github.com/brillout/vite-plugin-import-build/commit/362021defd9f81a26b6bde8a23911b23c23a3ff9)), closes [brillout/vite-plugin-ssr#672](https://github.com/brillout/vite-plugin-ssr/issues/672)
+* skip removing error stack lines ([ec0570b](https://github.com/brillout/vite-plugin-import-build/commit/ec0570b5e954323bab63f8577b0f3f61672992b6))
+
+
+
 ## [0.2.10](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.9...v0.2.10) (2023-02-24)
 
 
