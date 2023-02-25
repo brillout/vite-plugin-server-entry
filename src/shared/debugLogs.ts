@@ -50,6 +50,7 @@ function debugLogsRuntimePost({
   success: boolean
   requireError: unknown
 }): undefined | void {
+  if (!DEBUG) return
   log('requireError', requireError)
   log('success', success)
   log('DEBUG_LOGS_RUNTIME [end]')
