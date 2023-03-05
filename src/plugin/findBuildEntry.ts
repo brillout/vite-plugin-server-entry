@@ -10,12 +10,14 @@ type RollupBundle = Record<string, unknown>
 function findBuildEntry(entryName: string, rollupBundle: RollupBundle, config: ResolvedConfig) {
   let entryFound: undefined | string
   const entries = Object.keys(rollupBundle)
-  for (const entry of entries) {
-    if (entry.endsWith('.map')) continue // https://github.com/brillout/vite-plugin-ssr/issues/612
+  for (const name of entries) {
+    if (name.endsWith('.map')) continue // https://github.com/brillout/vite-plugin-ssr/issues/612
     assert(!entryName.includes('.'))
-    if (entryName === entry.split('.')[0]) {
+    assert(!entryName.includes('-'))
+    const nameWithoutHash = name.split('.')[0].split('-')[0]
+    if (entryName === nameWithoutHash) {
       assert(!entryFound)
-      entryFound = entry
+      entryFound = name
     }
   }
   if (!entryFound) {
