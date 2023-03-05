@@ -114,7 +114,7 @@ async function generateImporter(emitFile: EmitFile, rollupBundle: RollupBundle, 
   const source = config._vitePluginImportBuild.libraries
     .map(({ getImporterCode }) =>
       getImporterCode({
-        findBuildEntry: (entryName: string) => findBuildEntry(entryName, rollupBundle)
+        findBuildEntry: (entryName: string) => findBuildEntry(entryName, rollupBundle, config)
       })
     )
     .join('\n')
