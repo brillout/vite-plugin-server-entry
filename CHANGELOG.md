@@ -1,3 +1,13 @@
+## [0.2.12](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.11...v0.2.12) (2023-03-05)
+
+
+### Bug Fixes
+
+* improve entry finder ([5b045cc](https://github.com/brillout/vite-plugin-import-build/commit/5b045cc305d846fdd44fad3e9f3819cd5577ad49))
+* improve entry not found error message ([212294c](https://github.com/brillout/vite-plugin-import-build/commit/212294c96948d9894cfe3cd031843beb72d70cb8))
+
+
+
 ## [0.2.11](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.10...v0.2.11) (2023-02-25)
 
 
