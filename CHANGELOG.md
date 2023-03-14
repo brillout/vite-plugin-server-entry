@@ -1,3 +1,12 @@
+## [0.2.13](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.12...v0.2.13) (2023-03-14)
+
+
+### Bug Fixes
+
+* fix webpack support (fix brillout/telefunc[#66](https://github.com/brillout/vite-plugin-import-build/issues/66)) ([af767c8](https://github.com/brillout/vite-plugin-import-build/commit/af767c80c1a84b9d92afc0a1694f056a85b30dde))
+
+
+
 ## [0.2.12](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.11...v0.2.12) (2023-03-05)
 
 
