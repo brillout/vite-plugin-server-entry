@@ -54,8 +54,13 @@ function isImportBuildOutsideOfCwd(paths: ImporterPaths): boolean | null {
   try {
     importBuildFilePath = paths.importBuildFilePathResolved()
   } catch {
+    // Edge environments usually(/always?) don't support require.resolve()
+    //  - This code block is called for edge environments that return a dummy process.cwd(), e.g. Cloudflare Workers: process.cwd() === '/'
     return null
   }
+
+  if (isWebpackResolve(importBuildFileName)) return null
+
   importBuildFilePath = toPosixPath(importBuildFilePath)
   assertPosixPath(cwd)
   return !importBuildFilePath.startsWith(cwd)
