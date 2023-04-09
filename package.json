@@ -2,7 +2,7 @@
   "name": "@brillout/vite-plugin-import-build",
   "version": "0.2.13",
   "dependencies": {
-    "@brillout/import": "^0.2.2"
+    "@brillout/import": "^0.2.3"
   },
   "scripts": {
     "dev": "tsc --watch",
