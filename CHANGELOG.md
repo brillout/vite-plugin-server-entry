@@ -1,3 +1,12 @@
+## [0.2.15](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.14...v0.2.15) (2023-04-14)
+
+
+### Bug Fixes
+
+* fix webpack support (fix brillout/vite-plugin-ssr[#786](https://github.com/brillout/vite-plugin-import-build/issues/786)) ([2ab73b3](https://github.com/brillout/vite-plugin-import-build/commit/2ab73b3c4f82d750767c4b53c87616c9e18de931))
+
+
+
 ## [0.2.14](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.13...v0.2.14) (2023-04-09)
 
 
