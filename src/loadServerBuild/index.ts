@@ -59,7 +59,7 @@ function isImportBuildOutsideOfCwd(paths: ImporterPaths): boolean | null {
     return null
   }
 
-  if (isWebpackResolve(importBuildFileName)) return null
+  if (isWebpackResolve(importBuildFilePath)) return null
 
   importBuildFilePath = toPosixPath(importBuildFilePath)
   assertPosixPath(cwd)
