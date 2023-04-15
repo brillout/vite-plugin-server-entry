@@ -39,7 +39,7 @@ async function loadServerBuild(): Promise<void | undefined> {
   debugLogsRuntimePost({ success, requireError })
   assertUsage(
     success,
-    'Cannot find/import server build. (Re-)build your app (`$ vite build`) and try again. If you still get this error, then you may need to manually import your server build, see https://github.com/brillout/vite-plugin-import-build#importbuildcjs'
+    'Cannot find server build. (Re-)build your app and try again. If you still get this error, then you may need to manually import the server build, see https://github.com/brillout/vite-plugin-import-build#manual-import'
   )
 }
 

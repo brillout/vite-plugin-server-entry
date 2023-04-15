@@ -1,32 +1,38 @@
-Automatically loads your server build. (Your server files built at `dist/server/` &ndash; or `${build.outDir}/server` if you use [`vite.config.js` > `build.outDir`](https://vitejs.dev/config/build-options.html#build-outdir)).
+# `@brillout/vite-plugin-import-build`
 
-## `importBuild.cjs`
+Little utility that automatically loads the server build (files at `dist/server/`).
 
-Usually, `@brillout/vite-plugin-import-build` does everything automagically and you don't have to do anything.
+<br/>
 
-> You *always* get following error? This may happen if you use Yarn PnP (follow the instructions below to make it work), but if you aren't using Yarn PnP then [open a new issue](https://github.com/brillout/vite-plugin-import-build/issues/new) &ndash; it's a bug that should be fixed.
->
-> ```
-> [@brillout/vite-plugin-import-build][Wrong Usage] Cannot find server build.
-> (Re-)build your app (`$ vite build`) and try again. If you still get this error,
-> then you may need to manually import your server build,
-> see https://github.com/brillout/vite-plugin-import-build#importbuildcjs
-> ```
+## Manual import
 
-But, in some environments, you need to help `@brillout/vite-plugin-import-build` by adding the following to your server code:
+Most of the time `@brillout/vite-plugin-import-build` can automatically import the server build (files at `dist/server/`).
+
+But, in some situations, it doesn't work and you have to import the server build manually.
+
+If you keep getting the following error then import the server build manually.
+
+```
+[@brillout/vite-plugin-import-build][Wrong Usage] Cannot find server build. (Re-)build your app
+and try again. If you still get this error, then you may need to manually import the server build.
+```
+
+> If you aren't using Yarn PnP and you keep getting the error, then [open a new issue](https://github.com/brillout/vite-plugin-import-build/issues/new). (If you aren't using Yarn PnP then the automatic import should always work.)
+
+To manually import the server build:
 
 ```js
 // server.js
 
-// Load server build, see https://github.com/brillout/vite-plugin-import-build#importbuildcjs
+// Load server build, see https://github.com/brillout/vite-plugin-import-build#manual-import
 import './path/to/dist/server/importBuild.cjs'
 
-// Your server code (e.g. Express.js, Vercel Serverless/Edge, Cloudflare Worker, ...)
+// Your server code (e.g. Express.js, Vercel Serverless/Edge Function, Cloudflare Worker, ...)
 // ...
 ```
 
-If you use [`vite.config.js` > `build.outDir`](https://vitejs.dev/config/build-options.html#build-outdir) then replace `./path/to/dist/server/importBuild.cjs` with `./path/to/${build.outDir}/server/importBuild.cjs`.
+If you use [`vite.config.js` > `build.outDir`](https://vitejs.dev/config/build-options.html#build-outdir) then replace `dist/server/importBuild.cjs` with `${build.outDir}/server/importBuild.cjs`.
 
-If your production server and your development server share the same entry `server.js`, then you need to import `importBuild.cjs` in a conditional manner, see [Conditionally import `importBuild.cjs`](https://github.com/brillout/vite-plugin-import-build/issues/6).
+See [Conditional manual import](https://github.com/brillout/vite-plugin-import-build/issues/6) if your production and development share the same server entry file.
 
-See [How it works](https://github.com/brillout/vite-plugin-import-build/issues/4) to learn more about `importBuild.cjs` and why/when you need to import it.
+See [How it works](https://github.com/brillout/vite-plugin-import-build/issues/4) if you're curious and/or you want to learn more.
