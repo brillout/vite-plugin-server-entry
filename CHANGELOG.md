@@ -1,3 +1,12 @@
+## [0.2.16](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.15...v0.2.16) (2023-04-15)
+
+
+### Bug Fixes
+
+* improve error message ([1e54c3e](https://github.com/brillout/vite-plugin-import-build/commit/1e54c3efb54598e2843da6384118da31300f6fd4))
+
+
+
 ## [0.2.15](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.14...v0.2.15) (2023-04-14)
 
 
