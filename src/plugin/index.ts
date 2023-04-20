@@ -111,13 +111,13 @@ async function generateImporter(emitFile: EmitFile, rollupBundle: RollupBundle, 
   config._vitePluginImportBuild.importerAlreadyGenerated = true
 
   assert(viteIsSSR(config)) // rollupBundle should be the server-side one
-  const source = config._vitePluginImportBuild.libraries
-    .map(({ getImporterCode }) =>
+  const source = [
+    ...config._vitePluginImportBuild.libraries.map(({ getImporterCode }) =>
       getImporterCode({
         findBuildEntry: (entryName: string) => findBuildEntry(entryName, rollupBundle, config)
       })
     )
-    .join('\n')
+  ].join('\n')
 
   emitFile({
     fileName: importBuildFileName,
