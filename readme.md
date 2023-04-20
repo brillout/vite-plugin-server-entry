@@ -31,8 +31,8 @@ import './path/to/dist/server/importBuild.cjs'
 // ...
 ```
 
-If you use [`vite.config.js` > `build.outDir`](https://vitejs.dev/config/build-options.html#build-outdir) then replace `dist/server/importBuild.cjs` with `${build.outDir}/server/importBuild.cjs`.
+Make sure to import `importBuild.cjs` only in production: in development `@brillout/vite-plugin-import-build` isn't needed. See [Conditional manual import](https://github.com/brillout/vite-plugin-import-build/issues/6) if your production and development share the same server entry file.
 
-See [Conditional manual import](https://github.com/brillout/vite-plugin-import-build/issues/6) if your production and development share the same server entry file.
+If you use [`vite.config.js` > `build.outDir`](https://vitejs.dev/config/build-options.html#build-outdir) then replace `dist/server/importBuild.cjs` with `${build.outDir}/server/importBuild.cjs`.
 
 See [How it works](https://github.com/brillout/vite-plugin-import-build/issues/4) if you're curious and/or you want to learn more.
