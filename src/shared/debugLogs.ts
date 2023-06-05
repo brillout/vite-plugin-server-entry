@@ -45,13 +45,16 @@ function debugLogsRuntimePre(importer: Importer): undefined | void {
 
 function debugLogsRuntimePost({
   success,
-  requireError
+  requireError,
+  isOutsideOfCwd
 }: {
   success: boolean
   requireError: unknown
+  isOutsideOfCwd: null | boolean
 }): undefined | void {
   if (!DEBUG) return
   log('requireError', requireError)
+  log('isOutsideOfCwd', isOutsideOfCwd)
   log('success', success)
   log('DEBUG_LOGS_RUNTIME [end]')
 }

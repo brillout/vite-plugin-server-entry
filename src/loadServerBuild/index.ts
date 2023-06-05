@@ -13,6 +13,7 @@ async function loadServerBuild(): Promise<void | undefined> {
 
   let success = false
   let requireError: unknown
+  let isOutsideOfCwd: boolean | null = null
   if (importer.status === 'SET') {
     try {
       importer.loadImportBuild()
@@ -20,7 +21,8 @@ async function loadServerBuild(): Promise<void | undefined> {
     } catch (err) {
       requireError = err
     }
-    if (isImportBuildOutsideOfCwd(importer.paths)) {
+    isOutsideOfCwd = isImportBuildOutsideOfCwd(importer.paths)
+    if (isOutsideOfCwd) {
       success = false
     }
   } else {
@@ -36,7 +38,7 @@ async function loadServerBuild(): Promise<void | undefined> {
   //  - When the user directly imports importBuild.cjs, because we assume that vite-plugin-ssr and Telefunc don't call loadServerBuild() in that case
   //  - When disableAutoImporter is true, because I think no user uses disableAutoImporter? (I don't remember why I implemented it - maybe for Joel's vite-plugin-vercel?)
 
-  debugLogsRuntimePost({ success, requireError })
+  debugLogsRuntimePost({ success, requireError, isOutsideOfCwd })
   assertUsage(
     success,
     'Cannot find server build. (Re-)build your app and try again. If you still get this error, then you may need to manually import the server build, see https://github.com/brillout/vite-plugin-import-build#manual-import'
