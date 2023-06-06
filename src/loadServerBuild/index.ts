@@ -6,7 +6,7 @@ import { import_ } from '@brillout/import'
 import type { Importer, ImporterPaths } from './Importer'
 import { debugLogsRuntimePost, debugLogsRuntimePre } from '../shared/debugLogs'
 
-async function loadServerBuild(): Promise<void | undefined> {
+async function loadServerBuild(outDir?: string): Promise<void | undefined> {
   const importer: Importer = require('../autoImporter')
 
   debugLogsRuntimePre(importer)
@@ -31,14 +31,14 @@ async function loadServerBuild(): Promise<void | undefined> {
   }
 
   if (!success) {
-    success = await loadWithNodejs()
+    success = await loadWithNodejs(outDir)
   }
 
   // We don't handle the following cases:
   //  - When the user directly imports importBuild.cjs, because we assume that vite-plugin-ssr and Telefunc don't call loadServerBuild() in that case
   //  - When disableAutoImporter is true, because I think no user uses disableAutoImporter? (I don't remember why I implemented it - maybe for Joel's vite-plugin-vercel?)
 
-  debugLogsRuntimePost({ success, requireError, isOutsideOfCwd })
+  debugLogsRuntimePost({ success, requireError, isOutsideOfCwd, outDir })
   assertUsage(
     success,
     'Cannot find server build. (Re-)build your app and try again. If you still get this error, then you may need to manually import the server build, see https://github.com/brillout/vite-plugin-import-build#manual-import'
@@ -68,7 +68,7 @@ function isImportBuildOutsideOfCwd(paths: ImporterPaths): boolean | null {
   return !importBuildFilePath.startsWith(cwd)
 }
 
-async function loadWithNodejs(): Promise<boolean> {
+async function loadWithNodejs(outDir?: string): Promise<boolean> {
   const cwd = getCwd()
   if (!cwd) return false
 
@@ -81,14 +81,30 @@ async function loadWithNodejs(): Promise<boolean> {
     return false
   }
 
-  // The runtime doesn't have access to config.build.outDir so we try and shoot in the dark
-  const distImporterPathRelative = path.posix.join(cwd, 'dist', 'server', importBuildFileName)
-  const distImporterDir = path.posix.dirname(distImporterPathRelative)
+  const isPathAbsolute = (p: string) => {
+    if (process.platform === 'win32') {
+      return path.win32.isAbsolute(p)
+    } else {
+      return p.startsWith('/')
+    }
+  }
+
+  let distImporterPathUnresolved: string
+  if (outDir) {
+    // Only pre-rendering has access to config.build.outDir
+    assertPosixPath(outDir)
+    assert(isPathAbsolute(outDir), outDir)
+    distImporterPathUnresolved = path.posix.join(outDir, 'server', importBuildFileName)
+  } else {
+    // The SSR server doesn't have access to config.build.outDir so we shoot in the dark by trying with 'dist/'
+    distImporterPathUnresolved = path.posix.join(cwd, 'dist', 'server', importBuildFileName)
+  }
+  const distImporterDir = path.posix.dirname(distImporterPathUnresolved)
   let distImporterPath: string
   try {
-    distImporterPath = await requireResolve(distImporterPathRelative, __filename)
+    distImporterPath = await requireResolve(distImporterPathUnresolved, __filename)
   } catch {
-    assert(!fs.existsSync(distImporterDir), { distImporterDir, distImporterPathRelative })
+    assert(!fs.existsSync(distImporterDir), { distImporterDir, distImporterPathUnresolved })
     return false
   }
 
