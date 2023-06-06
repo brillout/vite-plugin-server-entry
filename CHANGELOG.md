@@ -1,3 +1,19 @@
+## [0.2.17](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.16...v0.2.17) (2023-06-06)
+
+
+### Bug Fixes
+
+* improve debug logs ([ee84028](https://github.com/brillout/vite-plugin-import-build/commit/ee84028f71ddb49db13d0b73f35e7514e4eba212))
+* improve instructions and comment (brillout/vite-plugin-ssr[#797](https://github.com/brillout/vite-plugin-import-build/issues/797)) ([36ceaf5](https://github.com/brillout/vite-plugin-import-build/commit/36ceaf54b50b838e1285ddea0d9a80b05292588a))
+* support side channel semver ([01f9d79](https://github.com/brillout/vite-plugin-import-build/commit/01f9d7922a7f36624713f271ee8d2a0832a276a8))
+
+
+### Features
+
+* add `outDir` argument ([89bbe89](https://github.com/brillout/vite-plugin-import-build/commit/89bbe89042749fcabc7ee027cba6f521f4fd4487))
+
+
+
 ## [0.2.16](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.15...v0.2.16) (2023-04-15)
 
 
