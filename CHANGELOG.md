@@ -1,3 +1,14 @@
+## [0.2.18](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.17...v0.2.18) (2023-06-14)
+
+
+### Bug Fixes
+
+* _disableAutoImporter ([0c234f4](https://github.com/brillout/vite-plugin-import-build/commit/0c234f4ccd73296189bcb8ffcb8c76d12958b778))
+* improve debug logs ([b31d2f7](https://github.com/brillout/vite-plugin-import-build/commit/b31d2f7b582201cf24cdf7b4cdcf50da1fd30640))
+* **yarn-pnp:** Fix where build is failing while using yarn-pnp  ([ce8331c](https://github.com/brillout/vite-plugin-import-build/commit/ce8331cb22dfba5ed1ac57933328a136410ba5ec))
+
+
+
 ## [0.2.17](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.16...v0.2.17) (2023-06-06)
 
 
