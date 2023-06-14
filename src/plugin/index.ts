@@ -76,7 +76,6 @@ function resolveConfig(configUnprocessed: ConfigUnprocessed, options: Options): 
     libraries: [],
     importerAlreadyGenerated: false,
     configVersion,
-    disableAutoImporter: false
   }
 
   assert(data.configVersion === 1)
