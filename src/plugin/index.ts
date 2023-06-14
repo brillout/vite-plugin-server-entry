@@ -31,12 +31,12 @@ type Config = ResolvedConfig & {
   _vitePluginImportBuild: Data
 }
 type ConfigUnprocessed = ResolvedConfig & {
-  // Public (not really public though since it only has a single config which is private)
+  // User config
   vitePluginImportBuild?: {
     // This flag is only used by https://github.com/brillout/vite-plugin-ssr/tree/main/test/disableAutoImporter
     _disableAutoImporter?: boolean
   }
-  // Private
+  // Private: aggregation of the configuration of all @brillout/vite-plugin-import-build instances, e.g. the instance used by vite-plugin-ssr as well as the instance used by Telefunc
   _vitePluginImportBuild?: Data
 }
 type GetImporterCode = (args: { findBuildEntry: (entryName: string) => string }) => string
