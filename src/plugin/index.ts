@@ -130,7 +130,10 @@ async function generateImporter(emitFile: EmitFile, rollupBundle: RollupBundle, 
 }
 
 function setAutoImporter(config: Config) {
-  if (autoImporterIsDisabled(config)) return
+  if (autoImporterIsDisabled(config)) {
+    debugLogsBuildtime({ disabled: true, paths: null })
+    return
+  }
   const { distServerPathRelative, distServerPathAbsolute } = getDistServerPathRelative(config)
   const importBuildFilePathRelative = path.posix.join(distServerPathRelative, importBuildFileName)
   const importBuildFilePathAbsolute = path.posix.join(distServerPathAbsolute, importBuildFileName)
@@ -205,7 +208,10 @@ function getDistServerPathRelative(config: ResolvedConfig) {
   }
   const distServerPathRelative = path.posix.join(rootRelative, outDir)
   const distServerPathAbsolute = path.posix.join(root, outDir)
-  debugLogsBuildtime({ importerDir, root, rootRelative, outDir, distServerPathRelative, distServerPathAbsolute })
+  debugLogsBuildtime({
+    disabled: false,
+    paths: { importerDir, root, rootRelative, outDir, distServerPathRelative, distServerPathAbsolute }
+  })
   return { distServerPathRelative, distServerPathAbsolute }
 }
 

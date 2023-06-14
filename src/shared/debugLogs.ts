@@ -62,12 +62,19 @@ function debugLogsRuntimePost({
   log('DEBUG_LOGS_RUNTIME [end]')
 }
 
-function debugLogsBuildtime(paths: Record<string, string>): undefined | void {
+function debugLogsBuildtime({
+  disabled,
+  paths
+}: { disabled: true; paths: null } | { disabled: false; paths: Record<string, string> }): undefined | void {
   if (!DEBUG) return
   log('DEBUG_LOGS_BUILD_TIME [begin]')
-  Object.entries(paths).forEach(([key, val]) => {
-    log(key, val)
-  })
+  if (disabled) {
+    log('DISABLED')
+  } else {
+    Object.entries(paths).forEach(([key, val]) => {
+      log(key, val)
+    })
+  }
   log('DEBUG_LOGS_BUILD_TIME [end]')
 }
 
