@@ -25,7 +25,7 @@ type Data = {
   libraries: Library[]
   importerAlreadyGenerated: boolean
   configVersion: number
-  disableAutoImporter: boolean
+  disableAutoImporter: boolean | null
 }
 type Config = ResolvedConfig & {
   _vitePluginImportBuild: Data
@@ -76,6 +76,7 @@ function resolveConfig(configUnprocessed: ConfigUnprocessed, options: Options): 
     libraries: [],
     importerAlreadyGenerated: false,
     configVersion,
+    disableAutoImporter: configUnprocessed.vitePluginImportBuild?._disableAutoImporter ?? null
   }
 
   assert(data.configVersion === 1)
