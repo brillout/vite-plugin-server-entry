@@ -26,7 +26,7 @@ async function loadServerBuild(outDir?: string): Promise<void | undefined> {
       success = false
     }
   } else {
-    // Yarn PnP or disabled
+    // Yarn PnP, or disableAutoImporter / _disableAutoImporter
     assert(importer.status === 'UNSET')
   }
 
@@ -34,9 +34,8 @@ async function loadServerBuild(outDir?: string): Promise<void | undefined> {
     success = await loadWithNodejs(outDir)
   }
 
-  // We don't handle the following cases:
+  // We don't handle the following case:
   //  - When the user directly imports importBuild.cjs, because we assume that vite-plugin-ssr and Telefunc don't call loadServerBuild() in that case
-  //  - When disableAutoImporter is true, because I think no user uses disableAutoImporter? (I don't remember why I implemented it - maybe for Joel's vite-plugin-vercel?)
 
   debugLogsRuntimePost({ success, requireError, isOutsideOfCwd, outDir })
   assertUsage(

@@ -1,6 +1,6 @@
 export { importBuild }
 
-import type { Plugin, ResolvedConfig } from 'vite'
+import type { Plugin, ResolvedConfig as ConfigVite } from 'vite'
 import type { EmitFile } from 'rollup'
 import {
   isYarnPnP,
@@ -20,42 +20,42 @@ import { debugLogsBuildtime } from '../shared/debugLogs'
 const autoImporterFilePath = require.resolve('../autoImporter')
 const configVersion = 1
 
-type Options = { getImporterCode: GetImporterCode; libraryName: string }
-type Data = {
-  libraries: Library[]
+// Config set by @brillout/vite-plugin-import-build user, e.g. vite-plugin-ssr and Telefunc
+type ConfigLibrary = { getImporterCode: GetImporterCode; libraryName: string }
+// Config set by end user, currently only used by https://github.com/brillout/vite-plugin-ssr/blob/70ab60b502a685e39e65417a011c134fed1b5bd5/test/disableAutoImporter/vite.config.js#L7
+type ConfigUser = {
+  _disableAutoImporter?: boolean
+}
+// Private aggregation of the configuration of all @brillout/vite-plugin-import-build instances, e.g. the instance used by vite-plugin-ssr as well as the instance used by Telefunc
+type ConfigAggregate = {
+  libraries: {
+    libraryName: string
+    vitePluginImportBuildVersion?: string // can be undefined when set by an older vite-plugin-import-build version
+    getImporterCode: GetImporterCode
+  }[]
   importerAlreadyGenerated: boolean
   configVersion: number
   disableAutoImporter: boolean | null
 }
-type Config = ResolvedConfig & {
-  _vitePluginImportBuild: Data
+
+type ConfigUnresolved = ConfigVite & {
+  vitePluginImportBuild?: ConfigUser
+  _vitePluginImportBuild?: ConfigAggregate
 }
-type ConfigUnprocessed = ResolvedConfig & {
-  // User config
-  vitePluginImportBuild?: {
-    // This flag is only used by https://github.com/brillout/vite-plugin-ssr/tree/main/test/disableAutoImporter
-    _disableAutoImporter?: boolean
-  }
-  // Private: aggregation of the configuration of all @brillout/vite-plugin-import-build instances, e.g. the instance used by vite-plugin-ssr as well as the instance used by Telefunc
-  _vitePluginImportBuild?: Data
-}
-type GetImporterCode = (args: { findBuildEntry: (entryName: string) => string }) => string
-type Library = {
-  libraryName: string
-  vitePluginImportBuildVersion?: string // can be undefined when set by an older vite-plugin-import-build version
-  getImporterCode: GetImporterCode
+type ConfigResolved = ConfigVite & {
+  _vitePluginImportBuild: ConfigAggregate
 }
 
-function importBuild(options: Options): Plugin_ {
-  let config: Config
+function importBuild(configLibrary: ConfigLibrary): Plugin_ {
+  let config: ConfigResolved
   let isServerSide = false
   return {
-    name: `@brillout/vite-plugin-import-build:${options.libraryName}`,
+    name: `@brillout/vite-plugin-import-build:${configLibrary.libraryName}`,
     apply: (_, env) => env.command === 'build',
-    configResolved(configUnprocessed: ConfigUnprocessed) {
-      isServerSide = viteIsSSR(configUnprocessed)
+    configResolved(configUnresolved: ConfigUnresolved) {
+      isServerSide = viteIsSSR(configUnresolved)
       if (!isServerSide) return
-      config = resolveConfig(configUnprocessed, options)
+      config = resolveConfig(configUnresolved, configLibrary)
     },
     buildStart() {
       if (!isServerSide) return
@@ -70,13 +70,13 @@ function importBuild(options: Options): Plugin_ {
   } as Plugin
 }
 
-function resolveConfig(configUnprocessed: ConfigUnprocessed, options: Options): Config {
-  assert(viteIsSSR(configUnprocessed))
-  const data: Data = configUnprocessed._vitePluginImportBuild ?? {
+function resolveConfig(configUnresolved: ConfigUnresolved, configLibrary: ConfigLibrary): ConfigResolved {
+  assert(viteIsSSR(configUnresolved))
+  const data: ConfigAggregate = configUnresolved._vitePluginImportBuild ?? {
     libraries: [],
     importerAlreadyGenerated: false,
     configVersion,
-    disableAutoImporter: configUnprocessed.vitePluginImportBuild?._disableAutoImporter ?? null
+    disableAutoImporter: configUnresolved.vitePluginImportBuild?._disableAutoImporter ?? null
   }
 
   assert(data.configVersion === 1)
@@ -86,25 +86,26 @@ function resolveConfig(configUnprocessed: ConfigUnprocessed, options: Options): 
     assert(1 === 1 + 1)
     const otherLibrary = data.libraries[0]
     assert(otherLibrary)
-    assert(otherLibrary.libraryName !== options.libraryName)
+    assert(otherLibrary.libraryName !== configLibrary.libraryName)
     throw new Error(
-      `Conflict between ${options.libraryName} and ${otherLibrary.libraryName}. Update both to their latest version and try again.`
+      `Conflict between ${configLibrary.libraryName} and ${otherLibrary.libraryName}. Update both to their latest version and try again.`
     )
   }
 
   data.libraries.push({
-    getImporterCode: options.getImporterCode,
-    libraryName: options.libraryName,
+    getImporterCode: configLibrary.getImporterCode,
+    libraryName: configLibrary.libraryName,
     vitePluginImportBuildVersion: projectInfo.projectVersion
   })
 
-  objectAssign(configUnprocessed, {
+  objectAssign(configUnresolved, {
     _vitePluginImportBuild: data
   })
-  return configUnprocessed
+  return configUnresolved
 }
 
-async function generateImporter(emitFile: EmitFile, rollupBundle: RollupBundle, config: Config) {
+type GetImporterCode = (args: { findBuildEntry: (entryName: string) => string }) => string
+async function generateImporter(emitFile: EmitFile, rollupBundle: RollupBundle, config: ConfigResolved) {
   // Let the newest vite-plugin-import-build version generate autoImporter.js
   if (isUsingOlderVitePluginImportBuildVersion(config)) return
   if (config._vitePluginImportBuild.importerAlreadyGenerated) return
@@ -129,7 +130,7 @@ async function generateImporter(emitFile: EmitFile, rollupBundle: RollupBundle, 
   setAutoImporter(config)
 }
 
-function setAutoImporter(config: Config) {
+function setAutoImporter(config: ConfigResolved) {
   if (autoImporterIsDisabled(config)) {
     debugLogsBuildtime({ disabled: true, paths: null })
     return
@@ -163,11 +164,11 @@ function resetAutoImporter() {
   } catch {}
 }
 
-function autoImporterIsDisabled(config: Config): boolean {
+function autoImporterIsDisabled(config: ConfigResolved): boolean {
   return config._vitePluginImportBuild.disableAutoImporter ?? isYarnPnP()
 }
 
-function isUsingOlderVitePluginImportBuildVersion(config: Config): boolean {
+function isUsingOlderVitePluginImportBuildVersion(config: ConfigResolved): boolean {
   return config._vitePluginImportBuild.libraries.some((library) => {
     if (!library.vitePluginImportBuildVersion) return false
     return isHigherVersion(library.vitePluginImportBuildVersion, projectInfo.projectVersion)
@@ -192,7 +193,7 @@ function parseSemver(semver: string): number[] {
   return parts.map((n) => parseInt(n, 10))
 }
 
-function getDistServerPathRelative(config: ResolvedConfig) {
+function getDistServerPathRelative(config: ConfigVite) {
   assert(viteIsSSR(config))
   const { root } = config
   assertPosixPath(root)
@@ -220,7 +221,7 @@ function getImporterDir() {
   return path.posix.join(currentDir, '..')
 }
 
-function assertOnlyNewerVersions(config: Config) {
+function assertOnlyNewerVersions(config: ConfigResolved) {
   if (!('vitePluginDistImporter' in config)) {
     return
   }
