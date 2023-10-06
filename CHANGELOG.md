@@ -1,3 +1,12 @@
+## [0.2.20](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.19...v0.2.20) (2023-10-06)
+
+
+### Bug Fixes
+
+* handle missing `__filename` ([aba6c7e](https://github.com/brillout/vite-plugin-import-build/commit/aba6c7eb16e1c9339fdad23d9347cbc7d640f54c))
+
+
+
 ## [0.2.19](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.18...v0.2.19) (2023-10-06)
 
 
