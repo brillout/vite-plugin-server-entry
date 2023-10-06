@@ -1,3 +1,12 @@
+## [0.2.19](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.18...v0.2.19) (2023-10-06)
+
+
+### Bug Fixes
+
+* help Vite's CJS/ESM analysis ([2331a4e](https://github.com/brillout/vite-plugin-import-build/commit/2331a4ebff54a456b9ab667b454570c4e5c3b86c))
+
+
+
 ## [0.2.18](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.17...v0.2.18) (2023-06-14)
 
 
