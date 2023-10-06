@@ -100,10 +100,20 @@ async function loadWithNodejs(outDir?: string): Promise<boolean> {
   }
   const distImporterDir = path.posix.dirname(distImporterPathUnresolved)
   let distImporterPath: string
+  let filename: string
   try {
-    distImporterPath = await requireResolve(distImporterPathUnresolved, __filename)
+    filename = __filename
   } catch {
-    assert(!fs.existsSync(distImporterDir), { distImporterDir, distImporterPathUnresolved })
+    // __filename isn't defined when this file is being bundled into an ESM bundle
+    return false
+  }
+  try {
+    distImporterPath = await requireResolve(distImporterPathUnresolved, filename)
+  } catch (err) {
+    if (fs.existsSync(distImporterDir)) {
+      console.error(err)
+      assert(false, { distImporterDir, distImporterPathUnresolved })
+    }
     return false
   }
 
