@@ -36,7 +36,7 @@ type PluginConfigResolved = {
   }[]
   importerAlreadyGenerated: boolean
   configVersion: number
-  disableAutoImporter: boolean | null
+  disableAutoImporter: boolean
 }
 
 type ConfigUnresolved = ConfigVite & {
@@ -83,20 +83,25 @@ function resolveConfig(
     libraries: [],
     importerAlreadyGenerated: false,
     configVersion,
-    disableAutoImporter: configUnresolved.vitePluginImportBuild?._disableAutoImporter ?? null
+    disableAutoImporter: false
+  }
+  if (configUnresolved.vitePluginImportBuild?._disableAutoImporter) {
+    pluginConfigResolved.disableAutoImporter = true
   }
 
-  assert(pluginConfigResolved.configVersion === 1)
   assert(configVersion === 1)
+  assert(pluginConfigResolved.configVersion === 1)
   if (pluginConfigResolved.configVersion !== configVersion) {
-    // We don't use this yet (IIRC configVersion never had another value than `1`)
-    assert(1 === 1 + 1)
+    // We don't use this yet: configVersion never had another value than `1`
+    assert(false)
+    /*
     const otherLibrary = pluginConfigResolved.libraries[0]
     assert(otherLibrary)
     assert(otherLibrary.libraryName !== pluginConfigProvidedByLibrary.libraryName)
     throw new Error(
       `Conflict between ${pluginConfigProvidedByLibrary.libraryName} and ${otherLibrary.libraryName}. Update both to their latest version and try again.`
     )
+    */
   }
 
   pluginConfigResolved.libraries.push({
@@ -108,7 +113,8 @@ function resolveConfig(
   objectAssign(configUnresolved, {
     _vitePluginImportBuild: pluginConfigResolved
   })
-  return configUnresolved
+  const configResolved: ConfigResolved = configUnresolved
+  return configResolved
 }
 
 type GetImporterCode = (args: { findBuildEntry: (entryName: string) => string }) => string
