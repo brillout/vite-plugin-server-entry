@@ -17,7 +17,8 @@ But the plugin doesn't work if you use Yarn PnP and you'll keep getting followin
 and try again. If you still get this error, then you may need to manually import the server build.
 ```
 
-> ⚠️ If you aren't using Yarn PnP and you keep getting this error, then it's a bug that should be fixed &mdash; please [open a new issue](https://github.com/brillout/vite-plugin-import-build/issues/new).
+> [!WARNING]
+> If you aren't using Yarn PnP and you keep getting this error, then it's a bug that should be fixed &mdash; please [open a new issue](https://github.com/brillout/vite-plugin-import-build/issues/new).
 
 To manually import your server build:
 
