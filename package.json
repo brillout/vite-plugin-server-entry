@@ -11,7 +11,7 @@
     "release:commit": "release-me commit"
   },
   "devDependencies": {
-    "@brillout/release-me": "^0.1.6",
+    "@brillout/release-me": "^0.1.12",
     "@types/node": "^15.12.2",
     "rollup": "^2.75.5",
     "typescript": "^4.3.5",
