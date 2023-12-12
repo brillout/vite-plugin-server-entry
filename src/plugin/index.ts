@@ -36,7 +36,7 @@ type PluginConfigProvidedByUser = {
 type PluginConfigResolved = {
   libraries: {
     libraryName: string
-    vitePluginImportBuildVersion?: string // can be undefined when set by an older vite-plugin-import-build version
+    vitePluginImportBuildVersion?: string // can be undefined when set by an older @brillout/vite-plugin-import-build version
     getImporterCode: GetImporterCode
   }[]
   filesAlreadyWritten: boolean
@@ -55,7 +55,7 @@ type ConfigResolved = ConfigVite & {
 /**
  * The Vite plugin `importBuild()` does two things:
  *  - Generates an "import build" file at `dist/server/importBuild.cjs`.
- *  - Generates an "auto importer" file at `node_modules/vite-plugin-import-build/dist/autoImporter.js`.
+ *  - Generates an "auto importer" file at `node_modules/@brillout/vite-plugin-import-build/dist/autoImporter.js`.
  *
  * See https://github.com/brillout/vite-plugin-import-build#what-it-does for more information.
  */
@@ -78,7 +78,7 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
     generateBundle(_rollupOptions, rollupBundle) {
       if (!isServerSideBuild) return
 
-      // Let the newest vite-plugin-import-build version generate autoImporter.js
+      // Let the newest @brillout/vite-plugin-import-build version generate autoImporter.js
       if (isUsingOlderVitePluginImportBuildVersion(config)) return
       if (config._vitePluginImportBuild.filesAlreadyWritten) return
       config._vitePluginImportBuild.filesAlreadyWritten = true
@@ -86,7 +86,7 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
       // Write dist/server/importBuild.cjs
       writeImportBuildFile(this.emitFile.bind(this), rollupBundle, config)
 
-      // Write node_modules/vite-plugin-import-build/dist/autoImporter.js
+      // Write node_modules/@brillout/vite-plugin-import-build/dist/autoImporter.js
       const autoImporterDisabled = config._vitePluginImportBuild.disableAutoImporter || isYarnPnP()
       if (!autoImporterDisabled) {
         writeAutoImporterFile(config)
@@ -181,7 +181,7 @@ function writeAutoImporterFile(config: ConfigResolved) {
       `  importBuildFilePathOriginal: ${JSON.stringify(importBuildFilePathAbsolute)},`,
       `  importBuildFilePathResolved: () => require.resolve(${JSON.stringify(importBuildFilePathRelative)}),`,
       '};',
-      // Support old vite-plugin-import-build@0.1.12 version, which is needed e.g. if user uses a Telefunc version using 0.1.12 while using a VPS version using 0.2.0
+      // Support old version vite-plugin-import-build@0.1.12 which is needed, e.g. if user uses a Telefunc version using 0.1.12 with a vite-plugin-ssr version using 0.2.0
       `exports.load = exports.loadImportBuild;`,
       ''
     ].join('\n')

@@ -7,7 +7,7 @@
 
 ## What is this?
 
-`vite-plugin-import-build` automatically loads your server build (i.e. your files at `dist/server/`).
+`@brillout/vite-plugin-import-build` automatically loads your server build (i.e. your files at `dist/server/`).
 
 [Vike](https://vike.dev) and [Telefunc](https://telefunc.com) automatically add this plugin to your Vite app: there is nothing for you to do and you can usually ignore this plugin.
 
@@ -16,9 +16,9 @@
 
 ## Manual import
 
-Most of the time `vite-plugin-import-build` is able to automatically import your server build (i.e. your files at `dist/server/`) &mdash; there is nothing for you to do.
+Most of the time `@brillout/vite-plugin-import-build` is able to automatically import your server build (i.e. your files at `dist/server/`) &mdash; there is nothing for you to do.
 
-But `vite-plugin-import-build` doesn't work if you use Yarn PnP and you'll keep getting following error. The workaround is to manually import your server build.
+But `@brillout/vite-plugin-import-build` doesn't work if you use Yarn PnP and you'll keep getting following error. The workaround is to manually import your server build.
 
 ```bash
 # Yarn PnP users always get this error:
@@ -53,13 +53,13 @@ If you use [`vite.config.js` > `build.outDir`](https://vitejs.dev/config/build-o
 > [!NOTE]
 > This section is meant for library authors. As a user, you don't need to read this. If you have a problem, read [Manual import](#Manual-import) instead or reach out to maintainers.
 
-`vite-plugin-import-build` does two things:
+`@brillout/vite-plugin-import-build` does two things:
  - Generates an "import build" file at `dist/server/importBuild.cjs`.
- - Generates an "auto importer" file at `node_modules/vite-plugin-import-build/dist/autoImporter.js`.
+ - Generates an "auto importer" file at `node_modules/@brillout/vite-plugin-import-build/dist/autoImporter.js`.
 
 The *import build* file (`dist/server/importBuild.cjs`) enables tools, such as Vike and Telefunc, to consolidate their server entry file into a single entry file at `dist/server/importBuild.cjs`. We recommend having a quick look at the content of `dist/server/importBuild.cjs`: you'll see that it essentially loads built user files that live inside `dist/server/` (e.g. for Telefunc transpiled `.telefunc.js` user files, and for Vike transpiled `+Page.js` user files).
 
-The *auto importer* file (`node_modules/vite-plugin-import-build/dist/autoImporter.js`) automatically imports `dist/server/importBuild.cjs`, so that the user doesn't have to manually import `dist/server/importBuild.cjs` himself as shown in the following. That's the only purpose of the auto importer.
+The *auto importer* file (`node_modules/@brillout/vite-plugin-import-build/dist/autoImporter.js`) automatically imports `dist/server/importBuild.cjs`, so that the user doesn't have to manually import `dist/server/importBuild.cjs` himself as shown in the following. That's the only purpose of the auto importer.
 
 ```js
 // server/index.js (the user's server entry file)
