@@ -1,3 +1,16 @@
+<p align="center">
+  <a href="/../../#readme">
+    <h1>vite-plugin-import-build</h1>
+  </a>
+</p>
+
+<br/> &nbsp;&nbsp;&nbsp;&#8226;&nbsp;
+[What is this?](#what-is-this)
+<br/> &nbsp;&nbsp;&nbsp;&#8226;&nbsp;
+[Manual import](#manual-import)
+<br/> &nbsp;&nbsp;&nbsp;&#8226;&nbsp;
+[What it does](#what-it-does)
+
 ## What is this?
 
 This Vite plugin automatically loads your server build (i.e. your files at `dist/server/`).
@@ -36,7 +49,7 @@ Make sure to import `dist/server/importBuild.cjs` only in production. See [Condi
 
 If you use [`vite.config.js` > `build.outDir`](https://vitejs.dev/config/build-options.html#build-outdir) then replace `dist/server/importBuild.cjs` with `${build.outDir}/server/importBuild.cjs`.
 
-<br/><p align="center"><sup><a href="#readme"><b>&#8679;</b> <b>TOP</b> <b>&#8679;</b></a></sup></p>
+<p align="center"><sup><a href="#readme"><b>&#8679;</b> <b>TOP</b> <b>&#8679;</b></a></sup></p><br/>
 
 
 ## What it does
@@ -64,4 +77,4 @@ if (process.env.NODE_ENV === 'production') {
 
 See [How the auto importer works](https://github.com/brillout/vite-plugin-import-build/issues/4) to learn more.
 
-<br/><p align="center"><sup><a href="#readme"><b>&#8679;</b> <b>TOP</b> <b>&#8679;</b></a></sup></p>
+<p align="center"><sup><a href="#readme"><b>&#8679;</b> <b>TOP</b> <b>&#8679;</b></a></sup></p><br/>
