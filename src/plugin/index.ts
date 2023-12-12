@@ -20,14 +20,15 @@ import { debugLogsBuildtime } from '../shared/debugLogs'
 const autoImporterFilePath = require.resolve('../autoImporter')
 const configVersion = 1
 
-// Config set by @brillout/vite-plugin-import-build user, e.g. vite-plugin-ssr and Telefunc
-type ConfigLibrary = { getImporterCode: GetImporterCode; libraryName: string }
-// Config set by end user, currently only used by https://github.com/brillout/vite-plugin-ssr/blob/70ab60b502a685e39e65417a011c134fed1b5bd5/test/disableAutoImporter/vite.config.js#L7
-type ConfigUser = {
+// Config set by library using @brillout/vite-plugin-import-build (e.g. Vike or Telefunc)
+type PluginConfigProvidedByLibrary = { getImporterCode: GetImporterCode; libraryName: string }
+// Config set by end user (e.g. Vike or Telefunc user)
+//  - Currently only used by https://github.com/brillout/vite-plugin-ssr/blob/70ab60b502a685e39e65417a011c134fed1b5bd5/test/disableAutoImporter/vite.config.js#L7
+type PluginConfigProvidedByUser = {
   _disableAutoImporter?: boolean
 }
 // Private aggregation of the configuration of all @brillout/vite-plugin-import-build instances, e.g. the instance used by vite-plugin-ssr as well as the instance used by Telefunc
-type ConfigAggregate = {
+type PluginConfigResolved = {
   libraries: {
     libraryName: string
     vitePluginImportBuildVersion?: string // can be undefined when set by an older vite-plugin-import-build version
@@ -39,23 +40,23 @@ type ConfigAggregate = {
 }
 
 type ConfigUnresolved = ConfigVite & {
-  vitePluginImportBuild?: ConfigUser
-  _vitePluginImportBuild?: ConfigAggregate
+  vitePluginImportBuild?: PluginConfigProvidedByUser
+  _vitePluginImportBuild?: PluginConfigResolved
 }
 type ConfigResolved = ConfigVite & {
-  _vitePluginImportBuild: ConfigAggregate
+  _vitePluginImportBuild: PluginConfigResolved
 }
 
-function importBuild(configLibrary: ConfigLibrary): Plugin_ {
+function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrary): Plugin_ {
   let config: ConfigResolved
   let isServerSide = false
   return {
-    name: `@brillout/vite-plugin-import-build:${configLibrary.libraryName}`,
+    name: `@brillout/vite-plugin-import-build:${pluginConfigProvidedByLibrary.libraryName}`,
     apply: (_, env) => env.command === 'build',
     configResolved(configUnresolved: ConfigUnresolved) {
       isServerSide = viteIsSSR(configUnresolved)
       if (!isServerSide) return
-      config = resolveConfig(configUnresolved, configLibrary)
+      config = resolveConfig(configUnresolved, pluginConfigProvidedByLibrary)
     },
     buildStart() {
       if (!isServerSide) return
@@ -70,36 +71,39 @@ function importBuild(configLibrary: ConfigLibrary): Plugin_ {
   } as Plugin
 }
 
-function resolveConfig(configUnresolved: ConfigUnresolved, configLibrary: ConfigLibrary): ConfigResolved {
+function resolveConfig(
+  configUnresolved: ConfigUnresolved,
+  pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrary
+): ConfigResolved {
   assert(viteIsSSR(configUnresolved))
-  const data: ConfigAggregate = configUnresolved._vitePluginImportBuild ?? {
+  const pluginConfigResolved: PluginConfigResolved = configUnresolved._vitePluginImportBuild ?? {
     libraries: [],
     importerAlreadyGenerated: false,
     configVersion,
     disableAutoImporter: configUnresolved.vitePluginImportBuild?._disableAutoImporter ?? null
   }
 
-  assert(data.configVersion === 1)
+  assert(pluginConfigResolved.configVersion === 1)
   assert(configVersion === 1)
-  if (data.configVersion !== configVersion) {
+  if (pluginConfigResolved.configVersion !== configVersion) {
     // We don't use this yet (IIRC configVersion never had another value than `1`)
     assert(1 === 1 + 1)
-    const otherLibrary = data.libraries[0]
+    const otherLibrary = pluginConfigResolved.libraries[0]
     assert(otherLibrary)
-    assert(otherLibrary.libraryName !== configLibrary.libraryName)
+    assert(otherLibrary.libraryName !== pluginConfigProvidedByLibrary.libraryName)
     throw new Error(
-      `Conflict between ${configLibrary.libraryName} and ${otherLibrary.libraryName}. Update both to their latest version and try again.`
+      `Conflict between ${pluginConfigProvidedByLibrary.libraryName} and ${otherLibrary.libraryName}. Update both to their latest version and try again.`
     )
   }
 
-  data.libraries.push({
-    getImporterCode: configLibrary.getImporterCode,
-    libraryName: configLibrary.libraryName,
+  pluginConfigResolved.libraries.push({
+    getImporterCode: pluginConfigProvidedByLibrary.getImporterCode,
+    libraryName: pluginConfigProvidedByLibrary.libraryName,
     vitePluginImportBuildVersion: projectInfo.projectVersion
   })
 
   objectAssign(configUnresolved, {
-    _vitePluginImportBuild: data
+    _vitePluginImportBuild: pluginConfigResolved
   })
   return configUnresolved
 }
