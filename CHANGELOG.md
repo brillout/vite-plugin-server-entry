@@ -1,3 +1,20 @@
+## [0.2.21](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.20...v0.2.21) (2023-12-12)
+
+
+### Bug Fixes
+
+* explicitly fail upon wrong disableAutoImporter usage ([e99a4e6](https://github.com/brillout/vite-plugin-import-build/commit/e99a4e600bc4872101daf0aea89648d9e8f8f2a7))
+* improve autoImporter.status assertion ([30b5745](https://github.com/brillout/vite-plugin-import-build/commit/30b57457e4cb059024a3d4a9d8593bf3f35f21c8))
+* make writting auto importer file failure explicit ([0cd82c6](https://github.com/brillout/vite-plugin-import-build/commit/0cd82c6a99ad93424092458182b46e9e95d29ef7))
+* when disabling auto importer, then also disable crawling ([85b1cfd](https://github.com/brillout/vite-plugin-import-build/commit/85b1cfdb4eeee6911bfa1ef011cc9e53c6e94601))
+
+
+### Features
+
+* add option for libraries to disable auto importer ([56fc54d](https://github.com/brillout/vite-plugin-import-build/commit/56fc54da6f63a1023b0f5dec62f9f44468eaf77f))
+
+
+
 ## [0.2.20](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.19...v0.2.20) (2023-10-06)
 
 

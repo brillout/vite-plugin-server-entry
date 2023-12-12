@@ -1,4 +1,4 @@
-const PROJECT_VERSION = '0.2.20' as const
+const PROJECT_VERSION = '0.2.21' as const
 
 export const projectInfo = {
   projectName: '@brillout/vite-plugin-import-build' as const,
