@@ -61,7 +61,7 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
     buildStart() {
       if (!isServerSide) return
       assertOnlyNewerVersions(config)
-      resetAutoImporter()
+      resetAutoImporterFile()
     },
     async generateBundle(_rollupOptions, rollupBundle) {
       if (!isServerSide) return
@@ -131,10 +131,10 @@ async function generateImportBuildFile(emitFile: EmitFile, rollupBundle: RollupB
     source
   })
 
-  setAutoImporter(config)
+  writeAutoImporterFile(config)
 }
 
-function setAutoImporter(config: ConfigResolved) {
+function writeAutoImporterFile(config: ConfigResolved) {
   if (autoImporterIsDisabled(config)) {
     debugLogsBuildtime({ disabled: true, paths: null })
     return
@@ -162,7 +162,7 @@ function setAutoImporter(config: ConfigResolved) {
     ].join('\n')
   )
 }
-function resetAutoImporter() {
+function resetAutoImporterFile() {
   try {
     writeFileSync(autoImporterFilePath, ["exports.status = 'UNSET';", ''].join('\n'))
   } catch {}
