@@ -69,7 +69,7 @@ function debugLogsBuildtime({
   if (!DEBUG) return
   log('DEBUG_LOGS_BUILD_TIME [begin]')
   if (disabled) {
-    log('DISABLED')
+    log('disabled: true')
   } else {
     Object.entries(paths).forEach(([key, val]) => {
       log(key, val)

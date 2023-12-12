@@ -17,6 +17,7 @@ import { writeFileSync } from 'fs'
 import { importBuildFileName } from '../shared/importBuildFileName'
 import { findBuildEntry, RollupBundle } from './findBuildEntry'
 import { debugLogsBuildtime } from '../shared/debugLogs'
+import type { AutoImporterCleared } from '../loadServerBuild/AutoImporter'
 const autoImporterFilePath = require.resolve('../autoImporter')
 const configVersion = 1
 
@@ -72,7 +73,7 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
     buildStart() {
       if (!isServerSideBuild) return
       assertOnlyNewerVersions(config)
-      resetAutoImporterFile()
+      clearAutoImporterFile({ status: 'UNSET' })
     },
     generateBundle(_rollupOptions, rollupBundle) {
       if (!isServerSideBuild) return
@@ -180,9 +181,9 @@ function writeAutoImporterFile(config: ConfigResolved) {
     ].join('\n')
   )
 }
-function resetAutoImporterFile() {
+function clearAutoImporterFile(autoImporter: AutoImporterCleared) {
   try {
-    writeFileSync(autoImporterFilePath, ["exports.status = 'UNSET';", ''].join('\n'))
+    writeFileSync(autoImporterFilePath, [`exports.status = '${autoImporter.status}';`, ''].join('\n'))
   } catch {}
 }
 
