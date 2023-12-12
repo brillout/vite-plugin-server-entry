@@ -1,14 +1,8 @@
-<p align="center">
-  <a href="/../../#readme">
-    <h1>vite-plugin-import-build</h1>
-  </a>
-</p>
-
-<br/> &nbsp;&nbsp;&nbsp;&#8226;&nbsp;
+<br/>
 [What is this?](#what-is-this)
-<br/> &nbsp;&nbsp;&nbsp;&#8226;&nbsp;
+<br/>
 [Manual import](#manual-import)
-<br/> &nbsp;&nbsp;&nbsp;&#8226;&nbsp;
+<br/>
 [What it does](#what-it-does)
 
 ## What is this?
@@ -16,6 +10,8 @@
 This Vite plugin automatically loads your server build (i.e. your files at `dist/server/`).
 
 [Vite-plugin-ssr](https://vite-plugin-ssr.com) and [Telefunc](https://telefunc.com) automatically add this plugin to your Vite app.
+
+<p align="center"><sup><a href="#readme"><b>&#8679;</b> <b>TOP</b> <b>&#8679;</b></a></sup></p><br/>
 
 
 ## Manual import
