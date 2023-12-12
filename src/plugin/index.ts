@@ -65,7 +65,7 @@ function importBuild(configLibrary: ConfigLibrary): Plugin_ {
     async generateBundle(_rollupOptions, rollupBundle) {
       if (!isServerSide) return
       const emitFile = this.emitFile.bind(this)
-      await generateImporter(emitFile, rollupBundle, config)
+      await generateImportBuildFile(emitFile, rollupBundle, config)
     }
   } as Plugin
 }
@@ -105,7 +105,7 @@ function resolveConfig(configUnresolved: ConfigUnresolved, configLibrary: Config
 }
 
 type GetImporterCode = (args: { findBuildEntry: (entryName: string) => string }) => string
-async function generateImporter(emitFile: EmitFile, rollupBundle: RollupBundle, config: ConfigResolved) {
+async function generateImportBuildFile(emitFile: EmitFile, rollupBundle: RollupBundle, config: ConfigResolved) {
   // Let the newest vite-plugin-import-build version generate autoImporter.js
   if (isUsingOlderVitePluginImportBuildVersion(config)) return
   if (config._vitePluginImportBuild.importerAlreadyGenerated) return
