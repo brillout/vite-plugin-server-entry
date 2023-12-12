@@ -3,11 +3,11 @@ export { debugLogsRuntimePost }
 export { debugLogsBuildtime }
 
 import { getCwd, logLabel } from './utils'
-import type { Importer } from '../loadServerBuild/Importer'
+import type { AutoImporter } from '../loadServerBuild/AutoImporter'
 
 const DEBUG = false
 
-function debugLogsRuntimePre(importer: Importer): undefined | void {
+function debugLogsRuntimePre(autoImporter: AutoImporter): undefined | void {
   if (!DEBUG) return
   log('DEBUG_LOGS_RUNTIME [begin]')
   try {
@@ -28,14 +28,14 @@ function debugLogsRuntimePre(importer: Importer): undefined | void {
     log('navigator', 'undefined')
   }
   log('cwd', getCwd())
-  log('importer.status', importer.status)
-  if (importer.status === 'SET') {
-    log('importer.paths.autoImporterFilePathOriginal', importer.paths.autoImporterFilePathOriginal)
-    log('importer.paths.autoImporterFileDirActual', importer.paths.autoImporterFileDirActual)
-    log('importer.paths.importBuildFilePathRelative', importer.paths.importBuildFilePathRelative)
-    log('importer.paths.importBuildFilePathOriginal', importer.paths.importBuildFilePathOriginal)
+  log('importer.status', autoImporter.status)
+  if (autoImporter.status === 'SET') {
+    log('importer.paths.autoImporterFilePathOriginal', autoImporter.paths.autoImporterFilePathOriginal)
+    log('importer.paths.autoImporterFileDirActual', autoImporter.paths.autoImporterFileDirActual)
+    log('importer.paths.importBuildFilePathRelative', autoImporter.paths.importBuildFilePathRelative)
+    log('importer.paths.importBuildFilePathOriginal', autoImporter.paths.importBuildFilePathOriginal)
     try {
-      log('importer.paths.importBuildFilePathResolved()', importer.paths.importBuildFilePathResolved())
+      log('importer.paths.importBuildFilePathResolved()', autoImporter.paths.importBuildFilePathResolved())
     } catch (err) {
       log('importer.paths.importBuildFilePathResolved() error:', err)
       log('importer.paths.importBuildFilePathResolved()', 'ERRORED')

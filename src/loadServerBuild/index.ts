@@ -3,31 +3,31 @@ export { loadServerBuild }
 import { getCwd, assert, assertUsage, toPosixPath, assertPosixPath, requireResolve } from './utils'
 import { importBuildFileName } from '../shared/importBuildFileName'
 import { import_ } from '@brillout/import'
-import type { Importer, ImporterPaths } from './Importer'
+import type { AutoImporter, AutoImporterPaths } from './AutoImporter'
 import { debugLogsRuntimePost, debugLogsRuntimePre } from '../shared/debugLogs'
 
 async function loadServerBuild(outDir?: string): Promise<void | undefined> {
-  const importer: Importer = require('../autoImporter')
+  const autoImporter: AutoImporter = require('../autoImporter')
 
-  debugLogsRuntimePre(importer)
+  debugLogsRuntimePre(autoImporter)
 
   let success = false
   let requireError: unknown
   let isOutsideOfCwd: boolean | null = null
-  if (importer.status === 'SET') {
+  if (autoImporter.status === 'SET') {
     try {
-      importer.loadImportBuild()
+      autoImporter.loadImportBuild()
       success = true
     } catch (err) {
       requireError = err
     }
-    isOutsideOfCwd = isImportBuildOutsideOfCwd(importer.paths)
+    isOutsideOfCwd = isImportBuildOutsideOfCwd(autoImporter.paths)
     if (isOutsideOfCwd) {
       success = false
     }
   } else {
-    // Yarn PnP, or disableAutoImporter / _disableAutoImporter
-    assert(importer.status === 'UNSET')
+    // Yarn PnP or user has set config.vitePluginImportBuild._disableAutoImporter
+    assert(autoImporter.status === 'UNSET')
   }
 
   if (!success) {
@@ -45,7 +45,7 @@ async function loadServerBuild(outDir?: string): Promise<void | undefined> {
 }
 
 // `${build.outDir}/dist/importBuild.cjs` may not belong to process.cwd() if e.g. vite-plugin-ssr is linked => autoImporter.js can potentially be shared between multiple projects
-function isImportBuildOutsideOfCwd(paths: ImporterPaths): boolean | null {
+function isImportBuildOutsideOfCwd(paths: AutoImporterPaths): boolean | null {
   const cwd = getCwd()
 
   // We cannot check edge environments. Upon edge deployment the server code is usually bundled right after `$ vite build`, so it's unlikley that the resolved importBuildFilePath doesn't belong to cwd

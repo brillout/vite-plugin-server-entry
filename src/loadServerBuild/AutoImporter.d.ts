@@ -1,11 +1,11 @@
-export type Importer =
+export type AutoImporter =
   | { status: 'UNSET' }
   | {
       status: 'SET'
       loadImportBuild: () => void
-      paths: ImporterPaths
+      paths: AutoImporterPaths
     }
-export type ImporterPaths = {
+export type AutoImporterPaths = {
   autoImporterFilePathOriginal: string
   autoImporterFileDirActual: string
   importBuildFilePathRelative: string
