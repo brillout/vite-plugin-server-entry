@@ -7,6 +7,7 @@ export type AutoImporter =
     }
 export type AutoImporterCleared =
   | { status: 'UNSET' }
+  | { status: 'RESET' }
 export type AutoImporterPaths = {
   autoImporterFilePathOriginal: string
   autoImporterFileDirActual: string

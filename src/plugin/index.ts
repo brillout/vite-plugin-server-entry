@@ -73,7 +73,7 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
     buildStart() {
       if (!isServerSideBuild) return
       assertOnlyNewerVersions(config)
-      clearAutoImporterFile({ status: 'UNSET' })
+      clearAutoImporterFile({ status: 'RESET' })
     },
     generateBundle(_rollupOptions, rollupBundle) {
       if (!isServerSideBuild) return
