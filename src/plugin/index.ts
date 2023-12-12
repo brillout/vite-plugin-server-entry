@@ -49,22 +49,22 @@ type ConfigResolved = ConfigVite & {
 
 function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrary): Plugin_ {
   let config: ConfigResolved
-  let isServerSide = false
+  let isServerSideBuild = false
   return {
     name: `@brillout/vite-plugin-import-build:${pluginConfigProvidedByLibrary.libraryName}`,
     apply: (_, env) => env.command === 'build',
     configResolved(configUnresolved: ConfigUnresolved) {
-      isServerSide = viteIsSSR(configUnresolved)
-      if (!isServerSide) return
+      isServerSideBuild = viteIsSSR(configUnresolved)
+      if (!isServerSideBuild) return
       config = resolveConfig(configUnresolved, pluginConfigProvidedByLibrary)
     },
     buildStart() {
-      if (!isServerSide) return
+      if (!isServerSideBuild) return
       assertOnlyNewerVersions(config)
       resetAutoImporterFile()
     },
     generateBundle(_rollupOptions, rollupBundle) {
-      if (!isServerSide) return
+      if (!isServerSideBuild) return
       const emitFile = this.emitFile.bind(this)
       generateImportBuildFile(emitFile, rollupBundle, config)
       writeAutoImporterFile(config)
