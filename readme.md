@@ -1,21 +1,24 @@
-[What is this?](#what-is-this)  
-[Manual import](#manual-import)  
-[What it does](#what-it-does)  
+- [What is this?](#what-is-this)
+- [Manual import](#manual-import)
+- [What it does](#what-it-does)
+
+<br/>
+
 
 ## What is this?
 
-This Vite plugin automatically loads your server build (i.e. your files at `dist/server/`).
+`vite-plugin-import-build` automatically loads your server build (i.e. your files at `dist/server/`).
 
-[Vite-plugin-ssr](https://vite-plugin-ssr.com) and [Telefunc](https://telefunc.com) automatically add this plugin to your Vite app.
+[Vike](https://vike.dev) and [Telefunc](https://telefunc.com) automatically add this plugin to your Vite app: there is nothing for you to do and you can usually ignore this plugin.
 
 <p align="center"><sup><a href="#readme"><b>&#8679;</b> <b>TOP</b> <b>&#8679;</b></a></sup></p><br/>
 
 
 ## Manual import
 
-Usually this Vite plugin is able to automatically import your server build (i.e. your files at `dist/server/`) &mdash; there is nothing for you to do.
+Most of the time `vite-plugin-import-build` is able to automatically import your server build (i.e. your files at `dist/server/`) &mdash; there is nothing for you to do.
 
-But the plugin doesn't work if you use Yarn PnP and you'll keep getting following error. The workaround is to manually import your server build.
+But `vite-plugin-import-build` doesn't work if you use Yarn PnP and you'll keep getting following error. The workaround is to manually import your server build.
 
 ```bash
 # Yarn PnP users always get this error:
