@@ -87,7 +87,8 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
       writeImportBuildFile(this.emitFile.bind(this), rollupBundle, config)
 
       // Write node_modules/vite-plugin-import-build/dist/autoImporter.js
-      if (!autoImporterIsDisabled(config)) {
+      const autoImporterDisabled = config._vitePluginImportBuild.disableAutoImporter || isYarnPnP()
+      if (!autoImporterDisabled) {
         writeAutoImporterFile(config)
       } else {
         clearAutoImporterFile({ status: 'DISABLED' })
@@ -167,6 +168,7 @@ function writeAutoImporterFile(config: ConfigResolved) {
   const importBuildFilePathAbsolute = path.posix.join(distServerPathAbsolute, importBuildFileName)
   const { root } = config
   assertPosixPath(root)
+  assert(!isYarnPnP())
   writeFileSync(
     autoImporterFilePath,
     [
@@ -188,10 +190,6 @@ function writeAutoImporterFile(config: ConfigResolved) {
 function clearAutoImporterFile(autoImporter: AutoImporterCleared) {
   if (isYarnPnP()) return
   writeFileSync(autoImporterFilePath, [`exports.status = '${autoImporter.status}';`, ''].join('\n'))
-}
-
-function autoImporterIsDisabled(config: ConfigResolved): boolean {
-  return config._vitePluginImportBuild.disableAutoImporter ?? isYarnPnP()
 }
 
 function isUsingOlderVitePluginImportBuildVersion(config: ConfigResolved): boolean {

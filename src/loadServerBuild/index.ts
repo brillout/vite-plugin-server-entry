@@ -11,6 +11,9 @@ async function loadServerBuild(outDir?: string): Promise<void | undefined> {
 
   debugLogsRuntimePre(autoImporter)
 
+  /* Is this better?
+  assertUsage(autoImporter.status !== 'DISABLED', "Make sure to not call loadServerBuild() if you disable the auto importer")
+  */
   if (autoImporter.status === 'DISABLED') return
 
   let success = false
