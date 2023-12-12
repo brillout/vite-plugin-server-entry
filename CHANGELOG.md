@@ -1,3 +1,12 @@
+## [0.2.22](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.21...v0.2.22) (2023-12-12)
+
+
+### Features
+
+* dedicate option for testing crawler ([9504160](https://github.com/brillout/vite-plugin-import-build/commit/9504160b649b0bd8c5a3196fb4e999a178f7a7c4))
+
+
+
 ## [0.2.21](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.20...v0.2.21) (2023-12-12)
 
 
