@@ -21,7 +21,11 @@ const autoImporterFilePath = require.resolve('../autoImporter')
 const configVersion = 1
 
 // Config set by library using @brillout/vite-plugin-import-build (e.g. Vike or Telefunc)
-type PluginConfigProvidedByLibrary = { getImporterCode: GetImporterCode; libraryName: string }
+type PluginConfigProvidedByLibrary = {
+  getImporterCode: GetImporterCode
+  libraryName: string
+  disableAutoImporter?: boolean
+}
 // Config set by end user (e.g. Vike or Telefunc user)
 //  - Currently only used by https://github.com/brillout/vite-plugin-ssr/blob/70ab60b502a685e39e65417a011c134fed1b5bd5/test/disableAutoImporter/vite.config.js#L7
 type PluginConfigProvidedByUser = {
@@ -89,13 +93,15 @@ function resolveConfig(
   pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrary
 ): ConfigResolved {
   assert(viteIsSSR(configUnresolved))
+  const pluginConfigProvidedByUser = configUnresolved.vitePluginImportBuild
+
   const pluginConfigResolved: PluginConfigResolved = configUnresolved._vitePluginImportBuild ?? {
     libraries: [],
     filesAlreadyWritten: false,
     configVersion,
     disableAutoImporter: false
   }
-  if (configUnresolved.vitePluginImportBuild?._disableAutoImporter) {
+  if (pluginConfigProvidedByLibrary.disableAutoImporter || pluginConfigProvidedByUser?._disableAutoImporter) {
     pluginConfigResolved.disableAutoImporter = true
   }
 
