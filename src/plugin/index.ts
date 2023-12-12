@@ -186,9 +186,8 @@ function writeAutoImporterFile(config: ConfigResolved) {
   )
 }
 function clearAutoImporterFile(autoImporter: AutoImporterCleared) {
-  try {
-    writeFileSync(autoImporterFilePath, [`exports.status = '${autoImporter.status}';`, ''].join('\n'))
-  } catch {}
+  if (isYarnPnP()) return
+  writeFileSync(autoImporterFilePath, [`exports.status = '${autoImporter.status}';`, ''].join('\n'))
 }
 
 function autoImporterIsDisabled(config: ConfigResolved): boolean {
