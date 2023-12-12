@@ -28,9 +28,9 @@ type PluginConfigProvidedByLibrary = {
   disableAutoImporter?: boolean
 }
 // Config set by end user (e.g. Vike or Telefunc user)
-//  - Currently only used by https://github.com/brillout/vite-plugin-ssr/blob/70ab60b502a685e39e65417a011c134fed1b5bd5/test/disableAutoImporter/vite.config.js#L7
 type PluginConfigProvidedByUser = {
-  _disableAutoImporter?: boolean
+  // Only used by https://github.com/brillout/vite-plugin-ssr/blob/70ab60b502a685e39e65417a011c134fed1b5bd5/test/disableAutoImporter/vite.config.js#L7
+  _testCrawler?: boolean
 }
 // The resolved aggregation of the config set by the user, and all the configs set by libraries (e.g. the config set by Vike and the config set by Telefunc).
 type PluginConfigResolved = {
@@ -42,6 +42,7 @@ type PluginConfigResolved = {
   filesAlreadyWritten: boolean
   configVersion: number
   disableAutoImporter: boolean
+  testCrawler: boolean
 }
 
 type ConfigUnresolved = ConfigVite & {
@@ -87,11 +88,13 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
       writeImportBuildFile(this.emitFile.bind(this), rollupBundle, config)
 
       // Write node_modules/@brillout/vite-plugin-import-build/dist/autoImporter.js
-      const autoImporterDisabled = config._vitePluginImportBuild.disableAutoImporter || isYarnPnP()
+      const { testCrawler } = config._vitePluginImportBuild
+      const autoImporterDisabled = config._vitePluginImportBuild.disableAutoImporter || isYarnPnP() || testCrawler
       if (!autoImporterDisabled) {
         writeAutoImporterFile(config)
       } else {
-        clearAutoImporterFile({ status: 'DISABLED' })
+        const status = testCrawler ? 'TEST_CRAWLER' : 'DISABLED'
+        clearAutoImporterFile({ status })
         debugLogsBuildtime({ disabled: true, paths: null })
       }
     }
@@ -109,10 +112,14 @@ function resolveConfig(
     libraries: [],
     filesAlreadyWritten: false,
     configVersion,
-    disableAutoImporter: false
+    disableAutoImporter: false,
+    testCrawler: false
   }
-  if (pluginConfigProvidedByLibrary.disableAutoImporter || pluginConfigProvidedByUser?._disableAutoImporter) {
+  if (pluginConfigProvidedByLibrary.disableAutoImporter) {
     pluginConfigResolved.disableAutoImporter = true
+  }
+  if (pluginConfigProvidedByUser?._testCrawler) {
+    pluginConfigResolved.testCrawler = true
   }
 
   assert(configVersion === 1)

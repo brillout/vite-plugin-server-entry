@@ -10,6 +10,7 @@ export type AutoImporterCleared =
   | { status: 'UNSET' }
   | { status: 'RESET' }
   | { status: 'DISABLED' }
+  | { status: 'TEST_CRAWLER' }
 export type AutoImporterPaths = {
   autoImporterFilePathOriginal: string
   autoImporterFileDirActual: string

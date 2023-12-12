@@ -31,12 +31,18 @@ async function loadServerBuild(outDir?: string): Promise<void | undefined> {
       success = false
     }
   } else {
-    // Yarn PnP or user has set config.vitePluginImportBuild._disableAutoImporter
-    assert(autoImporter.status === 'UNSET')
+    // Maybe this assertion is too strict? Is it prone to race conditions?
+    assert(autoImporter.status !== 'RESET')
+    assert(
+      // Yarn PnP
+      autoImporter.status === 'UNSET' ||
+        // User set config.vitePluginImportBuild._testCrawler
+        autoImporter.status === 'TEST_CRAWLER'
+    )
   }
 
   if (!success) {
-    success = await loadWithNodejs(outDir)
+    success = await crawlImportBuildFileWithNodeJs(outDir)
   }
 
   // We don't handle the following case:
@@ -72,7 +78,7 @@ function isImportBuildOutsideOfCwd(paths: AutoImporterPaths): boolean | null {
   return !importBuildFilePath.startsWith(cwd)
 }
 
-async function loadWithNodejs(outDir?: string): Promise<boolean> {
+async function crawlImportBuildFileWithNodeJs(outDir?: string): Promise<boolean> {
   const cwd = getCwd()
   if (!cwd) return false
 
