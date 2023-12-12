@@ -36,4 +36,27 @@ Make sure to import `dist/server/importBuild.cjs` only in production. See [Condi
 
 If you use [`vite.config.js` > `build.outDir`](https://vitejs.dev/config/build-options.html#build-outdir) then replace `dist/server/importBuild.cjs` with `${build.outDir}/server/importBuild.cjs`.
 
-See [How it works](https://github.com/brillout/vite-plugin-import-build/issues/4) if you're curious and/or you want to learn more.
+
+## What it does
+
+> [!NOTE]
+> This section is meant for library authors. As a user, you don't need to read this: if you have a problem, read this section [Manual import](#Manual-import) instead or reach out to maintainers.
+
+`vite-plugin-import-build` does two things:
+ - Generates an "import build" file at `dist/server/importBuild.cjs`.
+ - Generates an "auto importer" file at `node_modules/vite-plugin-import-build/dist/autoImporter.js`.
+
+The *import build* file (`dist/server/importBuild.cjs`) enables tools, such as Vike and Telefunc, to consolidate their entry files into a single entry file `dist/server/importBuild.cjs`. We recommend having a quick look at the content of `dist/server/importBuild.cjs`: you'll see that it essentially loads built user files living inside `dist/server/` (e.g for Telefunc transpiled `.telefunc.js` user files, and for Vike transpiled `+Page.js` user files).
+
+The *auto importer* file (`node_modules/vite-plugin-import-build/dist/autoImporter.js`) automatically imports `dist/server/importBuild.cjs`, so that the user doesn't have to manually import `import 'dist/server/importBuild.cjs'` himself as shown in the following. That's the only purpose of the auto importer.
+
+```js
+// server/index.js (the user's server entry)
+
+// Without the auto importer, the user would have to import `dist/server/importBuild.cjs` to his server entry like this:
+if (process.env.NODE_ENV === 'production') {
+  await import('../dist/server/importBuild.cjs')
+}
+```
+
+See [How the auto importer works](https://github.com/brillout/vite-plugin-import-build/issues/4) to learn more.
