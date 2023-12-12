@@ -27,7 +27,7 @@ type PluginConfigProvidedByLibrary = { getImporterCode: GetImporterCode; library
 type PluginConfigProvidedByUser = {
   _disableAutoImporter?: boolean
 }
-// Private aggregation of the configuration of all @brillout/vite-plugin-import-build instances, e.g. the instance used by vite-plugin-ssr as well as the instance used by Telefunc
+// The resolved aggregation of the config set by the user, and all the configs set by libraries (e.g. the config set by Vike and the config set by Telefunc).
 type PluginConfigResolved = {
   libraries: {
     libraryName: string
