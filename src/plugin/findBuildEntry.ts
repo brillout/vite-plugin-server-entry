@@ -7,7 +7,7 @@ import { assert, assertUsage } from './utils'
 // Subset of: `import type { OutputBundle } from 'rollup'`. (We use a subset to avoid mismatch upon different Rollup versions.)
 type RollupBundle = Record<string, unknown>
 
-function findBuildEntry(entryName: string, rollupBundle: RollupBundle, config: ResolvedConfig) {
+function findBuildEntry(entryName: string, rollupBundle: RollupBundle, config: ResolvedConfig): string {
   let entryFound: undefined | string
   const entries = Object.keys(rollupBundle)
   for (const name of entries) {
