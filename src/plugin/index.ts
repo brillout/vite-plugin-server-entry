@@ -77,14 +77,22 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
     },
     generateBundle(_rollupOptions, rollupBundle) {
       if (!isServerSideBuild) return
+
       // Let the newest vite-plugin-import-build version generate autoImporter.js
       if (isUsingOlderVitePluginImportBuildVersion(config)) return
       if (config._vitePluginImportBuild.filesAlreadyWritten) return
       config._vitePluginImportBuild.filesAlreadyWritten = true
+
       // Write dist/server/importBuild.cjs
       writeImportBuildFile(this.emitFile.bind(this), rollupBundle, config)
+
       // Write node_modules/vite-plugin-import-build/dist/autoImporter.js
-      writeAutoImporterFile(config)
+      if (!autoImporterIsDisabled(config)) {
+        writeAutoImporterFile(config)
+      } else {
+        clearAutoImporterFile({ status: 'DISABLED' })
+        debugLogsBuildtime({ disabled: true, paths: null })
+      }
     }
   } as Plugin
 }
@@ -154,10 +162,6 @@ function writeImportBuildFile(emitFile: EmitFile, rollupBundle: RollupBundle, co
 }
 
 function writeAutoImporterFile(config: ConfigResolved) {
-  if (autoImporterIsDisabled(config)) {
-    debugLogsBuildtime({ disabled: true, paths: null })
-    return
-  }
   const { distServerPathRelative, distServerPathAbsolute } = getDistServerPathRelative(config)
   const importBuildFilePathRelative = path.posix.join(distServerPathRelative, importBuildFileName)
   const importBuildFilePathAbsolute = path.posix.join(distServerPathAbsolute, importBuildFileName)

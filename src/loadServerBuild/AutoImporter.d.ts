@@ -5,9 +5,11 @@ export type AutoImporter =
       loadImportBuild: () => void
       paths: AutoImporterPaths
     }
+// prettier-ignore
 export type AutoImporterCleared =
   | { status: 'UNSET' }
   | { status: 'RESET' }
+  | { status: 'DISABLED' }
 export type AutoImporterPaths = {
   autoImporterFilePathOriginal: string
   autoImporterFileDirActual: string

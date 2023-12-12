@@ -11,6 +11,8 @@ async function loadServerBuild(outDir?: string): Promise<void | undefined> {
 
   debugLogsRuntimePre(autoImporter)
 
+  if (autoImporter.status === 'DISABLED') return
+
   let success = false
   let requireError: unknown
   let isOutsideOfCwd: boolean | null = null
