@@ -66,7 +66,9 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
     generateBundle(_rollupOptions, rollupBundle) {
       if (!isServerSideBuild) return
       const emitFile = this.emitFile.bind(this)
-      generateImportBuildFile(emitFile, rollupBundle, config)
+      // Write dist/server/importBuild.cjs
+      writeImportBuildFile(emitFile, rollupBundle, config)
+      // Write node_modules/vite-plugin-import-build/dist/autoImporter.js
       writeAutoImporterFile(config)
     }
   } as Plugin
@@ -110,7 +112,7 @@ function resolveConfig(
 }
 
 type GetImporterCode = (args: { findBuildEntry: (entryName: string) => string }) => string
-function generateImportBuildFile(emitFile: EmitFile, rollupBundle: RollupBundle, config: ConfigResolved) {
+function writeImportBuildFile(emitFile: EmitFile, rollupBundle: RollupBundle, config: ConfigResolved) {
   // Let the newest vite-plugin-import-build version generate autoImporter.js
   if (isUsingOlderVitePluginImportBuildVersion(config)) return
   if (config._vitePluginImportBuild.importerAlreadyGenerated) return
