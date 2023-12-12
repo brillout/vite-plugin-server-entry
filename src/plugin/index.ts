@@ -63,7 +63,7 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
       assertOnlyNewerVersions(config)
       resetAutoImporterFile()
     },
-    async generateBundle(_rollupOptions, rollupBundle) {
+    generateBundle(_rollupOptions, rollupBundle) {
       if (!isServerSide) return
       const emitFile = this.emitFile.bind(this)
       generateImportBuildFile(emitFile, rollupBundle, config)
