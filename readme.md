@@ -36,6 +36,8 @@ Make sure to import `dist/server/importBuild.cjs` only in production. See [Condi
 
 If you use [`vite.config.js` > `build.outDir`](https://vitejs.dev/config/build-options.html#build-outdir) then replace `dist/server/importBuild.cjs` with `${build.outDir}/server/importBuild.cjs`.
 
+<br/><p align="center"><sup><a href="#readme"><b>&#8679;</b> <b>TOP</b> <b>&#8679;</b></a></sup></p>
+
 
 ## What it does
 
@@ -53,10 +55,13 @@ The *auto importer* file (`node_modules/vite-plugin-import-build/dist/autoImport
 ```js
 // server/index.js (the user's server entry)
 
-// Without the auto importer, the user would have to import `dist/server/importBuild.cjs` to his server entry like this:
+// Without the auto importer, the user would have to manually import dist/server/importBuild.cjs
+// in his server entry like this:
 if (process.env.NODE_ENV === 'production') {
   await import('../dist/server/importBuild.cjs')
 }
 ```
 
 See [How the auto importer works](https://github.com/brillout/vite-plugin-import-build/issues/4) to learn more.
+
+<br/><p align="center"><sup><a href="#readme"><b>&#8679;</b> <b>TOP</b> <b>&#8679;</b></a></sup></p>
