@@ -11,12 +11,12 @@ import {
   projectInfo,
   objectAssign,
   joinEnglish,
-  injectRollupInputs
+  injectRollupInputs,
+  findRollupBundleEntry
 } from './utils'
 import path from 'path'
 import { writeFileSync } from 'fs'
 import { importBuildFileName } from '../shared/importBuildFileName'
-import { findBuildEntry } from './findBuildEntry'
 import { debugLogsBuildtime } from '../shared/debugLogs'
 import type { AutoImporterCleared } from '../loadServerBuild/AutoImporter'
 const autoImporterFilePath = require.resolve('../autoImporter')
@@ -122,7 +122,7 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
       // Write dist/server/importBuild.cjs
       {
         const fileName = 'importBuild.cjs'
-        const fileNameActual = findBuildEntry(inputName, rollupBundle, config)
+        const fileNameActual = findRollupBundleEntry(inputName, rollupBundle).fileName
         if (fileNameActual !== fileName)
           this.emitFile({
             fileName,

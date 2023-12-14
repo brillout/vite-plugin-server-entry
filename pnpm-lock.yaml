@@ -16,9 +16,6 @@ devDependencies:
   '@types/node':
     specifier: ^15.12.2
     version: 15.14.9
-  rollup:
-    specifier: ^2.75.5
-    version: 2.75.5
   typescript:
     specifier: ^4.3.5
     version: 4.6.3
@@ -808,14 +805,6 @@ packages:
       normalize-package-data: 6.0.0
       parse-json: 7.1.1
       type-fest: 4.8.3
-    dev: true
-
-  /rollup@2.75.5:
-    resolution: {integrity: sha512-JzNlJZDison3o2mOxVmb44Oz7t74EfSd1SQrplQk0wSaXV7uLQXtVdHbxlcT3w+8tZ1TL4r/eLfc7nAbz38BBA==}
-    engines: {node: '>=10.0.0'}
-    hasBin: true
-    optionalDependencies:
-      fsevents: 2.3.2
     dev: true
 
   /rollup@3.29.4:
