@@ -231,13 +231,13 @@ function isHigherVersion(semver1: string, semver2: string): boolean {
   const semver2Parts = parseSemver(semver2)
   for (let i = 0; i <= semver1Parts.length - 1; i++) {
     if (semver1Parts[i] === semver2Parts[i]) continue
-    return semver1Parts[i] > semver2Parts[i]
+    return semver1Parts[i]! > semver2Parts[i]!
   }
   return false
 }
 
 function parseSemver(semver: string): number[] {
-  semver = semver.split('-')[0] // '0.2.16-commit-89bbe89' => '0.2.16'
+  semver = semver.split('-')[0]! // '0.2.16-commit-89bbe89' => '0.2.16'
   assert(/^[0-9\.]+$/.test(semver))
   const parts = semver.split('.')
   assert(parts.length === 3)
