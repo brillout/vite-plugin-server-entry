@@ -1,6 +1,7 @@
 export { importBuild }
+export { findImportBuildBundleEntry }
 
-import type { Plugin, ResolvedConfig as ConfigVite } from 'vite'
+import type { Plugin, ResolvedConfig as ConfigVite, Rollup } from 'vite'
 import {
   isYarnPnP,
   assert,
@@ -19,6 +20,9 @@ import { writeFileSync } from 'fs'
 import { importBuildFileName } from '../shared/importBuildFileName'
 import { debugLogsBuildtime } from '../shared/debugLogs'
 import type { AutoImporterCleared } from '../loadServerBuild/AutoImporter'
+type Bundle = Rollup.OutputBundle
+type Options = Rollup.NormalizedOutputOptions
+
 const autoImporterFilePath = require.resolve('../autoImporter')
 const inputName = 'importBuild'
 const importBuildVirtualId = 'virtual:@brillout/vite-plugin-import-build:importBuild'
@@ -28,7 +32,7 @@ const configVersion = 2
 
 // Config set by library using @brillout/vite-plugin-import-build (e.g. Vike or Telefunc)
 type PluginConfigProvidedByLibrary = {
-  getImporterCode: GetImporterCode
+  getImporterCode: () => string
   libraryName: string
   disableAutoImporter?: boolean
 }
@@ -49,7 +53,7 @@ type Library = {
   libraryName: string
   configVersion: number
   vitePluginImportBuildVersion: string
-  getImporterCode: GetImporterCode
+  getImporterCode: () => string
 }
 
 type ConfigUnresolved = ConfigVite & {
@@ -99,7 +103,7 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
         return importBuildFileContent
       }
     },
-    generateBundle(_rollupOptions, rollupBundle) {
+    generateBundle(_rollupOptions, bundle) {
       if (!isServerSideBuild) return
 
       // Let the newest @brillout/vite-plugin-import-build version write files
@@ -121,7 +125,7 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
       // Write dist/server/importBuild.cjs
       {
         const fileName = 'importBuild.cjs'
-        const fileNameActual = findRollupBundleEntry(inputName, rollupBundle).fileName
+        const fileNameActual = findRollupBundleEntry(inputName, bundle).fileName
         if (fileNameActual !== fileName)
           this.emitFile({
             fileName,
@@ -168,7 +172,6 @@ function resolveConfig(
   return configResolved
 }
 
-type GetImporterCode = (args: { findBuildEntry: (entryName: string) => string }) => string
 function getImportBuildFileContent(config: ConfigResolved) {
   assert(viteIsSSR(config))
   const importBuildFileContent = [
@@ -176,12 +179,8 @@ function getImportBuildFileContent(config: ConfigResolved) {
     ...config._vitePluginImportBuild.libraries.map((library) => {
       // Should be true becasue of assertConfigVersions()
       assert(getLibraryConfigVersion(library) === configVersion)
-      const importerCode = library.getImporterCode({
-        // Temporary workaround
-        findBuildEntry: (entryName: string) => `${entryName}.mjs`
-        //findBuildEntry: (entryName: string) => findBuildEntry(entryName, rollupBundle, config)
-      })
-      return importerCode
+      const entryCode = library.getImporterCode()
+      return entryCode
     })
   ].join('\n')
   return importBuildFileContent
@@ -314,3 +313,7 @@ function getLibraryConfigVersion(library: Library) {
 
 // Avoid multiple Vite versions mismatch
 type Plugin_ = any
+
+function findImportBuildBundleEntry(bundle: Bundle /*, options: Options*/): Bundle[string] {
+  return findRollupBundleEntry(inputName, bundle)
+}
