@@ -20,7 +20,11 @@ import { importBuildFileName } from '../shared/importBuildFileName'
 import { debugLogsBuildtime } from '../shared/debugLogs'
 import type { AutoImporterCleared } from '../loadServerBuild/AutoImporter'
 const autoImporterFilePath = require.resolve('../autoImporter')
-const configVersion = 1
+const inputName = 'importBuild'
+const importBuildVirtualId = 'virtual:@brillout/vite-plugin-import-build:importBuild'
+// https://vitejs.dev/guide/api-plugin.html#virtual-modules-convention
+const virtualIdPrefix = '\0'
+const configVersion = 2
 
 // Config set by library using @brillout/vite-plugin-import-build (e.g. Vike or Telefunc)
 type PluginConfigProvidedByLibrary = {
@@ -55,11 +59,6 @@ type ConfigUnresolved = ConfigVite & {
 type ConfigResolved = ConfigVite & {
   _vitePluginImportBuild: PluginConfigResolved
 }
-
-const inputName = 'importBuild'
-const importBuildVirtualId = 'virtual:@brillout/vite-plugin-import-build:importBuild'
-// https://vitejs.dev/guide/api-plugin.html#virtual-modules-convention
-const virtualIdPrefix = '\0'
 
 /**
  * The Vite plugin `importBuild()` does two things:
