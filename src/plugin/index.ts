@@ -20,6 +20,7 @@ import { writeFileSync } from 'fs'
 import { importBuildFileName } from '../shared/importBuildFileName'
 import { debugLogsBuildtime } from '../shared/debugLogs'
 import type { AutoImporterCleared } from '../loadServerBuild/AutoImporter'
+import { importBuildPromise } from '../loadServerBuild/importBuildPromise'
 type Bundle = Rollup.OutputBundle
 type Options = Rollup.NormalizedOutputOptions
 
@@ -130,7 +131,7 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
           this.emitFile({
             fileName,
             type: 'asset',
-            source: `import('./${fileNameActual}')`
+            source: `globalThis.${importBuildPromise} = import('./${fileNameActual}')`
           })
       }
     }

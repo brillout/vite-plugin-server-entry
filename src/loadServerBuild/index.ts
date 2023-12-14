@@ -5,6 +5,7 @@ import { importBuildFileName } from '../shared/importBuildFileName'
 import { import_ } from '@brillout/import'
 import type { AutoImporter, AutoImporterPaths } from './AutoImporter'
 import { debugLogsRuntimePost, debugLogsRuntimePre } from '../shared/debugLogs'
+import { importBuildPromise } from './importBuildPromise'
 
 async function loadServerBuild(outDir?: string): Promise<void | undefined> {
   const autoImporter: AutoImporter = require('../autoImporter')
@@ -22,6 +23,7 @@ async function loadServerBuild(outDir?: string): Promise<void | undefined> {
   if (autoImporter.status === 'SET') {
     try {
       autoImporter.loadImportBuild()
+      await (globalThis as any)[importBuildPromise]
       success = true
     } catch (err) {
       requireError = err
