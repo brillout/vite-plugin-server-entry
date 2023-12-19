@@ -281,8 +281,9 @@ function isHigherVersion(semver1: string, semver2: string): boolean {
   const parsed1 = parseSemver(semver1)
   const parsed2 = parseSemver(semver2)
   for (let i = 0; i <= parsed1.parts.length - 1; i++) {
-    if (parsed1.parts[i] === parsed2.parts[i]) continue
-    return parsed1.parts[i]! > parsed2.parts[i]!
+    if (parsed1.parts[i] !== parsed2.parts[i]) {
+      return parsed1.parts[i]! > parsed2.parts[i]!
+    }
   }
   return false
 }
