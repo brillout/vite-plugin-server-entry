@@ -13,7 +13,9 @@ import {
   objectAssign,
   joinEnglish,
   injectRollupInputs,
-  findRollupBundleEntry
+  normalizeRollupInput,
+  findRollupBundleEntry,
+  assertUsage
 } from './utils'
 import path from 'path'
 import { writeFileSync } from 'fs'
@@ -36,6 +38,7 @@ type PluginConfigProvidedByLibrary = {
   getImporterCode: () => string
   libraryName: string
   disableAutoImporter?: boolean
+  inject?: boolean
 }
 // Config set by end user (e.g. Vike or Telefunc user)
 type PluginConfigProvidedByUser = {
@@ -49,6 +52,7 @@ type PluginConfigResolved = {
   apiVersion: number
   disableAutoImporter: boolean
   testCrawler: boolean
+  inject: boolean
 }
 type Library = {
   libraryName: string
@@ -75,13 +79,19 @@ type ConfigResolved = ConfigVite & {
 function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrary): Plugin_ {
   let config: ConfigResolved
   let isServerSideBuild = false
+  let serverEntryFilePath: string | null
   return {
     name: `@brillout/vite-plugin-import-build:${pluginConfigProvidedByLibrary.libraryName.toLowerCase()}`,
     apply: 'build',
+    // Set to 'post' because:
+    //  - transform() should be called after other transformers
+    //  - configResolved() should contain the server entry
+    enforce: 'post',
     configResolved(configUnresolved: ConfigUnresolved) {
       isServerSideBuild = viteIsSSR(configUnresolved)
       if (!isServerSideBuild) return
       config = resolveConfig(configUnresolved, pluginConfigProvidedByLibrary)
+      serverEntryFilePath = config._vitePluginImportBuild.inject ? getServerEntryFilePath(configUnresolved) : null
       config.build.rollupOptions.input = injectRollupInputs({ [inputName]: importBuildVirtualId }, config)
     },
     buildStart() {
@@ -114,7 +124,11 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
 
       // Write node_modules/@brillout/vite-plugin-import-build/dist/autoImporter.js
       const { testCrawler } = config._vitePluginImportBuild
-      const doNotAutoImport = config._vitePluginImportBuild.disableAutoImporter || isYarnPnP() || testCrawler
+      const doNotAutoImport =
+        config._vitePluginImportBuild.disableAutoImporter ||
+        config._vitePluginImportBuild.inject ||
+        isYarnPnP() ||
+        testCrawler
       if (!doNotAutoImport) {
         writeAutoImporterFile(config)
       } else {
@@ -123,7 +137,8 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
         debugLogsBuildtime({ disabled: true, paths: null })
       }
 
-      // Write dist/server/importBuild.cjs
+      // Write dist/server/importBuild.cjs (legacy/deprecated entry file name)
+      // TODO: add deprecation warning
       {
         const fileName = 'importBuild.cjs'
         const fileNameActual = findRollupBundleEntry(inputName, bundle).fileName
@@ -134,6 +149,28 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
             source: `globalThis.${importBuildPromise} = import('./${fileNameActual}')`
           })
       }
+    },
+    transform(code, id) {
+      if (id !== serverEntryFilePath) return
+      assert(serverEntryFilePath)
+      assert(viteIsSSR(config))
+      {
+        const moduleInfo = this.getModuleInfo(id)
+        console.log(this.getModuleInfo(id))
+        assert(moduleInfo?.isEntry)
+      }
+      return [
+        // Convenience so that the user doesn't have to set manually set it, while the user can easily override it (this is the very first line of the server code).
+        "process.env.NODE_ENV = 'production';",
+        // Imports the entry of each tool, e.g. the Vike entry and the Telefunc entry.
+        `import '${importBuildVirtualId}';`,
+        code
+      ].join(
+        ''
+        /* We don't insert new lines, otherwise we break the source map.
+        '\n'
+        */
+      )
     }
   } as Plugin
 }
@@ -150,10 +187,14 @@ function resolveConfig(
     filesAlreadyWritten: false,
     apiVersion,
     disableAutoImporter: false,
-    testCrawler: false
+    testCrawler: false,
+    inject: false
   }
   if (pluginConfigProvidedByLibrary.disableAutoImporter) {
     pluginConfigResolved.disableAutoImporter = true
+  }
+  if (pluginConfigProvidedByLibrary.inject) {
+    pluginConfigResolved.inject = true
   }
   if (pluginConfigProvidedByUser?._testCrawler) {
     pluginConfigResolved.testCrawler = true
@@ -319,4 +360,23 @@ type Plugin_ = any
 
 function findImportBuildBundleEntry(bundle: Bundle /*, options: Options*/): Bundle[string] {
   return findRollupBundleEntry(inputName, bundle)
+}
+
+function getServerEntryFilePath(config: ConfigVite): string {
+  const entries = normalizeRollupInput(config.build.rollupOptions.input)
+  const entryName = 'index'
+  let serverEntryFilePath = entries[entryName]
+  if (!serverEntryFilePath) {
+    const entryNames = Object.keys(entries)
+      .map((e) => `'${e}'`)
+      .join(', ')
+    assertUsage(
+      false,
+      `Cannot find server build entry '${entryName}'. Make sure your Rollup config doesn't remove the entry '${entryName}' of your server build ${config.build.outDir}. (Found server build entries: [${entryNames}].)`
+    )
+  }
+  serverEntryFilePath = require.resolve(serverEntryFilePath)
+  // Needs to be absolute, otherwise it won't match the `id` in `transform(id)`
+  assert(path.isAbsolute(serverEntryFilePath))
+  return serverEntryFilePath
 }
