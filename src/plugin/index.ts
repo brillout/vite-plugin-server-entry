@@ -277,6 +277,7 @@ function clearAutoImporterFile(autoImporter: AutoImporterCleared) {
   writeFileSync(autoImporterFilePath, [`exports.status = '${autoImporter.status}';`, ''].join('\n'))
 }
 
+/** Is `semver1` higher than `semver2`?*/
 function isHigherVersion(semver1: string, semver2: string): boolean {
   const parsed1 = parseSemver(semver1)
   const parsed2 = parseSemver(semver2)
@@ -285,16 +286,22 @@ function isHigherVersion(semver1: string, semver2: string): boolean {
       return parsed1.parts[i]! > parsed2.parts[i]!
     }
   }
+  if (parsed1.isPreRelease !== parsed2.isPreRelease) {
+    return parsed1.isPreRelease
+  }
   return false
 }
-
-function parseSemver(semver: string): { parts: number[] } {
-  semver = semver.split('-')[0]! // '0.2.16-commit-89bbe89' => '0.2.16'
+function parseSemver(semver: string): { parts: number[]; isPreRelease: boolean } {
+  let isPreRelease = false
+  if (semver.includes('-')) {
+    isPreRelease = true
+    semver = semver.split('-')[0]! // '0.2.16-commit-89bbe89' => '0.2.16'
+  }
   assert(/^[0-9\.]+$/.test(semver))
   const partsStr = semver.split('.')
   assert(partsStr.length === 3)
   const parts = partsStr.map((n) => parseInt(n, 10))
-  return { parts }
+  return { parts, isPreRelease }
 }
 
 function getDistServerPathRelative(config: ConfigVite) {
