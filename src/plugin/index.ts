@@ -37,7 +37,6 @@ const apiVersion = 2
 type PluginConfigProvidedByLibrary = {
   getImporterCode: () => string
   libraryName: string
-  disableAutoImporter?: boolean
   inject?: boolean
 }
 // Config set by end user (e.g. Vike or Telefunc user)
@@ -50,7 +49,6 @@ type PluginConfigResolved = {
   libraries: Library[]
   filesAlreadyWritten: boolean
   apiVersion: number
-  disableAutoImporter: boolean
   testCrawler: boolean
   inject: boolean
 }
@@ -124,11 +122,7 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
 
       // Write node_modules/@brillout/vite-plugin-import-build/dist/autoImporter.js
       const { testCrawler } = config._vitePluginImportBuild
-      const doNotAutoImport =
-        config._vitePluginImportBuild.disableAutoImporter ||
-        config._vitePluginImportBuild.inject ||
-        isYarnPnP() ||
-        testCrawler
+      const doNotAutoImport = config._vitePluginImportBuild.inject || isYarnPnP() || testCrawler
       if (!doNotAutoImport) {
         writeAutoImporterFile(config)
       } else {
@@ -151,12 +145,11 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
       }
     },
     transform(code, id) {
+      if (!isServerSideBuild) return
       if (id !== serverEntryFilePath) return
       assert(serverEntryFilePath)
-      assert(viteIsSSR(config))
       {
         const moduleInfo = this.getModuleInfo(id)
-        console.log(this.getModuleInfo(id))
         assert(moduleInfo?.isEntry)
       }
       return [
@@ -186,12 +179,8 @@ function resolveConfig(
     libraries: [],
     filesAlreadyWritten: false,
     apiVersion,
-    disableAutoImporter: false,
     testCrawler: false,
     inject: false
-  }
-  if (pluginConfigProvidedByLibrary.disableAutoImporter) {
-    pluginConfigResolved.disableAutoImporter = true
   }
   if (pluginConfigProvidedByLibrary.inject) {
     pluginConfigResolved.inject = true
