@@ -150,9 +150,7 @@ function resolveConfig(
     filesAlreadyWritten: false,
     apiVersion,
     disableAutoImporter: false,
-    testCrawler: false,
-    // @ts-expect-error workaround for previously broken api version assertion
-    configVersion: 1
+    testCrawler: false
   }
   if (pluginConfigProvidedByLibrary.disableAutoImporter) {
     pluginConfigResolved.disableAutoImporter = true
@@ -160,6 +158,8 @@ function resolveConfig(
   if (pluginConfigProvidedByUser?._testCrawler) {
     pluginConfigResolved.testCrawler = true
   }
+  // @ts-expect-error workaround for previously broken api version assertion
+  pluginConfigResolved.configVersion = 1
 
   pluginConfigResolved.libraries.push({
     getImporterCode: pluginConfigProvidedByLibrary.getImporterCode,
