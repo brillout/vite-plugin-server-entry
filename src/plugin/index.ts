@@ -114,8 +114,8 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
 
       // Write node_modules/@brillout/vite-plugin-import-build/dist/autoImporter.js
       const { testCrawler } = config._vitePluginImportBuild
-      const autoImporterDisabled = config._vitePluginImportBuild.disableAutoImporter || isYarnPnP() || testCrawler
-      if (!autoImporterDisabled) {
+      const doNotAutoImport = config._vitePluginImportBuild.disableAutoImporter || isYarnPnP() || testCrawler
+      if (!doNotAutoImport) {
         writeAutoImporterFile(config)
       } else {
         const status = testCrawler ? 'TEST_CRAWLER' : 'DISABLED'
