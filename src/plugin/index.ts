@@ -47,7 +47,6 @@ type PluginConfigProvidedByUser = {
 // The resolved aggregation of the config set by the user, and all the configs set by libraries (e.g. the config set by Vike and the config set by Telefunc).
 type PluginConfigResolved = {
   libraries: Library[]
-  filesAlreadyWritten: boolean
   apiVersion: number
   testCrawler: boolean
   inject: boolean
@@ -124,9 +123,6 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
     generateBundle(_rollupOptions, bundle) {
       if (skip) return
 
-      if (config._vitePluginImportBuild.filesAlreadyWritten) return
-      config._vitePluginImportBuild.filesAlreadyWritten = true
-
       // Write node_modules/@brillout/vite-plugin-import-build/dist/autoImporter.js
       const { testCrawler } = config._vitePluginImportBuild
       const doNotAutoImport = config._vitePluginImportBuild.inject || isYarnPnP() || testCrawler
@@ -188,7 +184,6 @@ function resolveConfig(
 
   const pluginConfigResolved: PluginConfigResolved = configUnresolved._vitePluginImportBuild ?? {
     libraries: [],
-    filesAlreadyWritten: false,
     apiVersion,
     testCrawler: false,
     inject: false
