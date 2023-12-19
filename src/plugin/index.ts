@@ -76,36 +76,47 @@ type ConfigResolved = ConfigVite & {
  */
 function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrary): Plugin_ {
   let config: ConfigResolved
-  let isServerSideBuild = false
   let serverEntryFilePath: string | null
+  let library: Library
+  let skip = false
   return {
     name: `@brillout/vite-plugin-import-build:${pluginConfigProvidedByLibrary.libraryName.toLowerCase()}`,
     apply: 'build',
-    // Set to 'post' because:
-    //  - transform() should be called after other transformers
-    //  - configResolved() should contain the server entry
+    // Set to 'post' because transform() should be called after other transformers
     enforce: 'post',
     configResolved(configUnresolved: ConfigUnresolved) {
-      isServerSideBuild = viteIsSSR(configUnresolved)
-      if (!isServerSideBuild) return
-      config = resolveConfig(configUnresolved, pluginConfigProvidedByLibrary)
-      serverEntryFilePath = config._vitePluginImportBuild.inject ? getServerEntryFilePath(configUnresolved) : null
+      if (!viteIsSSR(configUnresolved)) {
+        skip = true
+        return
+      }
+
+      const resolved = resolveConfig(configUnresolved, pluginConfigProvidedByLibrary)
+      config = resolved.config
+      library = resolved.library
+      // We can't use isLeader() for the following but it's fine: running the following multiple times isn't a problem.
       config.build.rollupOptions.input = injectRollupInputs({ [inputName]: importBuildVirtualId }, config)
     },
     buildStart() {
-      if (!isServerSideBuild) return
+      if (skip) return
+      if (!isLeaderPluginInstance(config, library)) {
+        skip = true
+        return
+      }
+
+      serverEntryFilePath = config._vitePluginImportBuild.inject ? getServerEntryFilePath(config) : null
       assertApiVersions(config, pluginConfigProvidedByLibrary.libraryName)
       clearAutoImporterFile({ status: 'RESET' })
     },
     resolveId(id) {
-      if (!isServerSideBuild) return
+      if (skip) return
+
       if (id === importBuildVirtualId) {
         return virtualIdPrefix + importBuildVirtualId
       }
-      return null
     },
     load(id) {
-      if (!isServerSideBuild) return
+      if (skip) return
+
       assert(id !== importBuildVirtualId)
       if (id === virtualIdPrefix + importBuildVirtualId) {
         const importBuildFileContent = getImportBuildFileContent(config)
@@ -113,10 +124,8 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
       }
     },
     generateBundle(_rollupOptions, bundle) {
-      if (!isServerSideBuild) return
+      if (skip) return
 
-      // Let the newest @brillout/vite-plugin-import-build version write files
-      if (isUsingOlderVitePluginImportBuildVersion(config)) return
       if (config._vitePluginImportBuild.filesAlreadyWritten) return
       config._vitePluginImportBuild.filesAlreadyWritten = true
 
@@ -145,14 +154,16 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
       }
     },
     transform(code, id) {
-      if (!isServerSideBuild) return
-      if (id !== serverEntryFilePath) return
+      if (skip) return
+
       assert(serverEntryFilePath)
+      if (id !== serverEntryFilePath) return
       {
         const moduleInfo = this.getModuleInfo(id)
         assert(moduleInfo?.isEntry)
       }
-      return [
+
+      code = [
         // Convenience so that the user doesn't have to set manually set it, while the user can easily override it (this is the very first line of the server code).
         "process.env.NODE_ENV = 'production';",
         // Imports the entry of each tool, e.g. the Vike entry and the Telefunc entry.
@@ -164,6 +175,7 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
         '\n'
         */
       )
+      return code
     }
   } as Plugin
 }
@@ -171,7 +183,7 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
 function resolveConfig(
   configUnresolved: ConfigUnresolved,
   pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrary
-): ConfigResolved {
+) {
   assert(viteIsSSR(configUnresolved))
   const pluginConfigProvidedByUser = configUnresolved.vitePluginImportBuild
 
@@ -191,18 +203,36 @@ function resolveConfig(
   // @ts-expect-error workaround for previously broken api version assertion
   pluginConfigResolved.configVersion = 1
 
-  pluginConfigResolved.libraries.push({
+  const library = {
     getImporterCode: pluginConfigProvidedByLibrary.getImporterCode,
     libraryName: pluginConfigProvidedByLibrary.libraryName,
     vitePluginImportBuildVersion: projectInfo.projectVersion,
     apiVersion
-  })
+  }
+  pluginConfigResolved.libraries.push(library)
 
   objectAssign(configUnresolved, {
     _vitePluginImportBuild: pluginConfigResolved
   })
-  const configResolved: ConfigResolved = configUnresolved
-  return configResolved
+  const config: ConfigResolved = configUnresolved
+
+  return { config, library }
+}
+
+function isLeaderPluginInstance(config: ConfigResolved, library: Library) {
+  const { libraries } = config._vitePluginImportBuild
+  const pluginVersion = projectInfo.projectVersion
+  assert(libraries.includes(library))
+  const isNotUsingNewestPluginVersion = libraries.some((lib) => {
+    // Can be undefined when set by an older @brillout/vite-plugin-import-build version
+    if (!lib.vitePluginImportBuildVersion) return false
+    return isHigherVersion(lib.vitePluginImportBuildVersion, pluginVersion)
+  })
+  if (isNotUsingNewestPluginVersion) return false
+  const librariesUsingNewestPluginVersion = libraries.filter(
+    (lib) => lib.vitePluginImportBuildVersion === pluginVersion
+  )
+  return librariesUsingNewestPluginVersion[0] === library
 }
 
 function getImportBuildFileContent(config: ConfigResolved) {
@@ -247,14 +277,6 @@ function writeAutoImporterFile(config: ConfigResolved) {
 function clearAutoImporterFile(autoImporter: AutoImporterCleared) {
   if (isYarnPnP()) return
   writeFileSync(autoImporterFilePath, [`exports.status = '${autoImporter.status}';`, ''].join('\n'))
-}
-
-function isUsingOlderVitePluginImportBuildVersion(config: ConfigResolved): boolean {
-  return config._vitePluginImportBuild.libraries.some((library) => {
-    // Can be undefined when set by an older @brillout/vite-plugin-import-build version
-    if (!library.vitePluginImportBuildVersion) return false
-    return isHigherVersion(library.vitePluginImportBuildVersion, projectInfo.projectVersion)
-  })
 }
 
 function isHigherVersion(semver1: string, semver2: string): boolean {
@@ -304,9 +326,6 @@ function getImporterDir() {
 }
 
 function assertApiVersions(config: ConfigResolved, currentLibraryName: string) {
-  // Let the newest @brillout/vite-plugin-import-build version show the error
-  if (isUsingOlderVitePluginImportBuildVersion(config)) return
-
   const librariesNeedingUpdate: string[] = []
 
   // Very old versions used to define config.vitePluginDistImporter
