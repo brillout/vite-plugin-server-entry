@@ -153,6 +153,7 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
     },
     transform(code, id) {
       if (skip) return
+      if (!config._vitePluginImportBuild.inject) return
 
       assert(serverEntryFilePath)
       if (id !== serverEntryFilePath) return
