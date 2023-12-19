@@ -82,8 +82,6 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
   return {
     name: `@brillout/vite-plugin-import-build:${pluginConfigProvidedByLibrary.libraryName.toLowerCase()}`,
     apply: 'build',
-    // Set to 'post' because transform() should be called after other transformers
-    enforce: 'post',
     configResolved(configUnresolved: ConfigUnresolved) {
       if (!viteIsSSR(configUnresolved)) {
         skip = true
