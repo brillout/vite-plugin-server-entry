@@ -77,15 +77,14 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
   let config: ConfigResolved
   let serverEntryFilePath: string | null
   let library: Library
-  let skip = false
+  let skip: boolean
   return {
     name: `@brillout/vite-plugin-import-build:${pluginConfigProvidedByLibrary.libraryName.toLowerCase()}`,
     apply: 'build',
     configResolved(configUnresolved: ConfigUnresolved) {
-      if (!viteIsSSR(configUnresolved)) {
-        skip = true
-        return
-      }
+      // Upon the server-side build (`$ vite build --ssr`), we need to override the previous `skip` value set by the client-side build (`$ vite build`).
+      skip = !viteIsSSR(configUnresolved)
+      if (skip) return
 
       const resolved = resolveConfig(configUnresolved, pluginConfigProvidedByLibrary)
       config = resolved.config
