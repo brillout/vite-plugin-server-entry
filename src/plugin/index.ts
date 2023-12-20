@@ -393,5 +393,6 @@ function getServerEntryFilePath(config: ConfigVite): string {
   serverEntryFilePath = require.resolve(serverEntryFilePath)
   // Needs to be absolute, otherwise it won't match the `id` in `transform(id)`
   assert(path.isAbsolute(serverEntryFilePath))
+  serverEntryFilePath = toPosixPath(serverEntryFilePath)
   return serverEntryFilePath
 }
