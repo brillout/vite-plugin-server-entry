@@ -14,7 +14,7 @@ async function loadServerBuild(outDir?: string): Promise<void | undefined> {
 
   assertUsage(
     autoImporter.status !== 'DISABLED',
-    "As a library author, if you disable the auto importer, then make sure your library injects a manual import of the file dist/server/importBuild.cjs into the built server entry file dist/server/index.js (or wherever the built server entry file is located) and make sure your library doesn't call loadServerBuild(), see https://github.com/brillout/vite-plugin-import-build#manual-import and https://github.com/brillout/vite-plugin-import-build#what-it-does"
+    "As a library author, make sure your library doesn't call loadServerBuild() when using `inject: true`"
   )
 
   let success = false

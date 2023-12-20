@@ -78,6 +78,7 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
   let serverEntryFilePath: string | null
   let library: Library
   let skip: boolean
+  let injectDone = false
   return {
     name: `@brillout/vite-plugin-import-build:${pluginConfigProvidedByLibrary.libraryName.toLowerCase()}`,
     apply: 'build',
@@ -122,6 +123,10 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
     generateBundle(_rollupOptions, bundle) {
       if (skip) return
 
+      if (config._vitePluginImportBuild.inject) {
+        assert(injectDone)
+      }
+
       // Write node_modules/@brillout/vite-plugin-import-build/dist/autoImporter.js
       const { testCrawler } = config._vitePluginImportBuild
       const doNotAutoImport = config._vitePluginImportBuild.inject || isYarnPnP() || testCrawler
@@ -148,15 +153,15 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
     },
     transform(code, id) {
       if (skip) return
-      if (!config._vitePluginImportBuild.inject) return
 
+      if (!config._vitePluginImportBuild.inject) return
       assert(serverEntryFilePath)
       if (id !== serverEntryFilePath) return
       {
         const moduleInfo = this.getModuleInfo(id)
         assert(moduleInfo?.isEntry)
       }
-
+      injectDone = true
       code = [
         // Convenience so that the user doesn't have to set manually set it, while the user can easily override it (this is the very first line of the server code).
         "process.env.NODE_ENV = 'production';",
