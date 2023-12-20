@@ -8,6 +8,7 @@
     "dev": "tsc --watch",
     "build": "rm -rf dist/ && tsc",
     "release": "release-me patch",
+    "release:minor": "release-me minor",
     "release:commit": "release-me commit"
   },
   "devDependencies": {
