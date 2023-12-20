@@ -1,3 +1,13 @@
+## [0.3.1](https://github.com/brillout/vite-plugin-import-build/compare/v0.3.0...v0.3.1) (2023-12-20)
+
+
+### Bug Fixes
+
+* fix windows ([3c8861e](https://github.com/brillout/vite-plugin-import-build/commit/3c8861e18b338eeb989ecbe8d429e7d44f869b16))
+* improve assertions ([c225208](https://github.com/brillout/vite-plugin-import-build/commit/c22520855753e933e3d547228cc247670821afdc))
+
+
+
 # [0.3.0](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.22...v0.3.0) (2023-12-20)
 
 
