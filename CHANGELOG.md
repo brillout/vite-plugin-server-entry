@@ -1,3 +1,22 @@
+# [0.3.0](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.22...v0.3.0) (2023-12-20)
+
+
+### Bug Fixes
+
+* consier pre-release as higher version ([2f22ca1](https://github.com/brillout/vite-plugin-import-build/commit/2f22ca1ffae3408e2f7bd82f01bc8d7a543f8ff0))
+* ensure only one plugin instance is applied ([f60bdc3](https://github.com/brillout/vite-plugin-import-build/commit/f60bdc38712be251331f1dafaaaccffdb47c989f))
+* implement configVersion handling ([58cb5ac](https://github.com/brillout/vite-plugin-import-build/commit/58cb5ac956466a5cf09bbef69a7620dfb5a86a6d))
+* make bundle search more robust ([bfd4d45](https://github.com/brillout/vite-plugin-import-build/commit/bfd4d45526c67feaf6013f5a824a59fa94ca76e2))
+* new breaking interface ([13bc1ae](https://github.com/brillout/vite-plugin-import-build/commit/13bc1aea2e4b420d6807f4615b772166c9e6b2ff))
+* remove disableAutoImporter option ([a3bac4c](https://github.com/brillout/vite-plugin-import-build/commit/a3bac4c2edd4e0f7a5a33e8ace92348fe9d94479))
+
+
+### Features
+
+* inject ([e796ed8](https://github.com/brillout/vite-plugin-import-build/commit/e796ed84e380e280ff3ba7fdd2ce943f240ec2f4))
+
+
+
 ## [0.2.22](https://github.com/brillout/vite-plugin-import-build/compare/v0.2.21...v0.2.22) (2023-12-12)
 
 
