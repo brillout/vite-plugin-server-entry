@@ -1,7 +1,7 @@
 export { importBuild }
 export { findImportBuildBundleEntry }
 
-import type { Plugin, ResolvedConfig as ConfigVite, Rollup } from 'vite'
+import type { Plugin, ResolvedConfig as ConfigVite } from 'vite'
 import {
   isYarnPnP,
   assert,
@@ -23,8 +23,6 @@ import { importBuildFileName } from '../shared/importBuildFileName'
 import { debugLogsBuildtime } from '../shared/debugLogs'
 import type { AutoImporterCleared } from '../loadServerBuild/AutoImporter'
 import { importBuildPromise } from '../loadServerBuild/importBuildPromise'
-type Bundle = Rollup.OutputBundle
-type Options = Rollup.NormalizedOutputOptions
 
 const autoImporterFilePath = require.resolve('../autoImporter')
 const inputName = 'importBuild'
@@ -178,6 +176,8 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
     }
   } as Plugin
 }
+// Avoid multiple Vite versions mismatch
+type Plugin_ = any
 
 function resolveConfig(
   configUnresolved: ConfigUnresolved,
@@ -370,10 +370,9 @@ function getLibraryApiVersion(library: Library) {
   return apiVersionLib
 }
 
-// Avoid multiple Vite versions mismatch
-type Plugin_ = any
-
-function findImportBuildBundleEntry(bundle: Bundle /*, options: Options*/): Bundle[string] {
+function findImportBuildBundleEntry<OutputBundle extends Record<string, { name: string | undefined }>>(
+  bundle: OutputBundle
+): OutputBundle[string] {
   return findRollupBundleEntry(inputName, bundle)
 }
 
