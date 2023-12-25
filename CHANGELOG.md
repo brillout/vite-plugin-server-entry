@@ -1,3 +1,12 @@
+## [0.3.2](https://github.com/brillout/vite-plugin-import-build/compare/v0.3.1...v0.3.2) (2023-12-25)
+
+
+### Bug Fixes
+
+* avoid TypeScript multiple Vite version mistmatch ([d61b76f](https://github.com/brillout/vite-plugin-import-build/commit/d61b76f6a0b724290ccb2f29cf47868b05e21a6d))
+
+
+
 ## [0.3.1](https://github.com/brillout/vite-plugin-import-build/compare/v0.3.0...v0.3.1) (2023-12-20)
 
 
