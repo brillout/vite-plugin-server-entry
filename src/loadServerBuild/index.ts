@@ -4,7 +4,7 @@ import { getCwd, assert, assertUsage, toPosixPath, assertPosixPath, requireResol
 import { importBuildFileName } from '../shared/importBuildFileName'
 import { import_ } from '@brillout/import'
 import type { AutoImporter, AutoImporterPaths } from './AutoImporter'
-import { debugLogsRuntimePost, debugLogsRuntimePre } from '../shared/debugLogs'
+import { DEBUG, debugLogsRuntimePost, debugLogsRuntimePre } from '../shared/debugLogs'
 import { importBuildPromise } from './importBuildPromise'
 
 async function loadServerBuild(outDir?: string): Promise<void | undefined> {
@@ -26,7 +26,11 @@ async function loadServerBuild(outDir?: string): Promise<void | undefined> {
       await (globalThis as any)[importBuildPromise]
       success = true
     } catch (err) {
-      requireError = err
+      if (DEBUG) {
+        requireError = err
+      } else {
+        throw err
+      }
     }
     isOutsideOfCwd = isImportBuildOutsideOfCwd(autoImporter.paths)
     if (isOutsideOfCwd) {

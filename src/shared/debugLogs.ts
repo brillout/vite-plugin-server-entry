@@ -1,6 +1,7 @@
 export { debugLogsRuntimePre }
 export { debugLogsRuntimePost }
 export { debugLogsBuildtime }
+export { DEBUG }
 
 import { getCwd, logLabel } from './utils'
 import type { AutoImporter } from '../loadServerBuild/AutoImporter'
