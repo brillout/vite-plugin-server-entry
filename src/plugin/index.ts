@@ -139,11 +139,10 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
       // Write dist/server/importBuild.cjs (legacy/deprecated entry file name)
       // TODO: add deprecation warning
       {
-        const fileName = 'importBuild.cjs'
         const fileNameActual = findRollupBundleEntry(inputName, bundle).fileName
-        if (fileNameActual !== fileName)
+        if (fileNameActual !== importBuildFileName)
           this.emitFile({
-            fileName,
+            fileName: importBuildFileName,
             type: 'asset',
             source: `globalThis.${importBuildPromise} = import('./${fileNameActual}')`
           })
