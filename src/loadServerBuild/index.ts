@@ -142,6 +142,7 @@ async function crawlImportBuildFileWithNodeJs(outDir?: string): Promise<boolean>
   // Ensure ESM compability
   assert(distImporterPath.endsWith('.cjs'))
   await import_(distImporterPath)
+  await (globalThis as any)[importBuildPromise]
   return true
 }
 
