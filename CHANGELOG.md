@@ -1,3 +1,12 @@
+## [0.3.4](https://github.com/brillout/vite-plugin-import-build/compare/v0.3.3...v0.3.4) (2024-01-05)
+
+
+### Bug Fixes
+
+* await import upon crawl ([e292c9d](https://github.com/brillout/vite-plugin-import-build/commit/e292c9d4ddd2e5a7e6930b7d7b8cc926075447f1))
+
+
+
 ## [0.3.3](https://github.com/brillout/vite-plugin-import-build/compare/v0.3.2...v0.3.3) (2024-01-05)
 
 
