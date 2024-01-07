@@ -1,3 +1,12 @@
+# [0.4.0](https://github.com/brillout/vite-plugin-server-entry/compare/v0.3.4...v0.4.0) (2024-01-07)
+
+
+### Bug Fixes
+
+* rename everything ([1c9a059](https://github.com/brillout/vite-plugin-server-entry/commit/1c9a059ab226fe19724d793c3b03916f92cab412))
+
+
+
 ## [0.3.4](https://github.com/brillout/vite-plugin-import-build/compare/v0.3.3...v0.3.4) (2024-01-05)
 
 
