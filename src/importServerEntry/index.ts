@@ -58,7 +58,7 @@ async function importServerEntry(outDir?: string): Promise<void | undefined> {
   debugLogsRuntimePost({ success, requireError, isOutsideOfCwd, outDir })
   assertUsage(
     success,
-    'Cannot find server build. (Re-)build your app and try again. If you still get this error, then you may need to manually import the server build, see https://github.com/brillout/vite-plugin-server-entry#manual-import'
+    'Cannot find server entry. (Re-)build your app and try again. If you still get this error, then you may need to manually import the server entry, see https://github.com/brillout/vite-plugin-server-entry#manual-import'
   )
 }
 

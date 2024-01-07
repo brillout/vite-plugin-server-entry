@@ -406,7 +406,7 @@ function getServerEntryFilePath(config: ConfigVite): string {
       .join(', ')
     assertUsage(
       false,
-      `Cannot find server build entry '${entryName}'. Make sure your Rollup config doesn't remove the entry '${entryName}' of your server build ${config.build.outDir}. (Found server build entries: [${entryNames}].)`
+      `Cannot find server entry '${entryName}'. Make sure your Rollup config doesn't remove the entry '${entryName}' of your server build ${config.build.outDir}. (Found server entries: [${entryNames}].)`
     )
   }
   serverEntryFilePath = require.resolve(serverEntryFilePath)

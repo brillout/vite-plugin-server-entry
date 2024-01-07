@@ -7,7 +7,7 @@
 
 ## What is this?
 
-`@brillout/vite-plugin-server-entry` automatically loads your server build (i.e. your files at `dist/server/`).
+`@brillout/vite-plugin-server-entry` automatically generates a server entry at `dist/server/entry.js` and automatically loads it.
 
 [Vike](https://vike.dev) and [Telefunc](https://telefunc.com) automatically add this plugin to your Vite app: there is nothing for you to do and you can usually ignore this plugin.
 
@@ -16,25 +16,25 @@
 
 ## Manual import
 
-Most of the time `@brillout/vite-plugin-server-entry` is able to automatically import your server build (i.e. your files at `dist/server/`) &mdash; there is nothing for you to do.
+Most of the time `@brillout/vite-plugin-server-entry` is able to automatically import the server entry `dist/server/entry.js` &mdash; there is nothing for you to do.
 
-But `@brillout/vite-plugin-server-entry` doesn't work if you use Yarn PnP and you'll keep getting following error. The workaround is to manually import your server build.
+But `@brillout/vite-plugin-server-entry` doesn't work if you use Yarn PnP and you'll keep getting following error. The workaround is to manually import the server entry.
 
 ```bash
 # Yarn PnP users always get this error:
-[@brillout/vite-plugin-server-entry][Wrong Usage] Cannot find server build. (Re-)build your app
-and try again. If you still get this error, then you may need to manually import the server build.
+[@brillout/vite-plugin-server-entry][Wrong Usage] Cannot find server entry. (Re-)build your app
+and try again. If you still get this error, then you may need to manually import the server entry.
 ```
 
 > [!WARNING]
-> If you aren't using Yarn PnP and you keep getting this error, then it's a bug that should be fixed &mdash; please [open a new issue](https://github.com/brillout/vite-plugin-server-entry/issues/new).
+> If you aren't using Yarn PnP and you keep getting this error, then it's a bug that should be fixed &mdash; [file a bug repot](https://github.com/brillout/vite-plugin-server-entry/issues/new).
 
-To manually import your server build:
+To manually import the server entry:
 
 ```js
 // server.js
 
-// Load server build, see https://github.com/brillout/vite-plugin-server-entry#manual-import
+// Load the server entry, see https://github.com/brillout/vite-plugin-server-entry#manual-import
 import './path/to/dist/server/importBuild.cjs'
 
 // Your server code (Express.js, Vercel Serverless/Edge Function, Cloudflare Worker, ...)
