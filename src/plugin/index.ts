@@ -71,6 +71,7 @@ type ConfigResolved = ConfigVite & {
  * See https://github.com/brillout/vite-plugin-server-entry#what-it-does for more information.
  */
 function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrary): Plugin_ {
+  const pluginName = `@brillout/vite-plugin-server-entry:${pluginConfigProvidedByLibrary.libraryName.toLowerCase()}`
   let config: ConfigResolved
   let serverEntryFilePath: string | null
   let library: Library
@@ -78,26 +79,21 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
   let injectDone = false
   return [
     {
-      name: `@brillout/vite-plugin-server-entry:${pluginConfigProvidedByLibrary.libraryName.toLowerCase()}`,
+      name: pluginName,
       apply: 'build',
-      configResolved(configUnresolved: ConfigUnresolved) {
-        // Upon the server-side build (`$ vite build --ssr`), we need to override the previous `skip` value set by the client-side build (`$ vite build`).
-        skip = !viteIsSSR(configUnresolved)
+      enforce: 'post',
+      configResolved() {
         if (skip) return
-
-        const resolved = resolveConfig(configUnresolved, pluginConfigProvidedByLibrary)
-        config = resolved.config
-        library = resolved.library
-
-        // We can't use isLeaderPluginInstance() here but it's fine
-        const entries = normalizeRollupInput(config.build.rollupOptions.input)
-        if (
-          entries[serverEntryFileNameBase] === serverEntryVirtualId ||
-          entries[serverEntryFileNameBaseAlternative] === serverEntryVirtualId
-        ) {
-          // Already set by another library also using @brillout/vite-plugin-server-entry
+        if (!isLeaderPluginInstance(config, library)) {
+          skip = true
           return
         }
+
+        const entries = normalizeRollupInput(config.build.rollupOptions.input)
+        assert(
+          entries[serverEntryFileNameBase] !== serverEntryVirtualId &&
+            entries[serverEntryFileNameBaseAlternative] === serverEntryVirtualId
+        )
         const fileNameBase = !entries[serverEntryFileNameBase]
           ? serverEntryFileNameBase
           : serverEntryFileNameBaseAlternative
@@ -106,10 +102,6 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
       },
       buildStart() {
         if (skip) return
-        if (!isLeaderPluginInstance(config, library)) {
-          skip = true
-          return
-        }
 
         serverEntryFilePath = config._vitePluginServerEntry.inject ? getServerEntryFilePath(config) : null
         assertApiVersions(config, pluginConfigProvidedByLibrary.libraryName)
@@ -189,6 +181,17 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
         */
         )
         return code
+      }
+    },
+    {
+      name: `${pluginName}:config`,
+      apply: 'build',
+      configResolved(configUnresolved: ConfigUnresolved) {
+        // Upon the server-side build (`$ vite build --ssr`), we need to override the previous `skip` value set by the client-side build (`$ vite build`).
+        skip = !viteIsSSR(configUnresolved)
+        const resolved = resolveConfig(configUnresolved, pluginConfigProvidedByLibrary)
+        config = resolved.config
+        library = resolved.library
       }
     }
   ] as Plugin[]
@@ -367,7 +370,7 @@ function assertApiVersions(config: ConfigResolved, currentLibraryName: string) {
     if (apiVersionLib < apiVersion) {
       librariesNeedingUpdate.push(library.libraryName)
     } else {
-      // Should be true because of isLeaderPluginInstance()
+      // Should be true thanks to isLeaderPluginInstance()
       assert(apiVersionLib === apiVersion)
     }
   })
