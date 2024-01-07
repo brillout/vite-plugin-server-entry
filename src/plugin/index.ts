@@ -279,10 +279,6 @@ function writeAutoImporterFile(config: ConfigResolved, entryFileName: string) {
       `  serverEntryFilePathOriginal: ${JSON.stringify(serverEntryFilePathAbsolute)},`,
       `  serverEntryFilePathResolved: () => require.resolve(${JSON.stringify(serverEntryFilePathRelative)}),`,
       '};',
-      // Support old version vite-plugin-import-build@0.1.12 which is needed, e.g. if user uses a Telefunc version using 0.1.12 with a vite-plugin-ssr version using 0.2.0
-      `exports.load = exports.loadServerEntry;`,
-      // Support old version vite-plugin-import-build@0.3.4
-      `exports.loadImportBuild = exports.loadServerEntry;`,
       ''
     ].join('\n')
   )
