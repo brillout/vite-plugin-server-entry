@@ -24,6 +24,7 @@ import { serverEntryImportPromise } from '../shared/serverEntryImportPromise'
 import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase'
 import { debugLogsBuildtime } from './debugLogsBuildTime'
 
+const indexEntryName = 'index'
 const autoImporterFilePath = require.resolve('../importServerEntry/autoImporter.js')
 const serverEntryVirtualId = 'virtual:@brillout/vite-plugin-server-entry:serverEntry'
 // https://vitejs.dev/guide/api-plugin.html#virtual-modules-convention
@@ -89,6 +90,7 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
           return
         }
 
+        if (!config._vitePluginServerEntry.inject) {
         const entries = normalizeRollupInput(config.build.rollupOptions.input)
         assert(
           entries[serverEntryFileNameBase] !== serverEntryVirtualId &&
@@ -99,6 +101,7 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
           : serverEntryFileNameBaseAlternative
         assert(!entries[fileNameBase])
         config.build.rollupOptions.input = injectRollupInputs({ [fileNameBase]: serverEntryVirtualId }, config)
+        }
       },
       buildStart() {
         if (skip) return
@@ -131,12 +134,14 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
           assert(injectDone)
         }
 
-        const entryFileName = findServerEntry(bundle).fileName
+        const entry = findServerEntry(bundle)
 
         // Write node_modules/@brillout/vite-plugin-server-entry/dist/autoImporter.js
         const isTestCrawler = config._vitePluginServerEntry.testCrawler
         const doNotAutoImport = isInject || isYarnPnP() || isTestCrawler
         if (!doNotAutoImport) {
+          assert(!isInject && entry)
+          const entryFileName = entry.fileName
           writeAutoImporterFile(config, entryFileName)
         } else {
           const status = isTestCrawler ? 'TEST_CRAWLER' : 'DISABLED'
@@ -146,6 +151,8 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
 
         if (!isInject) {
           ;['importBuild.cjs', 'importBuild.mjs', 'importBuild.js'].forEach((fileName) => {
+            assert(!isInject && entry)
+            const entryFileName = entry.fileName
             this.emitFile({
               fileName,
               type: 'asset',
@@ -395,23 +402,23 @@ function findServerEntry<OutputBundle extends Record<string, { name: string | un
 ): OutputBundle[string] {
   const entry =
     // prettier-ignore
+    findRollupBundleEntry(serverEntryFileNameBaseAlternative, bundle) ||
     findRollupBundleEntry(serverEntryFileNameBase, bundle) ||
-    findRollupBundleEntry(serverEntryFileNameBaseAlternative, bundle)
+    findRollupBundleEntry(indexEntryName, bundle)
   assert(entry)
   return entry
 }
 
 function getServerEntryFilePath(config: ConfigVite): string {
   const entries = normalizeRollupInput(config.build.rollupOptions.input)
-  const entryName = 'index'
-  let serverEntryFilePath = entries[entryName]
+  let serverEntryFilePath = entries[indexEntryName]
   if (!serverEntryFilePath) {
     const entryNames = Object.keys(entries)
       .map((e) => `'${e}'`)
       .join(', ')
     assertUsage(
       false,
-      `Cannot find server entry '${entryName}'. Make sure your Rollup config doesn't remove the entry '${entryName}' of your server build ${config.build.outDir}. (Found server entries: [${entryNames}].)`
+      `Cannot find server entry '${indexEntryName}'. Make sure your Rollup config doesn't remove the entry '${indexEntryName}' of your server build ${config.build.outDir}. (Found server entries: [${entryNames}].)`
     )
   }
   serverEntryFilePath = require.resolve(serverEntryFilePath)
