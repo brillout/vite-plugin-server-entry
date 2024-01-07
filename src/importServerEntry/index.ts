@@ -1,14 +1,15 @@
-export { loadServerBuild }
+export { importServerEntry }
 
 import { getCwd, assert, assertUsage, toPosixPath, assertPosixPath, requireResolve } from './utils'
-import { importBuildFileName } from '../shared/importBuildFileName'
 import { import_ } from '@brillout/import'
 import type { AutoImporter, AutoImporterPaths } from './AutoImporter'
-import { DEBUG, debugLogsRuntimePost, debugLogsRuntimePre } from '../shared/debugLogs'
-import { importBuildPromise } from './importBuildPromise'
+import { debugLogsRuntimePost, debugLogsRuntimePre } from './debugLogsRuntime'
+import { serverEntryImportPromise } from '../shared/serverEntryImportPromise'
+import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase'
+import { DEBUG } from '../shared/debug'
 
-async function loadServerBuild(outDir?: string): Promise<void | undefined> {
-  const autoImporter: AutoImporter = require('../autoImporter')
+async function importServerEntry(outDir?: string): Promise<void | undefined> {
+  const autoImporter: AutoImporter = await import_('./autoImporter')
 
   debugLogsRuntimePre(autoImporter)
 
@@ -23,7 +24,7 @@ async function loadServerBuild(outDir?: string): Promise<void | undefined> {
   if (autoImporter.status === 'SET') {
     try {
       autoImporter.loadImportBuild()
-      await (globalThis as any)[importBuildPromise]
+      await (globalThis as any)[serverEntryImportPromise]
       success = true
     } catch (err) {
       if (DEBUG) {
@@ -32,7 +33,7 @@ async function loadServerBuild(outDir?: string): Promise<void | undefined> {
         throw err
       }
     }
-    isOutsideOfCwd = isServerEntryOutsideOfCwd(autoImporter.paths)
+    isOutsideOfCwd = isImportBuildOutsideOfCwd(autoImporter.paths)
     if (isOutsideOfCwd) {
       success = false
     }
@@ -42,7 +43,7 @@ async function loadServerBuild(outDir?: string): Promise<void | undefined> {
     assert(
       // Yarn PnP
       autoImporter.status === 'UNSET' ||
-        // User set config.vitePluginImportBuild._testCrawler
+        // User sets config.vitePluginServerEntry._testCrawler
         autoImporter.status === 'TEST_CRAWLER'
     )
   }
@@ -62,7 +63,7 @@ async function loadServerBuild(outDir?: string): Promise<void | undefined> {
 }
 
 // `${build.outDir}/dist/importBuild.cjs` may not belong to process.cwd() if e.g. vite-plugin-ssr is linked => autoImporter.js can potentially be shared between multiple projects
-function isServerEntryOutsideOfCwd(paths: AutoImporterPaths): boolean | null {
+function isImportBuildOutsideOfCwd(paths: AutoImporterPaths): boolean | null {
   const cwd = getCwd()
 
   // We cannot check edge environments. Upon edge deployment the server code is usually bundled right after `$ vite build`, so it's unlikley that the resolved importBuildFilePath doesn't belong to cwd
@@ -114,6 +115,7 @@ async function crawlImportBuildFileWithNodeJs(outDir?: string): Promise<boolean>
     outDir = path.posix.join(cwd, 'dist')
   }
   const serverEntryFileDir = path.posix.join(outDir, 'server')
+  if (!fs.existsSync(serverEntryFileDir)) return false
 
   let filename: string
   try {
@@ -123,27 +125,29 @@ async function crawlImportBuildFileWithNodeJs(outDir?: string): Promise<boolean>
     return false
   }
 
-  const serverEntryFilePathSpeculative = path.posix.join(serverEntryFileDir, importBuildFileName)
-  let serverEntryFilePath: string
-  try {
-    serverEntryFilePath = await requireResolve(serverEntryFilePathSpeculative, filename)
-  } catch (err) {
-    if (fs.existsSync(serverEntryFileDir)) {
-      console.error(err)
-      assert(false, { distImporterDir: serverEntryFileDir, serverEntryFilePathSpeculative })
-    }
-    return false
+  let serverEntryFilePath: string | null = null
+  for (const entryFileName of [
+    `${serverEntryFileNameBase}.mjs`,
+    `${serverEntryFileNameBase}.js`,
+    `${serverEntryFileNameBase}.cjs`,
+    `${serverEntryFileNameBaseAlternative}.mjs`,
+    `${serverEntryFileNameBaseAlternative}.js`,
+    `${serverEntryFileNameBaseAlternative}.cjs`
+  ]) {
+    const serverEntryFilePathSpeculative = path.posix.join(serverEntryFileDir, entryFileName)
+    try {
+      serverEntryFilePath = await requireResolve(serverEntryFilePathSpeculative, filename)
+    } catch {}
   }
+  assert(serverEntryFilePath)
 
   // webpack couldn't have properly resolved distImporterPath (since there is not static import statement)
   if (isWebpackResolve(serverEntryFilePath)) {
     return false
   }
 
-  // Ensure ESM compability
-  assert(serverEntryFilePath.endsWith('.cjs'))
   await import_(serverEntryFilePath)
-  await (globalThis as any)[importBuildPromise]
+  await (globalThis as any)[serverEntryImportPromise]
   return true
 }
 

@@ -1,5 +1,5 @@
 export { importBuild }
-export { findImportBuildBundleEntry }
+export { findServerEntry }
 
 import type { Plugin, ResolvedConfig as ConfigVite } from 'vite'
 import {
@@ -19,17 +19,16 @@ import {
 } from './utils'
 import path from 'path'
 import { writeFileSync } from 'fs'
-import { importBuildFileName } from '../shared/importBuildFileName'
-import { debugLogsBuildtime } from '../shared/debugLogs'
-import type { AutoImporterCleared } from '../loadServerBuild/AutoImporter'
-import { importBuildPromise } from '../loadServerBuild/importBuildPromise'
+import type { AutoImporterCleared } from '../importServerEntry/AutoImporter'
+import { serverEntryImportPromise } from '../shared/serverEntryImportPromise'
+import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase'
+import { debugLogsBuildtime } from './debugLogsBuildTime'
 
-const autoImporterFilePath = require.resolve('../autoImporter')
-const inputName = 'importBuild'
-const importBuildVirtualId = 'virtual:@brillout/vite-plugin-import-build:importBuild'
+const autoImporterFilePath = require.resolve('./importServerEntry/autoImporter')
+const importBuildVirtualId = 'virtual:@brillout/vite-plugin-server-entry:serverEntry'
 // https://vitejs.dev/guide/api-plugin.html#virtual-modules-convention
 const virtualIdPrefix = '\0'
-const apiVersion = 2
+const apiVersion = 3
 
 // Config set by library using @brillout/vite-plugin-import-build (e.g. Vike or Telefunc)
 type PluginConfigProvidedByLibrary = {
@@ -52,16 +51,16 @@ type PluginConfigResolved = {
 type Library = {
   libraryName: string
   apiVersion: number
-  vitePluginImportBuildVersion: string
+  pluginVersion: string
   getImporterCode: () => string
 }
 
 type ConfigUnresolved = ConfigVite & {
-  vitePluginImportBuild?: PluginConfigProvidedByUser
-  _vitePluginImportBuild?: PluginConfigResolved
+  vitePluginServerEntry?: PluginConfigProvidedByUser
+  _vitePluginServerEntry?: PluginConfigResolved
 }
 type ConfigResolved = ConfigVite & {
-  _vitePluginImportBuild: PluginConfigResolved
+  _vitePluginServerEntry: PluginConfigResolved
 }
 
 /**
@@ -88,8 +87,21 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
       const resolved = resolveConfig(configUnresolved, pluginConfigProvidedByLibrary)
       config = resolved.config
       library = resolved.library
-      // We can't use isLeader() for the following but it's fine: running the following multiple times isn't a problem.
-      config.build.rollupOptions.input = injectRollupInputs({ [inputName]: importBuildVirtualId }, config)
+
+      // We can't use isLeader() here but it's fine
+      const entries = normalizeRollupInput(config.build.rollupOptions.input)
+      if (
+        entries[serverEntryFileNameBase] === importBuildVirtualId ||
+        entries[serverEntryFileNameBaseAlternative] === importBuildVirtualId
+      ) {
+        // Already set by another library also using @brillout/vite-plugin-import-build
+        return
+      }
+      const fileNameBase = !entries[serverEntryFileNameBase]
+        ? serverEntryFileNameBase
+        : serverEntryFileNameBaseAlternative
+      assert(!entries[fileNameBase])
+      config.build.rollupOptions.input = injectRollupInputs({ [fileNameBase]: importBuildVirtualId }, config)
     },
     buildStart() {
       if (skip) return
@@ -98,7 +110,7 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
         return
       }
 
-      serverEntryFilePath = config._vitePluginImportBuild.inject ? getServerEntryFilePath(config) : null
+      serverEntryFilePath = config._vitePluginServerEntry.inject ? getServerEntryFilePath(config) : null
       assertApiVersions(config, pluginConfigProvidedByLibrary.libraryName)
       clearAutoImporterFile({ status: 'RESET' })
     },
@@ -121,37 +133,42 @@ function importBuild(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrar
     generateBundle(_rollupOptions, bundle) {
       if (skip) return
 
-      if (config._vitePluginImportBuild.inject) {
+      const isInject = config._vitePluginServerEntry.inject
+      if (isInject) {
         assert(injectDone)
       }
 
+      const entryFileName = findServerEntry(bundle).fileName
+
       // Write node_modules/@brillout/vite-plugin-import-build/dist/autoImporter.js
-      const { testCrawler } = config._vitePluginImportBuild
-      const doNotAutoImport = config._vitePluginImportBuild.inject || isYarnPnP() || testCrawler
+      const isTestCrawler = config._vitePluginServerEntry.testCrawler
+      const doNotAutoImport = isInject || isYarnPnP() || isTestCrawler
       if (!doNotAutoImport) {
-        writeAutoImporterFile(config)
+        writeAutoImporterFile(config, entryFileName)
       } else {
-        const status = testCrawler ? 'TEST_CRAWLER' : 'DISABLED'
+        const status = isTestCrawler ? 'TEST_CRAWLER' : 'DISABLED'
         clearAutoImporterFile({ status })
         debugLogsBuildtime({ disabled: true, paths: null })
       }
 
       // Write dist/server/importBuild.cjs (legacy/deprecated entry file name)
-      // TODO: add deprecation warning
-      {
-        const fileNameActual = findRollupBundleEntry(inputName, bundle).fileName
-        if (fileNameActual !== importBuildFileName)
+      if (!isInject) {
+        ;['importBuild.cjs', 'importBuild.mjs', 'importBuild.js'].forEach((fileName) => {
           this.emitFile({
-            fileName: importBuildFileName,
+            fileName,
             type: 'asset',
-            source: `globalThis.${importBuildPromise} = import('./${fileNameActual}')`
+            source: [
+              `globalThis.${serverEntryImportPromise} = import('./${entryFileName}');`,
+              `console.warn("[Warning] The server entry has been renamed from dist/server/importBuild.{cjs,mjs,js} to dist/server/entry.{cjs,mjs,js} — update your import('../path/to/dist/server/importBuild.{cjs,mjs,js}') accordingly.");`
+            ].join('\n')
           })
+        })
       }
     },
     transform(code, id) {
       if (skip) return
 
-      if (!config._vitePluginImportBuild.inject) return
+      if (!config._vitePluginServerEntry.inject) return
       assert(serverEntryFilePath)
       if (id !== serverEntryFilePath) return
       {
@@ -183,9 +200,9 @@ function resolveConfig(
   pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrary
 ) {
   assert(viteIsSSR(configUnresolved))
-  const pluginConfigProvidedByUser = configUnresolved.vitePluginImportBuild
+  const pluginConfigProvidedByUser = configUnresolved.vitePluginServerEntry
 
-  const pluginConfigResolved: PluginConfigResolved = configUnresolved._vitePluginImportBuild ?? {
+  const pluginConfigResolved: PluginConfigResolved = configUnresolved._vitePluginServerEntry ?? {
     libraries: [],
     apiVersion,
     testCrawler: false,
@@ -203,13 +220,13 @@ function resolveConfig(
   const library = {
     getImporterCode: pluginConfigProvidedByLibrary.getImporterCode,
     libraryName: pluginConfigProvidedByLibrary.libraryName,
-    vitePluginImportBuildVersion: projectInfo.projectVersion,
+    pluginVersion: projectInfo.projectVersion,
     apiVersion
   }
   pluginConfigResolved.libraries.push(library)
 
   objectAssign(configUnresolved, {
-    _vitePluginImportBuild: pluginConfigResolved
+    _vitePluginServerEntry: pluginConfigResolved
   })
   const config: ConfigResolved = configUnresolved
 
@@ -217,18 +234,16 @@ function resolveConfig(
 }
 
 function isLeaderPluginInstance(config: ConfigResolved, library: Library) {
-  const { libraries } = config._vitePluginImportBuild
-  const pluginVersion = projectInfo.projectVersion
+  const { libraries } = config._vitePluginServerEntry
+  const pluginVersionCurrent = projectInfo.projectVersion
   assert(libraries.includes(library))
   const isNotUsingNewestPluginVersion = libraries.some((lib) => {
     // Can be undefined when set by an older @brillout/vite-plugin-import-build version
-    if (!lib.vitePluginImportBuildVersion) return false
-    return isHigherVersion(lib.vitePluginImportBuildVersion, pluginVersion)
+    if (!lib.pluginVersion) return false
+    return isHigherVersion(lib.pluginVersion, pluginVersionCurrent)
   })
   if (isNotUsingNewestPluginVersion) return false
-  const librariesUsingNewestPluginVersion = libraries.filter(
-    (lib) => lib.vitePluginImportBuildVersion === pluginVersion
-  )
+  const librariesUsingNewestPluginVersion = libraries.filter((lib) => lib.pluginVersion === pluginVersionCurrent)
   return librariesUsingNewestPluginVersion[0] === library
 }
 
@@ -236,7 +251,7 @@ function getImportBuildFileContent(config: ConfigResolved) {
   assert(viteIsSSR(config))
   const importBuildFileContent = [
     '// Generated by https://github.com/brillout/vite-plugin-import-build',
-    ...config._vitePluginImportBuild.libraries.map((library) => {
+    ...config._vitePluginServerEntry.libraries.map((library) => {
       // Should be true becasue of assertApiVersions()
       assert(getLibraryApiVersion(library) === apiVersion)
       const entryCode = library.getImporterCode()
@@ -246,10 +261,10 @@ function getImportBuildFileContent(config: ConfigResolved) {
   return importBuildFileContent
 }
 
-function writeAutoImporterFile(config: ConfigResolved) {
+function writeAutoImporterFile(config: ConfigResolved, entryFileName: string) {
   const { distServerPathRelative, distServerPathAbsolute } = getDistServerPathRelative(config)
-  const importBuildFilePathRelative = path.posix.join(distServerPathRelative, importBuildFileName)
-  const importBuildFilePathAbsolute = path.posix.join(distServerPathAbsolute, importBuildFileName)
+  const importBuildFilePathRelative = path.posix.join(distServerPathRelative, entryFileName)
+  const importBuildFilePathAbsolute = path.posix.join(distServerPathAbsolute, entryFileName)
   const { root } = config
   assertPosixPath(root)
   assert(!isYarnPnP())
@@ -334,22 +349,24 @@ function getImporterDir() {
 function assertApiVersions(config: ConfigResolved, currentLibraryName: string) {
   const librariesNeedingUpdate: string[] = []
 
-  // Very old versions used to define config.vitePluginDistImporter
-  if ('vitePluginDistImporter' in config) {
-    const dataOld: any = (config as Record<string, any>).vitePluginDistImporter
-    dataOld.libraries.forEach((lib: any) => {
-      assert(lib.libraryName)
-      librariesNeedingUpdate.push(lib.libraryName)
-    })
-  }
+  // Old versions define config.{vitePluginDistImporter,_vitePluginImportBuild}
+  ;['vitePluginDistImporter', '_vitePluginImportBuild'].forEach((key) => {
+    if (key in config) {
+      const dataOld: any = (config as Record<string, any>)[key]
+      dataOld.libraries.forEach((lib: any) => {
+        assert(lib.libraryName)
+        librariesNeedingUpdate.push(lib.libraryName)
+      })
+    }
+  })
 
-  const pluginConfigResolved = config._vitePluginImportBuild
+  const pluginConfigResolved = config._vitePluginServerEntry
   pluginConfigResolved.libraries.forEach((library) => {
     const apiVersionLib = getLibraryApiVersion(library)
     if (apiVersionLib < apiVersion) {
       librariesNeedingUpdate.push(library.libraryName)
     } else {
-      // Should be true because of isUsingOlderVitePluginImportBuildVersion() call above
+      // Should be true because of isLeaderPluginInstance()
       assert(apiVersionLib === apiVersion)
     }
   })
@@ -369,10 +386,15 @@ function getLibraryApiVersion(library: Library) {
   return apiVersionLib
 }
 
-function findImportBuildBundleEntry<OutputBundle extends Record<string, { name: string | undefined }>>(
+function findServerEntry<OutputBundle extends Record<string, { name: string | undefined }>>(
   bundle: OutputBundle
 ): OutputBundle[string] {
-  return findRollupBundleEntry(inputName, bundle)
+  const entry =
+    // prettier-ignore
+    findRollupBundleEntry(serverEntryFileNameBase, bundle) ||
+    findRollupBundleEntry(serverEntryFileNameBaseAlternative, bundle)
+  assert(entry)
+  return entry
 }
 
 function getServerEntryFilePath(config: ConfigVite): string {
