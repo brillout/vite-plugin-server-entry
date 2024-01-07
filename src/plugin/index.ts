@@ -24,7 +24,7 @@ import { serverEntryImportPromise } from '../shared/serverEntryImportPromise'
 import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase'
 import { debugLogsBuildtime } from './debugLogsBuildTime'
 
-const autoImporterFilePath = require.resolve('../importServerEntry/autoImporter')
+const autoImporterFilePath = require.resolve('../importServerEntry/autoImporter.js')
 const serverEntryVirtualId = 'virtual:@brillout/vite-plugin-server-entry:serverEntry'
 // https://vitejs.dev/guide/api-plugin.html#virtual-modules-convention
 const virtualIdPrefix = '\0'
