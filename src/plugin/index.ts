@@ -320,7 +320,7 @@ function getDistServerPathRelative(config: ConfigVite) {
   const { root } = config
   assertPosixPath(root)
   assert(isAbsolutePath(root))
-  const importerDir = getImporterDir()
+  const importerDir = getDirname()
   const rootRelative = path.posix.relative(importerDir, root) // To `require()` an absolute path doesn't seem to work on Vercel
   let { outDir } = config.build
   // SvelteKit doesn't set config.build.outDir to a posix path
@@ -338,9 +338,9 @@ function getDistServerPathRelative(config: ConfigVite) {
   return { distServerPathRelative, distServerPathAbsolute }
 }
 
-function getImporterDir() {
-  const currentDir = toPosixPath(__dirname + (() => '')()) // trick to avoid `@vercel/ncc` to glob import
-  return path.posix.join(currentDir, '..')
+function getDirname() {
+  const dirname = toPosixPath(__dirname + (() => '')()) // trick to avoid `@vercel/ncc` to glob import
+  return dirname
 }
 
 function assertApiVersions(config: ConfigResolved, currentLibraryName: string) {
