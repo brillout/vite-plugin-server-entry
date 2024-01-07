@@ -65,8 +65,8 @@ type ConfigResolved = ConfigVite & {
 
 /**
  * This plugin does two things:
- *  - Generates an "server entry" file at `dist/server/entry.js`.
- *  - Generates an "auto importer" file at `node_modules/@brillout/vite-plugin-server-entry/dist/importServerEntry/autoImporter.js`.
+ *  - Generates a "server entry" file at `dist/server/entry.js`.
+ *  - Generates a "auto importer" file at `node_modules/@brillout/vite-plugin-server-entry/dist/importServerEntry/autoImporter.js`.
  *
  * See https://github.com/brillout/vite-plugin-server-entry#what-it-does for more information.
  */
@@ -346,7 +346,9 @@ function getImporterDir() {
 function assertApiVersions(config: ConfigResolved, currentLibraryName: string) {
   const librariesNeedingUpdate: string[] = []
 
-  // Old versions define config.{vitePluginDistImporter,_vitePluginImportBuild}
+  // Old versions used to define:
+  //  - config.vitePluginDistImporter
+  //  - config._vitePluginImportBuild
   ;['vitePluginDistImporter', '_vitePluginImportBuild'].forEach((key) => {
     if (key in config) {
       const dataOld: any = (config as Record<string, any>)[key]

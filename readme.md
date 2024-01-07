@@ -7,7 +7,7 @@
 
 ## What is this?
 
-`@brillout/vite-plugin-server-entry` automatically generates a server entry at `dist/server/entry.js` and automatically loads it.
+`@brillout/vite-plugin-server-entry` generates a server entry `dist/server/entry.js` and automatically loads it.
 
 [Vike](https://vike.dev) and [Telefunc](https://telefunc.com) automatically add this plugin to your Vite app: there is nothing for you to do and you can usually ignore this plugin.
 
@@ -27,7 +27,7 @@ and try again. If you still get this error, then you may need to manually import
 ```
 
 > [!WARNING]
-> If you aren't using Yarn PnP and you keep getting this error, then it's a bug that should be fixed &mdash; [file a bug repot](https://github.com/brillout/vite-plugin-server-entry/issues/new).
+> If you aren't using Yarn PnP and you keep getting this error, then it's a bug that should be fixed &mdash; [file a bug report](https://github.com/brillout/vite-plugin-server-entry/issues/new).
 
 To manually import the server entry:
 
@@ -35,15 +35,22 @@ To manually import the server entry:
 // server.js
 
 // Load the server entry, see https://github.com/brillout/vite-plugin-server-entry#manual-import
-import './path/to/dist/server/importBuild.cjs'
+import './path/to/dist/server/entry.js'
 
 // Your server code (Express.js, Vercel Serverless/Edge Function, Cloudflare Worker, ...)
 // ...
 ```
 
-Make sure to import `dist/server/importBuild.cjs` only in production. See [Conditional manual import](https://github.com/brillout/vite-plugin-server-entry/issues/6) if your production and development share the same server entry file.
+Make sure to import `dist/server/entry.js` only in production. See [Conditional manual import](https://github.com/brillout/vite-plugin-server-entry/issues/6) if your production and development share the same server.
 
-If you use [`vite.config.js` > `build.outDir`](https://vitejs.dev/config/build-options.html#build-outdir) then replace `dist/server/importBuild.cjs` with `${build.outDir}/server/importBuild.cjs`.
+If the file extension is `entry.mjs`, import accordingly:
+
+```diff
+- import './path/to/dist/server/entry.js
++ import './path/to/dist/server/entry.mjs
+```
+
+If you use [`vite.config.js` > `build.outDir`](https://vitejs.dev/config/build-options.html#build-outdir) then replace `dist/server/entry.js` with `${build.outDir}/server/entry.js`.
 
 <p align="center"><sup><a href="#readme"><b>&#8679;</b> <b>TOP</b> <b>&#8679;</b></a></sup></p><br/>
 
@@ -54,20 +61,20 @@ If you use [`vite.config.js` > `build.outDir`](https://vitejs.dev/config/build-o
 > This section is meant for library authors. As a user, you don't need to read this. If you have a problem, read [Manual import](#Manual-import) instead or reach out to maintainers.
 
 `@brillout/vite-plugin-server-entry` does two things:
- - Generates an "import build" file at `dist/server/importBuild.cjs`.
- - Generates an "auto importer" file at `node_modules/@brillout/vite-plugin-server-entry/dist/autoImporter.js`.
+ - Generates a "server entry" file at `dist/server/entry.js`.
+ - Generates a "auto importer" file at `node_modules/@brillout/vite-plugin-server-entry/dist/importServerEntry/autoImporter.js`.
 
-The *import build* file (`dist/server/importBuild.cjs`) enables tools, such as Vike and Telefunc, to consolidate their server entry file into a single entry file at `dist/server/importBuild.cjs`. We recommend having a quick look at the content of `dist/server/importBuild.cjs`: you'll see that it essentially loads built user files that live inside `dist/server/` (e.g. for Telefunc transpiled `.telefunc.js` user files, and for Vike transpiled `+Page.js` user files).
+The server entry (`dist/server/entry.js`) enables tools, such as Vike and Telefunc, to consolidate their entry files into a single file. It enables tools to load built user files (e.g. for Telefunc built `.telefunc.js` user files, and for Vike built `+Page.js` user files).
 
-The *auto importer* file (`node_modules/@brillout/vite-plugin-server-entry/dist/autoImporter.js`) automatically imports `dist/server/importBuild.cjs`, so that the user doesn't have to manually import `dist/server/importBuild.cjs` himself as shown in the following. That's the only purpose of the auto importer.
+The *auto importer* file (`node_modules/@brillout/vite-plugin-server-entry/dist/importServerEntry/autoImporter.js`) automatically imports `dist/server/entry.js`, so that the user doesn't have to manually import `dist/server/entry.js` himself as shown in the following. That's the only purpose of the auto importer.
 
 ```js
-// server/index.js (the user's server entry file)
+// server/index.js (the user's server file)
 
-// Without the auto importer, the user would have to manually import dist/server/importBuild.cjs
+// Without the auto importer, the user would have to manually import dist/server/entry.js
 // in his server entry file like this:
 if (process.env.NODE_ENV === 'production') {
-  await import('../dist/server/importBuild.cjs')
+  await import('../dist/server/entry.js')
 }
 ```
 
