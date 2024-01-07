@@ -94,7 +94,7 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
           const entries = normalizeRollupInput(config.build.rollupOptions.input)
           assert(
             entries[serverEntryFileNameBase] !== serverEntryVirtualId &&
-              entries[serverEntryFileNameBaseAlternative] === serverEntryVirtualId
+              entries[serverEntryFileNameBaseAlternative] !== serverEntryVirtualId
           )
           const fileNameBase = !entries[serverEntryFileNameBase]
             ? serverEntryFileNameBase
