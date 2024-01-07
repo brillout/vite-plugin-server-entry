@@ -91,16 +91,16 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
         }
 
         if (!config._vitePluginServerEntry.inject) {
-        const entries = normalizeRollupInput(config.build.rollupOptions.input)
-        assert(
-          entries[serverEntryFileNameBase] !== serverEntryVirtualId &&
-            entries[serverEntryFileNameBaseAlternative] === serverEntryVirtualId
-        )
-        const fileNameBase = !entries[serverEntryFileNameBase]
-          ? serverEntryFileNameBase
-          : serverEntryFileNameBaseAlternative
-        assert(!entries[fileNameBase])
-        config.build.rollupOptions.input = injectRollupInputs({ [fileNameBase]: serverEntryVirtualId }, config)
+          const entries = normalizeRollupInput(config.build.rollupOptions.input)
+          assert(
+            entries[serverEntryFileNameBase] !== serverEntryVirtualId &&
+              entries[serverEntryFileNameBaseAlternative] === serverEntryVirtualId
+          )
+          const fileNameBase = !entries[serverEntryFileNameBase]
+            ? serverEntryFileNameBase
+            : serverEntryFileNameBaseAlternative
+          assert(!entries[fileNameBase])
+          config.build.rollupOptions.input = injectRollupInputs({ [fileNameBase]: serverEntryVirtualId }, config)
         }
       },
       buildStart() {
