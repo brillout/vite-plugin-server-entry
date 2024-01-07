@@ -237,7 +237,7 @@ function isLeaderPluginInstance(config: ConfigResolved, library: Library) {
   const pluginVersionCurrent = projectInfo.projectVersion
   assert(libraries.includes(library))
   const isNotUsingNewestPluginVersion = libraries.some((lib) => {
-    // Can be undefined when set by an older @brillout/vite-plugin-server-entry version
+    // Can be undefined when set by an older @brillout/vite-plugin-dist-importer version
     if (!lib.pluginVersion) return false
     return isHigherVersion(lib.pluginVersion, pluginVersionCurrent)
   })
@@ -279,8 +279,10 @@ function writeAutoImporterFile(config: ConfigResolved, entryFileName: string) {
       `  serverEntryFilePathOriginal: ${JSON.stringify(serverEntryFilePathAbsolute)},`,
       `  serverEntryFilePathResolved: () => require.resolve(${JSON.stringify(serverEntryFilePathRelative)}),`,
       '};',
-      // Support old version vite-plugin-server-entry@0.1.12 which is needed, e.g. if user uses a Telefunc version using 0.1.12 with a vite-plugin-ssr version using 0.2.0
+      // Support old version vite-plugin-import-build@0.1.12 which is needed, e.g. if user uses a Telefunc version using 0.1.12 with a vite-plugin-ssr version using 0.2.0
       `exports.load = exports.loadServerEntry;`,
+      // Support old version vite-plugin-import-build@0.3.4
+      `exports.loadImportBuild = exports.loadServerEntry;`,
       ''
     ].join('\n')
   )
