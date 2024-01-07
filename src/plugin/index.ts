@@ -76,120 +76,122 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
   let library: Library
   let skip: boolean
   let injectDone = false
-  return {
-    name: `@brillout/vite-plugin-server-entry:${pluginConfigProvidedByLibrary.libraryName.toLowerCase()}`,
-    apply: 'build',
-    configResolved(configUnresolved: ConfigUnresolved) {
-      // Upon the server-side build (`$ vite build --ssr`), we need to override the previous `skip` value set by the client-side build (`$ vite build`).
-      skip = !viteIsSSR(configUnresolved)
-      if (skip) return
+  return [
+    {
+      name: `@brillout/vite-plugin-server-entry:${pluginConfigProvidedByLibrary.libraryName.toLowerCase()}`,
+      apply: 'build',
+      configResolved(configUnresolved: ConfigUnresolved) {
+        // Upon the server-side build (`$ vite build --ssr`), we need to override the previous `skip` value set by the client-side build (`$ vite build`).
+        skip = !viteIsSSR(configUnresolved)
+        if (skip) return
 
-      const resolved = resolveConfig(configUnresolved, pluginConfigProvidedByLibrary)
-      config = resolved.config
-      library = resolved.library
+        const resolved = resolveConfig(configUnresolved, pluginConfigProvidedByLibrary)
+        config = resolved.config
+        library = resolved.library
 
-      // We can't use isLeader() here but it's fine
-      const entries = normalizeRollupInput(config.build.rollupOptions.input)
-      if (
-        entries[serverEntryFileNameBase] === serverEntryVirtualId ||
-        entries[serverEntryFileNameBaseAlternative] === serverEntryVirtualId
-      ) {
-        // Already set by another library also using @brillout/vite-plugin-server-entry
-        return
-      }
-      const fileNameBase = !entries[serverEntryFileNameBase]
-        ? serverEntryFileNameBase
-        : serverEntryFileNameBaseAlternative
-      assert(!entries[fileNameBase])
-      config.build.rollupOptions.input = injectRollupInputs({ [fileNameBase]: serverEntryVirtualId }, config)
-    },
-    buildStart() {
-      if (skip) return
-      if (!isLeaderPluginInstance(config, library)) {
-        skip = true
-        return
-      }
+        // We can't use isLeaderPluginInstance() here but it's fine
+        const entries = normalizeRollupInput(config.build.rollupOptions.input)
+        if (
+          entries[serverEntryFileNameBase] === serverEntryVirtualId ||
+          entries[serverEntryFileNameBaseAlternative] === serverEntryVirtualId
+        ) {
+          // Already set by another library also using @brillout/vite-plugin-server-entry
+          return
+        }
+        const fileNameBase = !entries[serverEntryFileNameBase]
+          ? serverEntryFileNameBase
+          : serverEntryFileNameBaseAlternative
+        assert(!entries[fileNameBase])
+        config.build.rollupOptions.input = injectRollupInputs({ [fileNameBase]: serverEntryVirtualId }, config)
+      },
+      buildStart() {
+        if (skip) return
+        if (!isLeaderPluginInstance(config, library)) {
+          skip = true
+          return
+        }
 
-      serverEntryFilePath = config._vitePluginServerEntry.inject ? getServerEntryFilePath(config) : null
-      assertApiVersions(config, pluginConfigProvidedByLibrary.libraryName)
-      clearAutoImporterFile({ status: 'RESET' })
-    },
-    resolveId(id) {
-      if (skip) return
+        serverEntryFilePath = config._vitePluginServerEntry.inject ? getServerEntryFilePath(config) : null
+        assertApiVersions(config, pluginConfigProvidedByLibrary.libraryName)
+        clearAutoImporterFile({ status: 'RESET' })
+      },
+      resolveId(id) {
+        if (skip) return
 
-      if (id === serverEntryVirtualId) {
-        return virtualIdPrefix + serverEntryVirtualId
-      }
-    },
-    load(id) {
-      if (skip) return
+        if (id === serverEntryVirtualId) {
+          return virtualIdPrefix + serverEntryVirtualId
+        }
+      },
+      load(id) {
+        if (skip) return
 
-      assert(id !== serverEntryVirtualId)
-      if (id === virtualIdPrefix + serverEntryVirtualId) {
-        const serverEntryFileContent = getServerEntryFileContent(config)
-        return serverEntryFileContent
-      }
-    },
-    generateBundle(_rollupOptions, bundle) {
-      if (skip) return
+        assert(id !== serverEntryVirtualId)
+        if (id === virtualIdPrefix + serverEntryVirtualId) {
+          const serverEntryFileContent = getServerEntryFileContent(config)
+          return serverEntryFileContent
+        }
+      },
+      generateBundle(_rollupOptions, bundle) {
+        if (skip) return
 
-      const isInject = config._vitePluginServerEntry.inject
-      if (isInject) {
-        assert(injectDone)
-      }
+        const isInject = config._vitePluginServerEntry.inject
+        if (isInject) {
+          assert(injectDone)
+        }
 
-      const entryFileName = findServerEntry(bundle).fileName
+        const entryFileName = findServerEntry(bundle).fileName
 
-      // Write node_modules/@brillout/vite-plugin-server-entry/dist/autoImporter.js
-      const isTestCrawler = config._vitePluginServerEntry.testCrawler
-      const doNotAutoImport = isInject || isYarnPnP() || isTestCrawler
-      if (!doNotAutoImport) {
-        writeAutoImporterFile(config, entryFileName)
-      } else {
-        const status = isTestCrawler ? 'TEST_CRAWLER' : 'DISABLED'
-        clearAutoImporterFile({ status })
-        debugLogsBuildtime({ disabled: true, paths: null })
-      }
+        // Write node_modules/@brillout/vite-plugin-server-entry/dist/autoImporter.js
+        const isTestCrawler = config._vitePluginServerEntry.testCrawler
+        const doNotAutoImport = isInject || isYarnPnP() || isTestCrawler
+        if (!doNotAutoImport) {
+          writeAutoImporterFile(config, entryFileName)
+        } else {
+          const status = isTestCrawler ? 'TEST_CRAWLER' : 'DISABLED'
+          clearAutoImporterFile({ status })
+          debugLogsBuildtime({ disabled: true, paths: null })
+        }
 
-      if (!isInject) {
-        ;['importBuild.cjs', 'importBuild.mjs', 'importBuild.js'].forEach((fileName) => {
-          this.emitFile({
-            fileName,
-            type: 'asset',
-            source: [
-              `globalThis.${serverEntryImportPromise} = import('./${entryFileName}');`,
-              `console.warn("[Warning] The server entry has been renamed from dist/server/importBuild.{cjs,mjs,js} to dist/server/entry.{cjs,mjs,js} — update your import('../path/to/dist/server/importBuild.{cjs,mjs,js}') accordingly.");`
-            ].join('\n')
+        if (!isInject) {
+          ;['importBuild.cjs', 'importBuild.mjs', 'importBuild.js'].forEach((fileName) => {
+            this.emitFile({
+              fileName,
+              type: 'asset',
+              source: [
+                `globalThis.${serverEntryImportPromise} = import('./${entryFileName}');`,
+                `console.warn("[Warning] The server entry has been renamed from dist/server/importBuild.{cjs,mjs,js} to dist/server/entry.{cjs,mjs,js} — update your import('../path/to/dist/server/importBuild.{cjs,mjs,js}') accordingly.");`
+              ].join('\n')
+            })
           })
-        })
-      }
-    },
-    transform(code, id) {
-      if (skip) return
+        }
+      },
+      transform(code, id) {
+        if (skip) return
 
-      if (!config._vitePluginServerEntry.inject) return
-      assert(serverEntryFilePath)
-      if (id !== serverEntryFilePath) return
-      {
-        const moduleInfo = this.getModuleInfo(id)
-        assert(moduleInfo?.isEntry)
-      }
-      injectDone = true
-      code = [
-        // Convenience so that the user doesn't have to set manually set it, while the user can easily override it (this is the very first line of the server code).
-        "process.env.NODE_ENV = 'production';",
-        // Imports the entry of each tool, e.g. the Vike entry and the Telefunc entry.
-        `import '${serverEntryVirtualId}';`,
-        code
-      ].join(
-        ''
-        /* We don't insert new lines, otherwise we break the source map.
+        if (!config._vitePluginServerEntry.inject) return
+        assert(serverEntryFilePath)
+        if (id !== serverEntryFilePath) return
+        {
+          const moduleInfo = this.getModuleInfo(id)
+          assert(moduleInfo?.isEntry)
+        }
+        injectDone = true
+        code = [
+          // Convenience so that the user doesn't have to set manually set it, while the user can easily override it (this is the very first line of the server code).
+          "process.env.NODE_ENV = 'production';",
+          // Imports the entry of each tool, e.g. the Vike entry and the Telefunc entry.
+          `import '${serverEntryVirtualId}';`,
+          code
+        ].join(
+          ''
+          /* We don't insert new lines, otherwise we break the source map.
         '\n'
         */
-      )
-      return code
+        )
+        return code
+      }
     }
-  } as Plugin
+  ] as Plugin[]
 }
 // Avoid multiple Vite versions mismatch
 type Plugin_ = any
