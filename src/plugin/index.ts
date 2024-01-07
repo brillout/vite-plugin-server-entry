@@ -196,6 +196,7 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
       configResolved(configUnresolved: ConfigUnresolved) {
         // Upon the server-side build (`$ vite build --ssr`), we need to override the previous `skip` value set by the client-side build (`$ vite build`).
         skip = !viteIsSSR(configUnresolved)
+        if (skip) return
         const resolved = resolveConfig(configUnresolved, pluginConfigProvidedByLibrary)
         config = resolved.config
         library = resolved.library
