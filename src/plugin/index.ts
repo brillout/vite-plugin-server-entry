@@ -71,7 +71,7 @@ type ConfigResolved = ConfigVite & {
  *
  * See https://github.com/brillout/vite-plugin-server-entry#what-it-does for more information.
  */
-function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrary): Plugin_ {
+function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrary): Plugin_[] {
   const pluginName = `@brillout/vite-plugin-server-entry:${pluginConfigProvidedByLibrary.libraryName.toLowerCase()}`
   let config: ConfigResolved
   let serverIndexFilePath: string | null
