@@ -1,3 +1,13 @@
+## [0.4.2](https://github.com/brillout/vite-plugin-server-entry/compare/v0.4.1...v0.4.2) (2024-01-07)
+
+
+### Bug Fixes
+
+* don't create Rollup entry upon inject ([df3ee71](https://github.com/brillout/vite-plugin-server-entry/commit/df3ee71028b64c3cf8b5d4e4e8f4f8a23ba7d19c))
+* prettify stack trace ([807e5af](https://github.com/brillout/vite-plugin-server-entry/commit/807e5afbafd4778cb319befebcb03b430ae67b0f))
+
+
+
 ## [0.4.1](https://github.com/brillout/vite-plugin-server-entry/compare/v0.4.0...v0.4.1) (2024-01-07)
 
 
