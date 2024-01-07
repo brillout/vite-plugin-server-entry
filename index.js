@@ -1,5 +1,5 @@
 throw new Error(
-  "Module '@brillout/vite-plugin-server-entry' doesn't exist. Only '@brillout/vite-plugin-server-entry/plugin' and '@brillout/vite-plugin-server-entry/loadServerBuild' does."
+  "Module '@brillout/vite-plugin-server-entry' doesn't exist. Only '@brillout/vite-plugin-server-entry/plugin' and '@brillout/vite-plugin-server-entry/importServerEntry' does."
 )
 
 // Avoid:
