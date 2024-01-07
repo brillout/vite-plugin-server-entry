@@ -1,3 +1,12 @@
+## [0.4.3](https://github.com/brillout/vite-plugin-server-entry/compare/v0.4.2...v0.4.3) (2024-01-07)
+
+
+### Bug Fixes
+
+* minor TypeScript fix ([d75a812](https://github.com/brillout/vite-plugin-server-entry/commit/d75a81282700e79162c260c8806235530588ce93))
+
+
+
 ## [0.4.2](https://github.com/brillout/vite-plugin-server-entry/compare/v0.4.1...v0.4.2) (2024-01-07)
 
 
