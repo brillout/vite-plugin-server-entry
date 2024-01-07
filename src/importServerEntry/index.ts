@@ -9,7 +9,7 @@ import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../
 import { DEBUG } from '../shared/debug'
 
 async function importServerEntry(outDir?: string): Promise<void | undefined> {
-  const autoImporter: AutoImporter = await import_('./autoImporter')
+  const autoImporter: AutoImporter = require('./autoImporter.js')
 
   debugLogsRuntimePre(autoImporter)
 
