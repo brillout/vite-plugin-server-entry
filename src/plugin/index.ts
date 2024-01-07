@@ -74,7 +74,7 @@ type ConfigResolved = ConfigVite & {
 function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrary): Plugin_ {
   const pluginName = `@brillout/vite-plugin-server-entry:${pluginConfigProvidedByLibrary.libraryName.toLowerCase()}`
   let config: ConfigResolved
-  let serverEntryFilePath: string | null
+  let serverIndexFilePath: string | null
   let library: Library
   let skip: boolean
   let injectDone = false
@@ -106,7 +106,7 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
       buildStart() {
         if (skip) return
 
-        serverEntryFilePath = config._vitePluginServerEntry.inject ? getServerEntryFilePath(config) : null
+        serverIndexFilePath = config._vitePluginServerEntry.inject ? getServerIndexFilePath(config) : null
         assertApiVersions(config, pluginConfigProvidedByLibrary.libraryName)
         clearAutoImporterFile({ status: 'RESET' })
       },
@@ -168,8 +168,8 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
         if (skip) return
 
         if (!config._vitePluginServerEntry.inject) return
-        assert(serverEntryFilePath)
-        if (id !== serverEntryFilePath) return
+        assert(serverIndexFilePath)
+        if (id !== serverIndexFilePath) return
         {
           const moduleInfo = this.getModuleInfo(id)
           assert(moduleInfo?.isEntry)
@@ -409,7 +409,7 @@ function findServerEntry<OutputBundle extends Record<string, { name: string | un
   return entry
 }
 
-function getServerEntryFilePath(config: ConfigVite): string {
+function getServerIndexFilePath(config: ConfigVite): string {
   const entries = normalizeRollupInput(config.build.rollupOptions.input)
   let serverEntryFilePath = entries[indexEntryName]
   if (!serverEntryFilePath) {
