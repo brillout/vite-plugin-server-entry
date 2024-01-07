@@ -9,7 +9,7 @@ const logLabel = `[${projectInfo.npmPackageName}@${projectInfo.projectVersion}]`
 const internalErrorPrefix = `${logLabel}[Bug]` as const
 const usageErrorPrefix = `${logLabel}[Wrong Usage]` as const
 
-// We set to `0` because @brillout/vite-plugin-import-build is never used directly by the user
+// We set to `0` because @brillout/vite-plugin-server-entry is never used directly by the user
 const numberOfStackTraceLinesToRemove = 0
 
 function assert(condition: unknown, debugInfo?: unknown): asserts condition {

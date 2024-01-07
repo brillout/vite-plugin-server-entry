@@ -1,5 +1,5 @@
 {
-  "name": "@brillout/vite-plugin-import-build",
+  "name": "@brillout/vite-plugin-server-entry",
   "version": "0.3.4",
   "dependencies": {
     "@brillout/import": "^0.2.3"
@@ -23,7 +23,7 @@
     "*.js"
   ],
   "license": "MIT",
-  "repository": "https://github.com/brillout/vite-plugin-import-build",
+  "repository": "https://github.com/brillout/vite-plugin-server-entry",
   "publishConfig": {
     "access": "public"
   }
