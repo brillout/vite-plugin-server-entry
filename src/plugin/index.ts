@@ -29,7 +29,7 @@ const autoImporterFilePath = require.resolve('../importServerEntry/autoImporter.
 const serverEntryVirtualId = 'virtual:@brillout/vite-plugin-server-entry:serverEntry'
 // https://vitejs.dev/guide/api-plugin.html#virtual-modules-convention
 const virtualIdPrefix = '\0'
-const apiVersion = 3
+const apiVersion = 4
 
 // Config set by library using @brillout/vite-plugin-server-entry (e.g. Vike or Telefunc)
 type PluginConfigProvidedByLibrary = {
@@ -82,6 +82,7 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
     {
       name: pluginName,
       apply: 'build',
+      // We need to run this plugin after other plugin instances, so that assertApiVersions() works also for libraries using older plugin versions
       enforce: 'post',
       configResolved() {
         if (skip) return
@@ -89,6 +90,8 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
           skip = true
           return
         }
+
+        assertApiVersions(config, pluginConfigProvidedByLibrary.libraryName)
 
         if (!config._vitePluginServerEntry.inject) {
           const entries = normalizeRollupInput(config.build.rollupOptions.input)
@@ -107,7 +110,6 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
         if (skip) return
 
         serverIndexFilePath = config._vitePluginServerEntry.inject ? getServerIndexFilePath(config) : null
-        assertApiVersions(config, pluginConfigProvidedByLibrary.libraryName)
         clearAutoImporterFile({ status: 'RESET' })
       },
       resolveId(id) {
@@ -193,6 +195,8 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
     {
       name: `${pluginName}:config`,
       apply: 'build',
+      // We need to run this plugin before in order to make isLeaderPluginInstance() work
+      enforce: 'pre',
       configResolved(configUnresolved: ConfigUnresolved) {
         // Upon the server-side build (`$ vite build --ssr`), we need to override the previous `skip` value set by the client-side build (`$ vite build`).
         skip = !viteIsSSR(configUnresolved)
