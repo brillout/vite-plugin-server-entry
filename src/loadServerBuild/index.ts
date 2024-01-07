@@ -32,7 +32,7 @@ async function loadServerBuild(outDir?: string): Promise<void | undefined> {
         throw err
       }
     }
-    isOutsideOfCwd = isImportBuildOutsideOfCwd(autoImporter.paths)
+    isOutsideOfCwd = isServerEntryOutsideOfCwd(autoImporter.paths)
     if (isOutsideOfCwd) {
       success = false
     }
@@ -62,7 +62,7 @@ async function loadServerBuild(outDir?: string): Promise<void | undefined> {
 }
 
 // `${build.outDir}/dist/importBuild.cjs` may not belong to process.cwd() if e.g. vite-plugin-ssr is linked => autoImporter.js can potentially be shared between multiple projects
-function isImportBuildOutsideOfCwd(paths: AutoImporterPaths): boolean | null {
+function isServerEntryOutsideOfCwd(paths: AutoImporterPaths): boolean | null {
   const cwd = getCwd()
 
   // We cannot check edge environments. Upon edge deployment the server code is usually bundled right after `$ vite build`, so it's unlikley that the resolved importBuildFilePath doesn't belong to cwd
@@ -105,18 +105,16 @@ async function crawlImportBuildFileWithNodeJs(outDir?: string): Promise<boolean>
     }
   }
 
-  let distImporterPathUnresolved: string
   if (outDir) {
     // Only pre-rendering has access to config.build.outDir
     assertPosixPath(outDir)
     assert(isPathAbsolute(outDir), outDir)
-    distImporterPathUnresolved = path.posix.join(outDir, 'server', importBuildFileName)
   } else {
     // The SSR server doesn't have access to config.build.outDir so we shoot in the dark by trying with 'dist/'
-    distImporterPathUnresolved = path.posix.join(cwd, 'dist', 'server', importBuildFileName)
+    outDir = path.posix.join(cwd, 'dist')
   }
-  const distImporterDir = path.posix.dirname(distImporterPathUnresolved)
-  let distImporterPath: string
+  const serverEntryFileDir = path.posix.join(outDir, 'server')
+
   let filename: string
   try {
     filename = __filename
@@ -124,24 +122,27 @@ async function crawlImportBuildFileWithNodeJs(outDir?: string): Promise<boolean>
     // __filename isn't defined when this file is being bundled into an ESM bundle
     return false
   }
+
+  const serverEntryFilePathSpeculative = path.posix.join(serverEntryFileDir, importBuildFileName)
+  let serverEntryFilePath: string
   try {
-    distImporterPath = await requireResolve(distImporterPathUnresolved, filename)
+    serverEntryFilePath = await requireResolve(serverEntryFilePathSpeculative, filename)
   } catch (err) {
-    if (fs.existsSync(distImporterDir)) {
+    if (fs.existsSync(serverEntryFileDir)) {
       console.error(err)
-      assert(false, { distImporterDir, distImporterPathUnresolved })
+      assert(false, { distImporterDir: serverEntryFileDir, serverEntryFilePathSpeculative })
     }
     return false
   }
 
   // webpack couldn't have properly resolved distImporterPath (since there is not static import statement)
-  if (isWebpackResolve(distImporterPath)) {
+  if (isWebpackResolve(serverEntryFilePath)) {
     return false
   }
 
   // Ensure ESM compability
-  assert(distImporterPath.endsWith('.cjs'))
-  await import_(distImporterPath)
+  assert(serverEntryFilePath.endsWith('.cjs'))
+  await import_(serverEntryFilePath)
   await (globalThis as any)[importBuildPromise]
   return true
 }
