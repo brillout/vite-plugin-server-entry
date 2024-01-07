@@ -23,7 +23,7 @@ async function importServerEntry(outDir?: string): Promise<void | undefined> {
   let isOutsideOfCwd: boolean | null = null
   if (autoImporter.status === 'SET') {
     try {
-      autoImporter.loadServerEntry()
+      await autoImporter.loadServerEntry()
       await (globalThis as any)[serverEntryImportPromise]
       success = true
     } catch (err) {

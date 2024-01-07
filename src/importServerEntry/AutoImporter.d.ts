@@ -2,7 +2,7 @@ export type AutoImporter =
   | AutoImporterCleared
   | {
       status: 'SET'
-      loadServerEntry: () => void
+      loadServerEntry: () => Promise<void>
       paths: AutoImporterPaths
     }
 // prettier-ignore

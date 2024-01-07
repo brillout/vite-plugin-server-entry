@@ -271,7 +271,7 @@ function writeAutoImporterFile(config: ConfigResolved, entryFileName: string) {
     autoImporterFilePath,
     [
       "exports.status = 'SET';",
-      `exports.loadServerEntry = () => { require(${JSON.stringify(serverEntryFilePathRelative)}) };`,
+      `exports.loadServerEntry = async () => { await import(${JSON.stringify(serverEntryFilePathRelative)}); };`,
       'exports.paths = {',
       `  autoImporterFilePathOriginal: ${JSON.stringify(autoImporterFilePath)},`,
       '  autoImporterFileDirActual: (() => { try { return __dirname } catch { return null } })(),',
