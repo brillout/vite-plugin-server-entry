@@ -1,3 +1,15 @@
+## [0.4.1](https://github.com/brillout/vite-plugin-server-entry/compare/v0.4.0...v0.4.1) (2024-01-07)
+
+
+### Bug Fixes
+
+* import regression ([c072e77](https://github.com/brillout/vite-plugin-server-entry/commit/c072e77cc011ccf4f2e6685d0d5483f30afc4a7a))
+* new autoImporter path ([2fa28cd](https://github.com/brillout/vite-plugin-server-entry/commit/2fa28cdb4fc3e25ae8558a13c014d171aae12b7e))
+* relative autoImporter path ([7dd414c](https://github.com/brillout/vite-plugin-server-entry/commit/7dd414c2b06e270620f877e2470ef4949d39a63a))
+* use import() ([fe7242d](https://github.com/brillout/vite-plugin-server-entry/commit/fe7242d269bcbbe6b6e255708a0b8185d08dc8f1))
+
+
+
 # [0.4.0](https://github.com/brillout/vite-plugin-server-entry/compare/v0.3.4...v0.4.0) (2024-01-07)
 
 
