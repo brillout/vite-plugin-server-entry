@@ -15,7 +15,7 @@ async function importServerEntry(outDir?: string): Promise<void | undefined> {
 
   assertUsage(
     autoImporter.status !== 'DISABLED',
-    "As a library author, make sure your library doesn't call loadServerBuild() when using `inject: true`"
+    "As a library author, make sure your library doesn't call importServerEntry() when using `inject: true`"
   )
 
   let success = false
@@ -33,7 +33,7 @@ async function importServerEntry(outDir?: string): Promise<void | undefined> {
         throw err
       }
     }
-    isOutsideOfCwd = isImportBuildOutsideOfCwd(autoImporter.paths)
+    isOutsideOfCwd = isServerEntryOutsideOfCwd(autoImporter.paths)
     if (isOutsideOfCwd) {
       success = false
     }
@@ -49,11 +49,11 @@ async function importServerEntry(outDir?: string): Promise<void | undefined> {
   }
 
   if (!success) {
-    success = await crawlImportBuildFileWithNodeJs(outDir)
+    success = await crawlServerEntryFileWithNodeJs(outDir)
   }
 
   // We don't handle the following case:
-  //  - When the user directly imports importBuild.cjs, because we assume that vite-plugin-ssr and Telefunc don't call loadServerBuild() in that case
+  //  - When the user directly imports dist/server/entry.js because we assume that Vike and Telefunc don't call importServerEntry() in that case
 
   debugLogsRuntimePost({ success, requireError, isOutsideOfCwd, outDir })
   assertUsage(
@@ -62,8 +62,8 @@ async function importServerEntry(outDir?: string): Promise<void | undefined> {
   )
 }
 
-// `${build.outDir}/dist/importBuild.cjs` may not belong to process.cwd() if e.g. vite-plugin-ssr is linked => autoImporter.js can potentially be shared between multiple projects
-function isImportBuildOutsideOfCwd(paths: AutoImporterPaths): boolean | null {
+// dist/server/entry.js may not belong to process.cwd() if e.g. Vike is linked => autoImporter.js can potentially be shared between multiple projects
+function isServerEntryOutsideOfCwd(paths: AutoImporterPaths): boolean | null {
   const cwd = getCwd()
 
   // We cannot check edge environments. Upon edge deployment the server code is usually bundled right after `$ vite build`, so it's unlikley that the resolved serverEntryFilePath doesn't belong to cwd
@@ -85,7 +85,7 @@ function isImportBuildOutsideOfCwd(paths: AutoImporterPaths): boolean | null {
   return !serverEntryFilePath.startsWith(cwd)
 }
 
-async function crawlImportBuildFileWithNodeJs(outDir?: string): Promise<boolean> {
+async function crawlServerEntryFileWithNodeJs(outDir?: string): Promise<boolean> {
   const cwd = getCwd()
   if (!cwd) return false
 
