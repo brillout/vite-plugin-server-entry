@@ -2,7 +2,7 @@ export type AutoImporter =
   | AutoImporterCleared
   | {
       status: 'SET'
-      loadImportBuild: () => void
+      loadServerEntry: () => void
       paths: AutoImporterPaths
     }
 // prettier-ignore
@@ -14,7 +14,7 @@ export type AutoImporterCleared =
 export type AutoImporterPaths = {
   autoImporterFilePathOriginal: string
   autoImporterFileDirActual: string
-  importBuildFilePathRelative: string
-  importBuildFilePathOriginal: string
-  importBuildFilePathResolved: () => string
+  serverEntryFilePathRelative: string
+  serverEntryFilePathOriginal: string
+  serverEntryFilePathResolved: () => string
 }

@@ -30,13 +30,13 @@ function debugLogsRuntimePre(autoImporter: AutoImporter): undefined | void {
   if (autoImporter.status === 'SET') {
     logDebug('importer.paths.autoImporterFilePathOriginal', autoImporter.paths.autoImporterFilePathOriginal)
     logDebug('importer.paths.autoImporterFileDirActual', autoImporter.paths.autoImporterFileDirActual)
-    logDebug('importer.paths.importBuildFilePathRelative', autoImporter.paths.importBuildFilePathRelative)
-    logDebug('importer.paths.importBuildFilePathOriginal', autoImporter.paths.importBuildFilePathOriginal)
+    logDebug('importer.paths.serverEntryFilePathRelative', autoImporter.paths.serverEntryFilePathRelative)
+    logDebug('importer.paths.serverEntryFilePathOriginal', autoImporter.paths.serverEntryFilePathOriginal)
     try {
-      logDebug('importer.paths.importBuildFilePathResolved()', autoImporter.paths.importBuildFilePathResolved())
+      logDebug('importer.paths.serverEntryFilePathResolved()', autoImporter.paths.serverEntryFilePathResolved())
     } catch (err) {
-      logDebug('importer.paths.importBuildFilePathResolved() error:', err)
-      logDebug('importer.paths.importBuildFilePathResolved()', 'ERRORED')
+      logDebug('importer.paths.serverEntryFilePathResolved() error:', err)
+      logDebug('importer.paths.serverEntryFilePathResolved()', 'ERRORED')
     }
   }
 }

@@ -23,7 +23,7 @@ async function importServerEntry(outDir?: string): Promise<void | undefined> {
   let isOutsideOfCwd: boolean | null = null
   if (autoImporter.status === 'SET') {
     try {
-      autoImporter.loadImportBuild()
+      autoImporter.loadServerEntry()
       await (globalThis as any)[serverEntryImportPromise]
       success = true
     } catch (err) {
@@ -66,23 +66,23 @@ async function importServerEntry(outDir?: string): Promise<void | undefined> {
 function isImportBuildOutsideOfCwd(paths: AutoImporterPaths): boolean | null {
   const cwd = getCwd()
 
-  // We cannot check edge environments. Upon edge deployment the server code is usually bundled right after `$ vite build`, so it's unlikley that the resolved importBuildFilePath doesn't belong to cwd
+  // We cannot check edge environments. Upon edge deployment the server code is usually bundled right after `$ vite build`, so it's unlikley that the resolved serverEntryFilePath doesn't belong to cwd
   if (!cwd) return null
 
-  let importBuildFilePath: string
+  let serverEntryFilePath: string
   try {
-    importBuildFilePath = paths.importBuildFilePathResolved()
+    serverEntryFilePath = paths.serverEntryFilePathResolved()
   } catch {
     // Edge environments usually(/always?) don't support require.resolve()
     //  - This code block is called for edge environments that return a dummy process.cwd(), e.g. Cloudflare Workers: process.cwd() === '/'
     return null
   }
 
-  if (isWebpackResolve(importBuildFilePath)) return null
+  if (isWebpackResolve(serverEntryFilePath)) return null
 
-  importBuildFilePath = toPosixPath(importBuildFilePath)
+  serverEntryFilePath = toPosixPath(serverEntryFilePath)
   assertPosixPath(cwd)
-  return !importBuildFilePath.startsWith(cwd)
+  return !serverEntryFilePath.startsWith(cwd)
 }
 
 async function crawlImportBuildFileWithNodeJs(outDir?: string): Promise<boolean> {
