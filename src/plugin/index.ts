@@ -178,8 +178,8 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
         }
         injectDone = true
         code = [
-          // Convenience so that the user doesn't have to set manually set it, while the user can easily override it (this is the very first line of the server code).
-          "process.env.NODE_ENV = 'production';",
+          /* We don't do this, instead let Vike's CLI handle the default process.env.NODE_ENV value.
+          "process.env.NODE_ENV = 'production';", */
           // Imports the entry of each tool, e.g. the Vike entry and the Telefunc entry.
           `import '${serverEntryVirtualId}';`,
           code
