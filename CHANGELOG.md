@@ -1,3 +1,12 @@
+## [0.4.4](https://github.com/brillout/vite-plugin-server-entry/compare/v0.4.3...v0.4.4) (2024-02-09)
+
+
+### Bug Fixes
+
+* do not set `process.env.NODE_ENV = production;` ([55972f0](https://github.com/brillout/vite-plugin-server-entry/commit/55972f07b6c20fd143689778b5bc46723fcf55ae))
+
+
+
 ## [0.4.3](https://github.com/brillout/vite-plugin-server-entry/compare/v0.4.2...v0.4.3) (2024-01-07)
 
 
