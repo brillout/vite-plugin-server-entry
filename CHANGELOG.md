@@ -1,3 +1,13 @@
+## [0.4.5](https://github.com/brillout/vite-plugin-server-entry/compare/v0.4.4...v0.4.5) (2024-03-29)
+
+
+### Bug Fixes
+
+* improve error message upon build.ssr entry (fix [#9](https://github.com/brillout/vite-plugin-server-entry/issues/9)) ([d1856b9](https://github.com/brillout/vite-plugin-server-entry/commit/d1856b950d8875f8d05dd5660be6d3fd88a21cdb))
+* improve error message upon erased server entry ([#9](https://github.com/brillout/vite-plugin-server-entry/issues/9)) ([04fb71a](https://github.com/brillout/vite-plugin-server-entry/commit/04fb71a0303502dd100a1cdaa6cefdfc7924d2ce))
+
+
+
 ## [0.4.4](https://github.com/brillout/vite-plugin-server-entry/compare/v0.4.3...v0.4.4) (2024-02-09)
 
 
