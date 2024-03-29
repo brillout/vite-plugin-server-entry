@@ -410,7 +410,20 @@ function findServerEntry<OutputBundle extends Record<string, { name: string | un
     findRollupBundleEntry(serverEntryFileNameBaseAlternative, bundle) ||
     findRollupBundleEntry(serverEntryFileNameBase, bundle) ||
     findRollupBundleEntry(indexEntryName, bundle)
-  assert(entry)
+
+  assertUsage(
+    entry,
+    errMsgEntryRemoved(
+      [
+        //
+        serverEntryFileNameBase,
+        serverEntryFileNameBaseAlternative,
+        indexEntryName
+      ],
+      Object.keys(bundle)
+    )
+  )
+
   return entry
 }
 
@@ -419,16 +432,22 @@ function getServerIndexFilePath(config: ConfigVite): string {
   let serverEntryFilePath = entries[indexEntryName]
   if (!serverEntryFilePath) {
     const entryNames = Object.keys(entries)
-      .map((e) => `'${e}'`)
-      .join(', ')
-    assertUsage(
-      false,
-      `Cannot find server entry '${indexEntryName}'. Make sure your Rollup config doesn't remove the entry '${indexEntryName}' of your server build ${config.build.outDir}. (Found server entries: [${entryNames}].)`
-    )
+    assertUsage(false, errMsgEntryRemoved([indexEntryName], entryNames))
   }
   serverEntryFilePath = require.resolve(serverEntryFilePath)
   // Needs to be absolute, otherwise it won't match the `id` in `transform(id)`
   assert(path.isAbsolute(serverEntryFilePath))
   serverEntryFilePath = toPosixPath(serverEntryFilePath)
   return serverEntryFilePath
+}
+
+function errMsgEntryRemoved(entriesMissing: string[], entriesExisting: string[]) {
+  const list = (items: string[]) => '[' + items.map((e) => `'${e}'`).join(', ') + ']'
+  return [
+    entriesMissing.length === 1
+      ? `Cannot find build server entry '${entriesMissing[0]!}'.`
+      : `Cannot find build server entry, searching for:  ${list(entriesMissing)} (none of them exist, but one of these should exist).`,
+    `Make sure your Vite config (or that of a Vite plugin) doesn't remove/overwrite server build entries.`,
+    `(Found server entries: ${list(entriesExisting)}.)`
+  ].join(' ')
 }
