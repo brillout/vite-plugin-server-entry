@@ -201,6 +201,10 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
         // Upon the server-side build (`$ vite build --ssr`), we need to override the previous `skip` value set by the client-side build (`$ vite build`).
         skip = !viteIsSSR(configUnresolved)
         if (skip) return
+        assertUsage(
+          typeof configUnresolved.build.ssr !== 'string',
+          "Setting the server build entry over the Vite configuration `build.ssr` (i.e. `--ssr path/to/entry.js`) isn't supported (because of a Vite bug), see workaround at https://github.com/brillout/vite-plugin-server-entry/issues/9#issuecomment-2027641624"
+        )
         const resolved = resolveConfig(configUnresolved, pluginConfigProvidedByLibrary)
         config = resolved.config
         library = resolved.library
