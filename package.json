@@ -1,6 +1,6 @@
 {
   "name": "@brillout/vite-plugin-server-entry",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "dependencies": {
     "@brillout/import": "^0.2.3"
   },

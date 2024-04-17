@@ -1,3 +1,12 @@
+## [0.4.6](https://github.com/brillout/vite-plugin-server-entry/compare/v0.4.5...v0.4.6) (2024-04-17)
+
+
+### Bug Fixes
+
+* let user decide stack trace size ([6cc1c7c](https://github.com/brillout/vite-plugin-server-entry/commit/6cc1c7c3640b249181908063b60c8c1a3d2b18bf))
+
+
+
 ## [0.4.5](https://github.com/brillout/vite-plugin-server-entry/compare/v0.4.4...v0.4.5) (2024-03-29)
 
 
