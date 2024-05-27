@@ -13,8 +13,8 @@ importers:
         version: 0.2.3
     devDependencies:
       '@brillout/release-me':
-        specifier: ^0.1.12
-        version: 0.1.12
+        specifier: ^0.3.8
+        version: 0.3.8
       '@types/node':
         specifier: ^15.12.2
         version: 15.14.9
@@ -42,8 +42,11 @@ packages:
   '@brillout/import@0.2.3':
     resolution: {integrity: sha512-1T8WlD75eeFSMrptGy8jiLHmfHgMmSjWvLOIUvHmSVZt+6k0eQqYUoK4KbmE4T9pVLIfxvZSOm2D68VEqKRHRw==}
 
-  '@brillout/release-me@0.1.12':
-    resolution: {integrity: sha512-nQG1lM0o44gtkgI10YV/pLF3O3GbVghPl4WfYMkVCCt/CRNUsmypN+CfyGP/eJO8EJkiSdr8bVWhcizZciW5nQ==}
+  '@brillout/picocolors@1.0.12':
+    resolution: {integrity: sha512-2gowgbpAqEQz4U1D/dh3tU2fKcRm+yt724d8YTbCsVHxnLTHWP2J5RMO1iTWcoViX7rTmLvPkHHlYtEiKP4gLA==}
+
+  '@brillout/release-me@0.3.8':
+    resolution: {integrity: sha512-feo4CLWpMT0LS5l/fI37vv9pbOOEste6/AO9qLT5WtupqDkgK9k6iBuZmzLlef4AthIA2BY20tXlX/VcFWKuSw==}
     hasBin: true
 
   '@esbuild/android-arm64@0.18.20':
@@ -198,9 +201,6 @@ packages:
   ansi-styles@3.2.1:
     resolution: {integrity: sha512-VT0ZI6kZRdTh8YyJw3SMbYm/u+NqfsAxEpWO0Pf9sq8/e94WxxOpPKx9FR1FlyCtOVDNOQ+8ntlqFxiRc+r5qA==}
     engines: {node: '>=4'}
-
-  argparse@2.0.1:
-    resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
 
   array-ify@1.0.0:
     resolution: {integrity: sha512-c5AMf34bKdvPhQ7tBGhqkgKNUzMr4WUs+WDtC2ZUGOUncbxKMTvqxYctiseW3+L4bA8ec+GcZ6/A/FW4m8ukng==}
@@ -382,10 +382,6 @@ packages:
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
-
-  js-yaml@4.1.0:
-    resolution: {integrity: sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA==}
-    hasBin: true
 
   json-parse-even-better-errors@3.0.1:
     resolution: {integrity: sha512-aatBvbL26wVUCLmbWdCpeu9iF5wOyWpagiKkInA+kfws3sWdBrTnsvN2CKcyCYyUrc7rebNBlK6+kteg7ksecg==}
@@ -624,13 +620,14 @@ snapshots:
 
   '@brillout/import@0.2.3': {}
 
-  '@brillout/release-me@0.1.12':
+  '@brillout/picocolors@1.0.12': {}
+
+  '@brillout/release-me@0.3.8':
     dependencies:
+      '@brillout/picocolors': 1.0.12
       commander: 11.1.0
       conventional-changelog: 5.1.0
       execa: 5.1.1
-      js-yaml: 4.1.0
-      picocolors: 1.0.0
       semver: 7.5.4
 
   '@esbuild/android-arm64@0.18.20':
@@ -715,8 +712,6 @@ snapshots:
   ansi-styles@3.2.1:
     dependencies:
       color-convert: 1.9.3
-
-  argparse@2.0.1: {}
 
   array-ify@1.0.0: {}
 
@@ -927,10 +922,6 @@ snapshots:
 
   js-tokens@4.0.0: {}
 
-  js-yaml@4.1.0:
-    dependencies:
-      argparse: 2.0.1
-
   json-parse-even-better-errors@3.0.1: {}
 
   json-stringify-safe@5.0.1: {}
@@ -1079,11 +1070,11 @@ snapshots:
 
   vite@4.5.1(@types/node@15.14.9):
     dependencies:
-      '@types/node': 15.14.9
       esbuild: 0.18.20
       postcss: 8.4.32
       rollup: 3.29.4
     optionalDependencies:
+      '@types/node': 15.14.9
       fsevents: 2.3.2
 
   which@2.0.2:
