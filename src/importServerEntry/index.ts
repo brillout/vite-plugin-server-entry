@@ -126,20 +126,24 @@ async function crawlServerEntryFileWithNodeJs(outDir?: string): Promise<boolean>
   }
 
   let serverEntryFilePath: string | null = null
-  for (const entryFileName of [
+  const entryFileCandidates = [
     `${serverEntryFileNameBase}.mjs`,
     `${serverEntryFileNameBase}.js`,
     `${serverEntryFileNameBase}.cjs`,
     `${serverEntryFileNameBaseAlternative}.mjs`,
     `${serverEntryFileNameBaseAlternative}.js`,
     `${serverEntryFileNameBaseAlternative}.cjs`
-  ]) {
+  ]
+  for (const entryFileName of entryFileCandidates) {
     const serverEntryFilePathSpeculative = path.posix.join(serverEntryFileDir, entryFileName)
     try {
       serverEntryFilePath = await requireResolve(serverEntryFilePathSpeculative, filename)
     } catch {}
   }
-  assert(serverEntryFilePath)
+  assertUsage(
+    serverEntryFilePath,
+    `Cannot find server entry. If you use rollupOptions.output.entryFileNames then make sure to not rename the server entry file. Make sure that one of the following exists: \n${entryFileCandidates.map((e) => `  ${e}`).join('\n')}`
+  )
 
   // webpack couldn't have properly resolved distImporterPath (since there is not static import statement)
   if (isWebpackResolve(serverEntryFilePath)) {
