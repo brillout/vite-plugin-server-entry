@@ -1,3 +1,12 @@
+## [0.4.7](https://github.com/brillout/vite-plugin-server-entry/compare/v0.4.6...v0.4.7) (2024-07-04)
+
+
+### Bug Fixes
+
+* improve error message upon failure crawling server entry (fix [#11](https://github.com/brillout/vite-plugin-server-entry/issues/11)) ([4f0bd38](https://github.com/brillout/vite-plugin-server-entry/commit/4f0bd3864c39d6e732f5db07e5b45d6e4ae23330))
+
+
+
 ## [0.4.6](https://github.com/brillout/vite-plugin-server-entry/compare/v0.4.5...v0.4.6) (2024-04-17)
 
 
