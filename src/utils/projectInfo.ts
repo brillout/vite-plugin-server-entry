@@ -1,5 +1,4 @@
-const PROJECT_VERSION = '0.4.7' as const
-
+import { PROJECT_VERSION } from './PROJECT_VERSION'
 export const projectInfo = {
   projectName: '@brillout/vite-plugin-server-entry' as const,
   npmPackageName: '@brillout/vite-plugin-server-entry' as const,
