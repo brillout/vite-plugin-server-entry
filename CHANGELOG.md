@@ -1,3 +1,12 @@
+## [0.4.8](https://github.com/brillout/vite-plugin-server-entry/compare/v0.4.7...v0.4.8) (2024-08-19)
+
+
+### Bug Fixes
+
+* remove counter productive assertion ([c854964](https://github.com/brillout/vite-plugin-server-entry/commit/c85496427b5b71d0cd086ab510c3768e2faf3ed7))
+
+
+
 ## [0.4.7](https://github.com/brillout/vite-plugin-server-entry/compare/v0.4.6...v0.4.7) (2024-07-04)
 
 
