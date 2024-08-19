@@ -8,7 +8,7 @@ export type AutoImporter =
 // prettier-ignore
 export type AutoImporterCleared =
   | { status: 'UNSET' }
-  | { status: 'RESET' }
+  | { status: 'BUILDING' }
   | { status: 'DISABLED' }
   | { status: 'TEST_CRAWLER' }
 export type AutoImporterPaths = {

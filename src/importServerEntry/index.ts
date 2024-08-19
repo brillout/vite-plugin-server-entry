@@ -39,7 +39,7 @@ async function importServerEntry(outDir?: string): Promise<void | undefined> {
     }
   } else {
     // Maybe this assertion is too strict? Is it prone to race conditions?
-    assert(autoImporter.status !== 'RESET')
+    assert(autoImporter.status !== 'BUILDING')
     assert(
       // Yarn PnP
       autoImporter.status === 'UNSET' ||

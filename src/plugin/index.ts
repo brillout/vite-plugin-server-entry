@@ -110,7 +110,7 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
         if (skip) return
 
         serverIndexFilePath = config._vitePluginServerEntry.inject ? getServerIndexFilePath(config) : null
-        clearAutoImporterFile({ status: 'RESET' })
+        clearAutoImporterFile({ status: 'BUILDING' })
       },
       resolveId(id) {
         if (skip) return
