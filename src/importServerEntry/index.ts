@@ -38,11 +38,11 @@ async function importServerEntry(outDir?: string): Promise<void | undefined> {
       success = false
     }
   } else {
-    // Maybe this assertion is too strict? Is it prone to race conditions?
-    assert(autoImporter.status !== 'BUILDING')
     assert(
       // Yarn PnP
       autoImporter.status === 'UNSET' ||
+        // Build was aborted
+        autoImporter.status === 'BUILDING' ||
         // User sets config.vitePluginServerEntry._testCrawler
         autoImporter.status === 'TEST_CRAWLER'
     )
