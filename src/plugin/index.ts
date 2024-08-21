@@ -110,7 +110,8 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
         if (skip) return
 
         serverIndexFilePath = config._vitePluginServerEntry.inject ? getServerIndexFilePath(config) : null
-        clearAutoImporterFile({ status: 'BUILDING' })
+        const isInject = config._vitePluginServerEntry.inject
+        if (!isInject) clearAutoImporterFile({ status: 'BUILDING' }, config)
       },
       resolveId(id) {
         if (skip) return
@@ -146,8 +147,10 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
           const entryFileName = entry.fileName
           writeAutoImporterFile(config, entryFileName)
         } else {
-          const status = isTestCrawler ? 'TEST_CRAWLER' : 'DISABLED'
-          clearAutoImporterFile({ status })
+          if (!isInject) {
+            const status = isTestCrawler ? 'TEST_CRAWLER' : 'DISABLED'
+            clearAutoImporterFile({ status }, config)
+          }
           debugLogsBuildtime({ disabled: true, paths: null })
         }
 
@@ -288,6 +291,7 @@ function writeAutoImporterFile(config: ConfigResolved, entryFileName: string) {
   const { root } = config
   assertPosixPath(root)
   assert(!isYarnPnP())
+  assertIsNotInject(config)
   writeFileSync(
     autoImporterFilePath,
     [
@@ -304,8 +308,9 @@ function writeAutoImporterFile(config: ConfigResolved, entryFileName: string) {
     ].join('\n')
   )
 }
-function clearAutoImporterFile(autoImporter: AutoImporterCleared) {
+function clearAutoImporterFile(autoImporter: AutoImporterCleared, config: ConfigResolved) {
   if (isYarnPnP()) return
+  assertIsNotInject(config)
   writeFileSync(autoImporterFilePath, [`exports.status = '${autoImporter.status}';`, ''].join('\n'))
 }
 
@@ -454,4 +459,9 @@ function errMsgEntryRemoved(entriesMissing: string[], entriesExisting: string[])
     `Make sure your Vite config (or that of a Vite plugin) doesn't remove/overwrite server build entries.`,
     `(Found server entries: ${list(entriesExisting)}.)`
   ].join(' ')
+}
+
+function assertIsNotInject(config: ConfigResolved) {
+  const isInject = config._vitePluginServerEntry.inject
+  assert(!isInject)
 }
