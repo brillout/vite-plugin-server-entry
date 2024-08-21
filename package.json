@@ -5,15 +5,27 @@
     "@brillout/import": "^0.2.3"
   },
   "scripts": {
+    "========= Dev": "",
     "dev": "tsc --watch",
+    "========= Build": "",
     "build": "rm -rf dist/ && tsc",
+    "========= Formatting": "",
+    "format": "pnpm run format:biome",
+    "format:prettier": "git ls-files | egrep '\\.(json|js|jsx|css|ts|tsx|vue|mjs|cjs)$' | grep --invert-match package.json | xargs pnpm exec prettier --write",
+    "format:biome": "biome format --write .",
+    "format:check": "biome format . || echo Fix formatting by running: $ pnpm run format",
+    "========= Reset": "",
+    "reset": "git clean -Xdf && pnpm install && pnpm run build",
+    "========= Release": "",
     "release": "release-me patch",
     "release:minor": "release-me minor",
     "release:commit": "release-me commit"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.8.3",
     "@brillout/release-me": "^0.4.0",
     "@types/node": "^15.12.2",
+    "prettier": "^3.3.3",
     "typescript": "^4.3.5",
     "vite": "^4.5.1"
   },
