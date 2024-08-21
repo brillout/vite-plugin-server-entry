@@ -141,14 +141,21 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
 
         // Write node_modules/@brillout/vite-plugin-server-entry/dist/autoImporter.js
         const isTestCrawler = config._vitePluginServerEntry.testCrawler
-        const doNotAutoImport = isInject || isYarnPnP() || isTestCrawler
+        const isYarnPnP_ = isYarnPnP()
+        const doNotAutoImport = isInject || isYarnPnP_ || isTestCrawler
         if (!doNotAutoImport) {
           assert(!isInject && entry)
           const entryFileName = entry.fileName
           writeAutoImporterFile(config, entryFileName)
         } else {
           if (!isInject) {
-            const status = isTestCrawler ? 'TEST_CRAWLER' : 'DISABLED'
+            let status: 'TEST_CRAWLER' | 'DISABLED'
+            if (isTestCrawler) {
+              status = 'TEST_CRAWLER'
+            } else {
+              assert(isYarnPnP_)
+              status = 'DISABLED'
+            }
             clearAutoImporterFile({ status }, config)
           }
           debugLogsBuildtime({ disabled: true, paths: null })
