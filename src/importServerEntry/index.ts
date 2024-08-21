@@ -14,7 +14,7 @@ async function importServerEntry(outDir?: string): Promise<void | undefined> {
   debugLogsRuntimePre(autoImporter)
 
   assertUsage(
-    autoImporter.status !== 'DISABLED',
+    autoImporter.status !== 'DISABLED:INJECT',
     "As a library author, make sure your library doesn't call importServerEntry() when using `inject: true`"
   )
 
@@ -37,15 +37,6 @@ async function importServerEntry(outDir?: string): Promise<void | undefined> {
     if (isOutsideOfCwd) {
       success = false
     }
-  } else {
-    assert(
-      // Yarn PnP
-      autoImporter.status === 'UNSET' ||
-        // Build was aborted
-        autoImporter.status === 'BUILDING' ||
-        // User sets config.vitePluginServerEntry._testCrawler
-        autoImporter.status === 'TEST_CRAWLER'
-    )
   }
 
   if (!success) {

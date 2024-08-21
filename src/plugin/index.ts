@@ -18,7 +18,7 @@ import {
   assertUsage
 } from './utils'
 import path from 'path'
-import { writeFileSync } from 'fs'
+import { writeFileSync, readFileSync } from 'fs'
 import type { AutoImporterCleared } from '../importServerEntry/AutoImporter'
 import { serverEntryImportPromise } from '../shared/serverEntryImportPromise'
 import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase'
@@ -29,7 +29,7 @@ const autoImporterFilePath = require.resolve('../importServerEntry/autoImporter.
 const serverEntryVirtualId = 'virtual:@brillout/vite-plugin-server-entry:serverEntry'
 // https://vitejs.dev/guide/api-plugin.html#virtual-modules-convention
 const virtualIdPrefix = '\0'
-const apiVersion = 4
+const apiVersion = 5
 
 // Config set by library using @brillout/vite-plugin-server-entry (e.g. Vike or Telefunc)
 type PluginConfigProvidedByLibrary = {
@@ -110,8 +110,7 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
         if (skip) return
 
         serverIndexFilePath = config._vitePluginServerEntry.inject ? getServerIndexFilePath(config) : null
-        const isInject = config._vitePluginServerEntry.inject
-        if (!isInject) clearAutoImporterFile({ status: 'BUILDING' }, config)
+        clearAutoImporter(config)
       },
       resolveId(id) {
         if (skip) return
@@ -140,24 +139,11 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
         const entry = findServerEntry(bundle)
 
         // Write node_modules/@brillout/vite-plugin-server-entry/dist/autoImporter.js
-        const isTestCrawler = config._vitePluginServerEntry.testCrawler
-        const isYarnPnP_ = isYarnPnP()
-        const doNotAutoImport = isInject || isYarnPnP_ || isTestCrawler
-        if (!doNotAutoImport) {
+        if (!isAutoImporterDisabled(config)) {
           assert(!isInject && entry)
           const entryFileName = entry.fileName
           writeAutoImporterFile(config, entryFileName)
         } else {
-          if (!isInject) {
-            let status: 'TEST_CRAWLER' | 'DISABLED'
-            if (isTestCrawler) {
-              status = 'TEST_CRAWLER'
-            } else {
-              assert(isYarnPnP_)
-              status = 'DISABLED'
-            }
-            clearAutoImporterFile({ status }, config)
-          }
           debugLogsBuildtime({ disabled: true, paths: null })
         }
 
@@ -297,8 +283,8 @@ function writeAutoImporterFile(config: ConfigResolved, entryFileName: string) {
   const serverEntryFilePathAbsolute = path.posix.join(distServerPathAbsolute, entryFileName)
   const { root } = config
   assertPosixPath(root)
+  assert(!isAutoImporterDisabled(config))
   assert(!isYarnPnP())
-  assertIsNotInject(config)
   writeFileSync(
     autoImporterFilePath,
     [
@@ -315,10 +301,27 @@ function writeAutoImporterFile(config: ConfigResolved, entryFileName: string) {
     ].join('\n')
   )
 }
-function clearAutoImporterFile(autoImporter: AutoImporterCleared, config: ConfigResolved) {
-  if (isYarnPnP()) return
-  assertIsNotInject(config)
-  writeFileSync(autoImporterFilePath, [`exports.status = '${autoImporter.status}';`, ''].join('\n'))
+function clearAutoImporter(config: ConfigResolved) {
+  let status: AutoImporterCleared['status']
+  if (!isAutoImporterDisabled(config)) {
+    status = 'BUILDING'
+  } else {
+    const isTestCrawler = config._vitePluginServerEntry.testCrawler
+    const isInject = config._vitePluginServerEntry.inject
+    if (isYarnPnP()) {
+      return
+    } else if (isTestCrawler) {
+      status = 'DISABLED:TEST_CRAWLER'
+    } else {
+      assert(isInject)
+      status = 'DISABLED:INJECT'
+    }
+  }
+  assert(status)
+  const autoImporterContent = readFileSync(autoImporterFilePath)
+  if (autoImporterContent.includes(status)) return
+  assert(!isYarnPnP())
+  writeFileSync(autoImporterFilePath, [`exports.status = '${status}';`, ''].join('\n'))
 }
 
 /** Is `semver1` higher than `semver2`?*/
@@ -422,7 +425,6 @@ function findServerEntry<OutputBundle extends Record<string, { name: string | un
   bundle: OutputBundle
 ): OutputBundle[string] {
   const entry =
-    // prettier-ignore
     findRollupBundleEntry(serverEntryFileNameBaseAlternative, bundle) ||
     findRollupBundleEntry(serverEntryFileNameBase, bundle) ||
     findRollupBundleEntry(indexEntryName, bundle)
@@ -468,7 +470,8 @@ function errMsgEntryRemoved(entriesMissing: string[], entriesExisting: string[])
   ].join(' ')
 }
 
-function assertIsNotInject(config: ConfigResolved) {
+function isAutoImporterDisabled(config: ConfigResolved): boolean {
+  const isTestCrawler = config._vitePluginServerEntry.testCrawler
   const isInject = config._vitePluginServerEntry.inject
-  assert(!isInject)
+  return isYarnPnP() || isInject || isTestCrawler
 }

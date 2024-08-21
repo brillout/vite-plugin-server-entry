@@ -6,11 +6,12 @@ export type AutoImporter =
       paths: AutoImporterPaths
     }
 // prettier-ignore
+// biome-ignore format:
 export type AutoImporterCleared =
   | { status: 'UNSET' }
   | { status: 'BUILDING' }
-  | { status: 'DISABLED' }
-  | { status: 'TEST_CRAWLER' }
+  | { status: 'DISABLED:INJECT' }
+  | { status: 'DISABLED:TEST_CRAWLER' }
 export type AutoImporterPaths = {
   autoImporterFilePathOriginal: string
   autoImporterFileDirActual: string
