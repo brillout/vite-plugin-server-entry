@@ -35,18 +35,19 @@ const apiVersion = 5
 type PluginConfigProvidedByLibrary = {
   getImporterCode: () => string
   libraryName: string
-  inject?: boolean
+  inject?: boolean | string[]
 }
 // Config set by end user (e.g. Vike or Telefunc user)
 type PluginConfigProvidedByUser = {
   autoImport?: boolean
+  inject?: boolean | string[]
 }
 // The resolved aggregation of the config set by the user, and all the configs set by libraries (e.g. the config set by Vike and the config set by Telefunc).
 type PluginConfigResolved = {
   libraries: Library[]
   apiVersion: number
   autoImport: boolean
-  inject: boolean
+  inject: boolean | string[]
 }
 type Library = {
   libraryName: string
@@ -73,7 +74,7 @@ type ConfigResolved = ConfigVite & {
 function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrary): Plugin_[] {
   const pluginName = `@brillout/vite-plugin-server-entry:${pluginConfigProvidedByLibrary.libraryName.toLowerCase()}`
   let config: ConfigResolved
-  let serverIndexFilePath: string | null
+  let injectEntries: string[] | null
   let library: Library
   let skip: boolean
   let injectDone = false
@@ -108,7 +109,7 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
       buildStart() {
         if (skip) return
 
-        serverIndexFilePath = config._vitePluginServerEntry.inject ? getServerIndexFilePath(config) : null
+        injectEntries = config._vitePluginServerEntry.inject ? getInjectEntries(config) : null
         clearAutoImporter(config)
       },
       resolveId(id) {
@@ -150,8 +151,8 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
         if (skip) return
 
         if (!config._vitePluginServerEntry.inject) return
-        assert(serverIndexFilePath)
-        if (id !== serverIndexFilePath) return
+        assert(injectEntries)
+        if (!injectEntries.includes(id)) return
         {
           const moduleInfo = this.getModuleInfo(id)
           assert(moduleInfo?.isEntry)
@@ -208,12 +209,24 @@ function resolveConfig(
     autoImport: true,
     inject: false
   }
-  if (pluginConfigProvidedByLibrary.inject) {
-    pluginConfigResolved.inject = true
-  }
   if (pluginConfigProvidedByUser.autoImport !== undefined) {
     pluginConfigResolved.autoImport = pluginConfigProvidedByUser.autoImport
   }
+  const setInject = (inject?: boolean | string[]) => {
+    if (!inject) return
+    if (inject === true) {
+      if (!pluginConfigResolved.inject) {
+        pluginConfigResolved.inject = true
+      }
+      return
+    }
+    if (!Array.isArray(pluginConfigResolved.inject)) {
+      pluginConfigResolved.inject = []
+    }
+    pluginConfigResolved.inject.push(...inject)
+  }
+  setInject(pluginConfigProvidedByLibrary.inject)
+  setInject(pluginConfigProvidedByUser.inject)
   // @ts-expect-error workaround for previously broken api version assertion
   pluginConfigResolved.configVersion = 1
 
@@ -410,6 +423,7 @@ function findServerEntry<OutputBundle extends Record<string, { name: string | un
   const entry =
     findRollupBundleEntry(serverEntryFileNameBaseAlternative, bundle) ||
     findRollupBundleEntry(serverEntryFileNameBase, bundle) ||
+    // Does it make sense? Shouldn't it be removed, or be the list all inject entries?
     findRollupBundleEntry(indexEntryName, bundle)
 
   assertUsage(
@@ -428,18 +442,27 @@ function findServerEntry<OutputBundle extends Record<string, { name: string | un
   return entry
 }
 
-function getServerIndexFilePath(config: ConfigVite): string {
+function getInjectEntries(config: ConfigResolved): string[] {
+  assert(config._vitePluginServerEntry.inject !== false)
   const entries = normalizeRollupInput(config.build.rollupOptions.input)
-  let serverEntryFilePath = entries[indexEntryName]
-  if (!serverEntryFilePath) {
+  const injectEntryNames =
+    config._vitePluginServerEntry.inject === true ? [indexEntryName] : config._vitePluginServerEntry.inject
+  const injectEntries = injectEntryNames
+    .map((entryName) => {
+      let entryFilePath = entries[entryName]
+      if (!entryFilePath) return null
+      entryFilePath = require.resolve(entryFilePath)
+      // Needs to be absolute, otherwise it won't match the `id` in `transform(id)`
+      assert(path.isAbsolute(entryFilePath))
+      entryFilePath = toPosixPath(entryFilePath)
+      return entryFilePath
+    })
+    .filter((e) => e !== null)
+  if (injectEntries.length === 0) {
     const entryNames = Object.keys(entries)
-    assertUsage(false, errMsgEntryRemoved([indexEntryName], entryNames))
+    assertUsage(false, errMsgEntryRemoved(injectEntryNames, entryNames))
   }
-  serverEntryFilePath = require.resolve(serverEntryFilePath)
-  // Needs to be absolute, otherwise it won't match the `id` in `transform(id)`
-  assert(path.isAbsolute(serverEntryFilePath))
-  serverEntryFilePath = toPosixPath(serverEntryFilePath)
-  return serverEntryFilePath
+  return injectEntries
 }
 
 function errMsgEntryRemoved(entriesMissing: string[], entriesExisting: string[]) {
@@ -455,5 +478,5 @@ function errMsgEntryRemoved(entriesMissing: string[], entriesExisting: string[])
 
 function isAutoImportDisabled(config: ConfigResolved): boolean {
   const { inject, autoImport } = config._vitePluginServerEntry
-  return isYarnPnP() || inject || !autoImport
+  return isYarnPnP() || !!inject || !autoImport
 }
