@@ -1,5 +1,4 @@
 export { serverEntryPlugin }
-export { findServerEntry }
 export type { ConfigVitePluginServerEntry }
 
 import type { Plugin, ResolvedConfig as ConfigVite } from 'vite'
@@ -134,10 +133,9 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
           assert(injectDone)
         }
 
-        const entry = findServerEntry(bundle)
-
         // Write node_modules/@brillout/vite-plugin-server-entry/dist/autoImporter.js
         if (!isAutoImportDisabled(config)) {
+          const entry = findServerEntry(bundle)
           assert(!inject && entry)
           const entryFileName = entry.fileName
           writeAutoImporterFile(config, entryFileName)
@@ -431,14 +429,15 @@ function getLibraryApiVersion(library: Library) {
   return apiVersionLib
 }
 
+// TODO/breaking-change: don't export this as as Vike doesn't / no one needs it anymore
+export { findServerEntry }
+
 function findServerEntry<OutputBundle extends Record<string, { name: string | undefined }>>(
   bundle: OutputBundle
 ): OutputBundle[string] {
   const entry =
     findRollupBundleEntry(serverEntryFileNameBaseAlternative, bundle) ||
-    findRollupBundleEntry(serverEntryFileNameBase, bundle) ||
-    // Does it make sense? Shouldn't it be removed, or be the list all inject entries?
-    findRollupBundleEntry(indexEntryName, bundle)
+    findRollupBundleEntry(serverEntryFileNameBase, bundle)
 
   assertUsage(
     entry,
@@ -446,8 +445,7 @@ function findServerEntry<OutputBundle extends Record<string, { name: string | un
       [
         //
         serverEntryFileNameBase,
-        serverEntryFileNameBaseAlternative,
-        indexEntryName
+        serverEntryFileNameBaseAlternative
       ],
       Object.keys(bundle)
     )
