@@ -217,7 +217,7 @@ function resolveConfig(
   pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrary
 ) {
   assert(viteIsSSR(configUnresolved))
-  const pluginConfigProvidedByUser = configUnresolved.vitePluginServerEntry
+  const pluginConfigProvidedByUser = configUnresolved.vitePluginServerEntry ?? {}
 
   const pluginConfigResolved: PluginConfigResolved = configUnresolved._vitePluginServerEntry ?? {
     libraries: [],
@@ -228,7 +228,7 @@ function resolveConfig(
   if (pluginConfigProvidedByLibrary.inject) {
     pluginConfigResolved.inject = true
   }
-  if (pluginConfigProvidedByUser?._testCrawler) {
+  if (pluginConfigProvidedByUser._testCrawler) {
     pluginConfigResolved.testCrawler = true
   }
   // @ts-expect-error workaround for previously broken api version assertion
