@@ -14,7 +14,7 @@ async function importServerEntry(outDir?: string): Promise<void | undefined> {
   debugLogsRuntimePre(autoImporter)
 
   assertUsage(
-    autoImporter.status !== 'DISABLED:INJECT',
+    autoImporter.status !== 'DISABLED_BY_INJECT',
     "As a library author, make sure your library doesn't call importServerEntry() when using `inject: true`"
   )
 

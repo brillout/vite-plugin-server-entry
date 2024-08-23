@@ -131,25 +131,25 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
       generateBundle(_rollupOptions, bundle) {
         if (skip) return
 
-        const isInject = config._vitePluginServerEntry.inject
-        if (isInject) {
+        const { inject } = config._vitePluginServerEntry
+        if (inject) {
           assert(injectDone)
         }
 
         const entry = findServerEntry(bundle)
 
         // Write node_modules/@brillout/vite-plugin-server-entry/dist/autoImporter.js
-        if (!isAutoImporterDisabled(config)) {
-          assert(!isInject && entry)
+        if (!isAutoImportDisabled(config)) {
+          assert(!inject && entry)
           const entryFileName = entry.fileName
           writeAutoImporterFile(config, entryFileName)
         } else {
           debugLogsBuildtime({ disabled: true, paths: null })
         }
 
-        if (!isInject) {
+        if (!inject) {
           ;['importBuild.cjs', 'importBuild.mjs', 'importBuild.js'].forEach((fileName) => {
-            assert(!isInject && entry)
+            assert(!inject && entry)
             const entryFileName = entry.fileName
             this.emitFile({
               fileName,
@@ -283,7 +283,7 @@ function writeAutoImporterFile(config: ConfigResolved, entryFileName: string) {
   const serverEntryFilePathAbsolute = path.posix.join(distServerPathAbsolute, entryFileName)
   const { root } = config
   assertPosixPath(root)
-  assert(!isAutoImporterDisabled(config))
+  assert(!isAutoImportDisabled(config))
   assert(!isYarnPnP())
   writeFileSync(
     autoImporterFilePath,
@@ -303,18 +303,17 @@ function writeAutoImporterFile(config: ConfigResolved, entryFileName: string) {
 }
 function clearAutoImporter(config: ConfigResolved) {
   let status: AutoImporterCleared['status']
-  if (!isAutoImporterDisabled(config)) {
+  if (!isAutoImportDisabled(config)) {
     status = 'BUILDING'
   } else {
-    const { autoImport } = config._vitePluginServerEntry
-    const isInject = config._vitePluginServerEntry.inject
+    const { inject, autoImport } = config._vitePluginServerEntry
     if (isYarnPnP()) {
       return
     } else if (!autoImport) {
       status = 'DISABLED_BY_USER'
     } else {
-      assert(isInject)
-      status = 'DISABLED:INJECT'
+      assert(inject)
+      status = 'DISABLED_BY_INJECT'
     }
   }
   assert(status)
@@ -470,8 +469,7 @@ function errMsgEntryRemoved(entriesMissing: string[], entriesExisting: string[])
   ].join(' ')
 }
 
-function isAutoImporterDisabled(config: ConfigResolved): boolean {
-  const { autoImport } = config._vitePluginServerEntry
-  const isInject = config._vitePluginServerEntry.inject
-  return isYarnPnP() || isInject || !autoImport
+function isAutoImportDisabled(config: ConfigResolved): boolean {
+  const { inject, autoImport } = config._vitePluginServerEntry
+  return isYarnPnP() || inject || !autoImport
 }
