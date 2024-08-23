@@ -40,14 +40,13 @@ type PluginConfigProvidedByLibrary = {
 }
 // Config set by end user (e.g. Vike or Telefunc user)
 type PluginConfigProvidedByUser = {
-  // Only used by https://github.com/brillout/vite-plugin-ssr/blob/70ab60b502a685e39e65417a011c134fed1b5bd5/test/disableAutoImporter/vite.config.js#L7
-  _testCrawler?: boolean
+  autoImport?: boolean
 }
 // The resolved aggregation of the config set by the user, and all the configs set by libraries (e.g. the config set by Vike and the config set by Telefunc).
 type PluginConfigResolved = {
   libraries: Library[]
   apiVersion: number
-  testCrawler: boolean
+  autoImport: boolean
   inject: boolean
 }
 type Library = {
@@ -222,14 +221,14 @@ function resolveConfig(
   const pluginConfigResolved: PluginConfigResolved = configUnresolved._vitePluginServerEntry ?? {
     libraries: [],
     apiVersion,
-    testCrawler: false,
+    autoImport: true,
     inject: false
   }
   if (pluginConfigProvidedByLibrary.inject) {
     pluginConfigResolved.inject = true
   }
-  if (pluginConfigProvidedByUser._testCrawler) {
-    pluginConfigResolved.testCrawler = true
+  if (pluginConfigProvidedByUser.autoImport !== undefined) {
+    pluginConfigResolved.autoImport = pluginConfigProvidedByUser.autoImport
   }
   // @ts-expect-error workaround for previously broken api version assertion
   pluginConfigResolved.configVersion = 1
@@ -307,12 +306,12 @@ function clearAutoImporter(config: ConfigResolved) {
   if (!isAutoImporterDisabled(config)) {
     status = 'BUILDING'
   } else {
-    const isTestCrawler = config._vitePluginServerEntry.testCrawler
+    const { autoImport } = config._vitePluginServerEntry
     const isInject = config._vitePluginServerEntry.inject
     if (isYarnPnP()) {
       return
-    } else if (isTestCrawler) {
-      status = 'DISABLED:TEST_CRAWLER'
+    } else if (!autoImport) {
+      status = 'DISABLED_BY_USER'
     } else {
       assert(isInject)
       status = 'DISABLED:INJECT'
@@ -472,7 +471,7 @@ function errMsgEntryRemoved(entriesMissing: string[], entriesExisting: string[])
 }
 
 function isAutoImporterDisabled(config: ConfigResolved): boolean {
-  const isTestCrawler = config._vitePluginServerEntry.testCrawler
+  const { autoImport } = config._vitePluginServerEntry
   const isInject = config._vitePluginServerEntry.inject
-  return isYarnPnP() || isInject || isTestCrawler
+  return isYarnPnP() || isInject || !autoImport
 }
