@@ -1,3 +1,12 @@
+## [0.4.10](https://github.com/brillout/vite-plugin-server-entry/compare/v0.4.9...v0.4.10) (2024-08-23)
+
+
+### Bug Fixes
+
+* remove unused logic ([e3ae31d](https://github.com/brillout/vite-plugin-server-entry/commit/e3ae31dc1c0ba187fff06c2e4ac6ac12b16bfe4d))
+
+
+
 ## [0.4.9](https://github.com/brillout/vite-plugin-server-entry/compare/v0.4.8...v0.4.9) (2024-08-23)
 
 
