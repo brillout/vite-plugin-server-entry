@@ -100,16 +100,8 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
         applyPluginConfigProvidedByUser(config)
 
         if (!config._vitePluginServerEntry.inject) {
-          const entries = normalizeRollupInput(config.build.rollupOptions.input)
-          assert(
-            entries[serverEntryFileNameBase] !== serverEntryVirtualId &&
-              entries[serverEntryFileNameBaseAlternative] !== serverEntryVirtualId
-          )
-          const fileNameBase = !entries[serverEntryFileNameBase]
-            ? serverEntryFileNameBase
-            : serverEntryFileNameBaseAlternative
-          assert(!entries[fileNameBase])
-          config.build.rollupOptions.input = injectRollupInputs({ [fileNameBase]: serverEntryVirtualId }, config)
+          const serverEntryName = getServerEntryName(config)
+          config.build.rollupOptions.input = injectRollupInputs({ [serverEntryName]: serverEntryVirtualId }, config)
         }
       },
       buildStart() {
@@ -201,6 +193,19 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
 }
 // Avoid multiple Vite versions mismatch
 type Plugin_ = any
+
+function getServerEntryName(config: ConfigResolved) {
+  const entries = normalizeRollupInput(config.build.rollupOptions.input)
+  assert(
+    entries[serverEntryFileNameBase] !== serverEntryVirtualId &&
+      entries[serverEntryFileNameBaseAlternative] !== serverEntryVirtualId
+  )
+  const serverEntryName = !entries[serverEntryFileNameBase]
+    ? serverEntryFileNameBase
+    : serverEntryFileNameBaseAlternative
+  assert(!entries[serverEntryName])
+  return serverEntryName
+}
 
 function resolveConfig(
   configUnresolved: ConfigUnresolved,
