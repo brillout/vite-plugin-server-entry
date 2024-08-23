@@ -1,3 +1,21 @@
+## [0.4.9](https://github.com/brillout/vite-plugin-server-entry/compare/v0.4.8...v0.4.9) (2024-08-23)
+
+
+### Bug Fixes
+
+* do not write node_modules/.../autoImporter.js upon inject mode ([cbf1306](https://github.com/brillout/vite-plugin-server-entry/commit/cbf1306e2fc758cb4580876290c78b19fe60a2c8))
+* improve inject setting ([e442da1](https://github.com/brillout/vite-plugin-server-entry/commit/e442da11da2812febf89b28d1a38ad56015c0e62))
+* remove deprecated dist/server/importBuild.js ([8c1f978](https://github.com/brillout/vite-plugin-server-entry/commit/8c1f978d60728e6bf908221a519687e52d4520aa))
+* resolve user configs later ([54b9807](https://github.com/brillout/vite-plugin-server-entry/commit/54b9807a4ed545ca2963730ee39ecb2a31fd08b8))
+
+
+### Features
+
+* ConfigVitePluginServerEntry ([a56d728](https://github.com/brillout/vite-plugin-server-entry/commit/a56d7280ce979954e4add1d6b3c3f4c55b58b0b1))
+* new setting config.vitePluginServerEntry.autoImport (fix [#12](https://github.com/brillout/vite-plugin-server-entry/issues/12)) ([e2b9ca9](https://github.com/brillout/vite-plugin-server-entry/commit/e2b9ca9fe8f4224c6965f0ac37980aeafb686f7b))
+
+
+
 ## [0.4.8](https://github.com/brillout/vite-plugin-server-entry/compare/v0.4.7...v0.4.8) (2024-08-19)
 
 
