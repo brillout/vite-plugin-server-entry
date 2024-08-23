@@ -29,6 +29,7 @@ const autoImporterFilePath = require.resolve('../importServerEntry/autoImporter.
 const serverEntryVirtualId = 'virtual:@brillout/vite-plugin-server-entry:serverEntry'
 // https://vitejs.dev/guide/api-plugin.html#virtual-modules-convention
 const virtualIdPrefix = '\0'
+// Using the semver major to determine compatible versions is a much inferior solution. Because, for example, when the user updates Vike > @brillout/vite-plugin-server-entry from version 0.4.8 (`apiVersion===4`) to 0.4.10 (`apiVersion===5`) then things just works because Telefunc > @brillout/vite-plugin-server-entry also updates to `0.4.10`. On the other hand, when the user updates Vike > @brillout/vite-plugin-server-entry to 0.5.0 then this won't update Telefunc > @brillout/vite-plugin-server-entry which is stuck to 0.4.x and the user is forced to update Telefunc.
 const apiVersion = 5
 
 // Config set by library using @brillout/vite-plugin-server-entry (e.g. Vike or Telefunc)
