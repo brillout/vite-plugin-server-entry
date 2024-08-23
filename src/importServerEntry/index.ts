@@ -4,7 +4,6 @@ import { getCwd, assert, assertUsage, toPosixPath, assertPosixPath, requireResol
 import { import_ } from '@brillout/import'
 import type { AutoImporter, AutoImporterPaths } from './AutoImporter'
 import { debugLogsRuntimePost, debugLogsRuntimePre } from './debugLogsRuntime'
-import { serverEntryImportPromise } from '../shared/serverEntryImportPromise'
 import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase'
 import { DEBUG } from '../shared/debug'
 
@@ -24,7 +23,6 @@ async function importServerEntry(outDir?: string): Promise<void | undefined> {
   if (autoImporter.status === 'SET') {
     try {
       await autoImporter.loadServerEntry()
-      await (globalThis as any)[serverEntryImportPromise]
       success = true
     } catch (err) {
       if (DEBUG) {
@@ -142,7 +140,6 @@ async function crawlServerEntryFileWithNodeJs(outDir?: string): Promise<boolean>
   }
 
   await import_(serverEntryFilePath)
-  await (globalThis as any)[serverEntryImportPromise]
   return true
 }
 

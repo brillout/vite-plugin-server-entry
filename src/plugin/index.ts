@@ -20,7 +20,6 @@ import {
 import path from 'path'
 import { writeFileSync, readFileSync } from 'fs'
 import type { AutoImporterCleared } from '../importServerEntry/AutoImporter'
-import { serverEntryImportPromise } from '../shared/serverEntryImportPromise'
 import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase'
 import { debugLogsBuildtime } from './debugLogsBuildTime'
 
@@ -145,21 +144,6 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
           writeAutoImporterFile(config, entryFileName)
         } else {
           debugLogsBuildtime({ disabled: true, paths: null })
-        }
-
-        if (!inject) {
-          ;['importBuild.cjs', 'importBuild.mjs', 'importBuild.js'].forEach((fileName) => {
-            assert(!inject && entry)
-            const entryFileName = entry.fileName
-            this.emitFile({
-              fileName,
-              type: 'asset',
-              source: [
-                `globalThis.${serverEntryImportPromise} = import('./${entryFileName}');`,
-                `console.warn("[Warning] The server entry has been renamed from dist/server/importBuild.{cjs,mjs,js} to dist/server/entry.{cjs,mjs,js} — update your import('../path/to/dist/server/importBuild.{cjs,mjs,js}') accordingly.");`
-              ].join('\n')
-            })
-          })
         }
       },
       transform(code, id) {
