@@ -97,6 +97,8 @@ function serverEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedBy
 
         assertApiVersions(config, pluginConfigProvidedByLibrary.libraryName)
 
+        applyPluginConfigProvidedByUser(config)
+
         if (!config._vitePluginServerEntry.inject) {
           const entries = normalizeRollupInput(config.build.rollupOptions.input)
           assert(
@@ -205,7 +207,6 @@ function resolveConfig(
   pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrary
 ) {
   assert(viteIsSSR(configUnresolved))
-  const pluginConfigProvidedByUser = configUnresolved.vitePluginServerEntry ?? {}
 
   const pluginConfigResolved: PluginConfigResolved = configUnresolved._vitePluginServerEntry ?? {
     libraries: [],
@@ -213,24 +214,7 @@ function resolveConfig(
     autoImport: true,
     inject: false
   }
-  if (pluginConfigProvidedByUser.autoImport !== undefined) {
-    pluginConfigResolved.autoImport = pluginConfigProvidedByUser.autoImport
-  }
-  const setInject = (inject?: boolean | string[]) => {
-    if (!inject) return
-    if (inject === true) {
-      if (!pluginConfigResolved.inject) {
-        pluginConfigResolved.inject = true
-      }
-      return
-    }
-    if (!Array.isArray(pluginConfigResolved.inject)) {
-      pluginConfigResolved.inject = []
-    }
-    pluginConfigResolved.inject.push(...inject)
-  }
-  setInject(pluginConfigProvidedByLibrary.inject)
-  setInject(pluginConfigProvidedByUser.inject)
+  setInjectConfig(pluginConfigResolved, pluginConfigProvidedByLibrary.inject)
   // @ts-expect-error workaround for previously broken api version assertion
   pluginConfigResolved.configVersion = 1
 
@@ -248,6 +232,27 @@ function resolveConfig(
   const config: ConfigResolved = configUnresolved
 
   return { config, library }
+}
+function applyPluginConfigProvidedByUser(config: ConfigResolved & ConfigUnresolved) {
+  const pluginConfigResolved: PluginConfigResolved = config._vitePluginServerEntry
+  const pluginConfigProvidedByUser = config.vitePluginServerEntry ?? {}
+  setInjectConfig(pluginConfigResolved, pluginConfigProvidedByUser.inject)
+  if (pluginConfigProvidedByUser.autoImport !== undefined) {
+    pluginConfigResolved.autoImport = pluginConfigProvidedByUser.autoImport
+  }
+}
+function setInjectConfig(pluginConfigResolved: PluginConfigResolved, inject?: boolean | string[]) {
+  if (!inject) return
+  if (inject === true) {
+    if (!pluginConfigResolved.inject) {
+      pluginConfigResolved.inject = true
+    }
+    return
+  }
+  if (!Array.isArray(pluginConfigResolved.inject)) {
+    pluginConfigResolved.inject = []
+  }
+  pluginConfigResolved.inject.push(...inject)
 }
 
 function isLeaderPluginInstance(config: ConfigResolved, library: Library) {
