@@ -1,5 +1,6 @@
 export { serverEntryPlugin }
 export { findServerEntry }
+export type { ConfigVitePluginServerEntry }
 
 import type { Plugin, ResolvedConfig as ConfigVite } from 'vite'
 import {
@@ -54,6 +55,9 @@ type Library = {
   apiVersion: number
   pluginVersion: string
   getImporterCode: () => string
+}
+type ConfigVitePluginServerEntry = {
+  vitePluginServerEntry?: PluginConfigProvidedByUser
 }
 
 type ConfigUnresolved = ConfigVite & {
