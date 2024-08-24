@@ -19,12 +19,12 @@ import {
 } from './utils'
 import path from 'path'
 import { writeFileSync, readFileSync } from 'fs'
-import type { AutoImporterCleared } from '../importServerEntry/AutoImporter'
+import type { AutoImporterCleared } from '../runtime/AutoImporter'
 import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase'
 import { debugLogsBuildtime } from './debugLogsBuildTime'
 
 const indexEntryName = 'index'
-const autoImporterFilePath = require.resolve('../importServerEntry/autoImporter.js')
+const autoImporterFilePath = require.resolve('../runtime/autoImporter.js')
 const serverEntryVirtualId = 'virtual:@brillout/vite-plugin-server-entry:serverEntry'
 // https://vitejs.dev/guide/api-plugin.html#virtual-modules-convention
 const virtualIdPrefix = '\0'
@@ -70,7 +70,7 @@ type ConfigResolved = ConfigVite & {
 /**
  * This plugin does two things:
  *  - Generates a "server entry" file at `dist/server/entry.js`.
- *  - Generates a "auto importer" file at `node_modules/@brillout/vite-plugin-server-entry/dist/importServerEntry/autoImporter.js`.
+ *  - Generates a "auto importer" file at `node_modules/@brillout/vite-plugin-server-entry/dist/runtime/autoImporter.js`.
  *
  * See https://github.com/brillout/vite-plugin-server-entry#what-it-does for more information.
  */
@@ -429,7 +429,9 @@ function getLibraryApiVersion(library: Library) {
   return apiVersionLib
 }
 
-// TODO/breaking-change: don't export this as as Vike doesn't / no one needs it anymore
+// TODO/breaking-change: remove outdated exports.
+// - Remove `export { findServerEntry }` since Vike doesn't / no one needs it anymore
+// - Also remove package.json#exports["./plugin.js"] and package.json#exports["./importServerEntry.js"]
 export { findServerEntry }
 
 function findServerEntry<OutputBundle extends Record<string, { name: string | undefined }>>(

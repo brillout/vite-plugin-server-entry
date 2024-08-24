@@ -5,6 +5,12 @@
   "dependencies": {
     "@brillout/import": "^0.2.3"
   },
+  "exports": {
+    "./plugin": "./dist/plugin/index.js",
+    "./runtime": "./dist/runtime/index.js",
+    "./plugin.js": "./dist/plugin/index.js",
+    "./importServerEntry.js": "./dist/runtime/index.js"
+  },
   "scripts": {
     "========= Dev": "",
     "dev": "tsc --watch",
@@ -30,10 +36,24 @@
     "typescript": "^5.5.4",
     "vite": "^4.5.1"
   },
+  "typesVersions": {
+    "*": {
+      "plugin": [
+        "./dist/plugin/index.d.ts"
+      ],
+      "runtime": [
+        "./dist/runtime/index.d.ts"
+      ],
+      "plugin.js": [
+        "./dist/plugin/index.d.ts"
+      ],
+      "importServerEntry.js": [
+        "./dist/runtime/index.d.ts"
+      ]
+    }
+  },
   "files": [
-    "dist/",
-    "*.d.ts",
-    "*.js"
+    "dist/"
   ],
   "license": "MIT",
   "publishConfig": {
