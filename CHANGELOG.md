@@ -1,3 +1,12 @@
+## [0.4.11](https://github.com/brillout/vite-plugin-server-entry/compare/v0.4.10...v0.4.11) (2024-08-24)
+
+
+### Bug Fixes
+
+* simplify exports and code structure ([661ca2b](https://github.com/brillout/vite-plugin-server-entry/commit/661ca2b500a377b2b089082360c4f1b56403f4b0))
+
+
+
 ## [0.4.10](https://github.com/brillout/vite-plugin-server-entry/compare/v0.4.9...v0.4.10) (2024-08-23)
 
 
