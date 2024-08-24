@@ -1,6 +1,7 @@
 {
   "name": "@brillout/vite-plugin-server-entry",
   "version": "0.4.10",
+  "repository": "https://github.com/brillout/vite-plugin-server-entry",
   "dependencies": {
     "@brillout/import": "^0.2.3"
   },
@@ -35,7 +36,6 @@
     "*.js"
   ],
   "license": "MIT",
-  "repository": "https://github.com/brillout/vite-plugin-server-entry",
   "publishConfig": {
     "access": "public"
   }
