@@ -1,5 +1,9 @@
 export { crawlServerEntry }
 
+// Use Node.js to search for the file dist/server/entry.js which we use only as fallback if:
+// - the server entry isn't injected (the setting `inject` is `false`), and
+// - the auto importer doesn't work (Yarn PnP users and pnpm edge cases).
+
 import { getCwd, assert, assertUsage, assertPosixPath, requireResolve, isWebpackResolve } from './utils'
 import { import_ } from '@brillout/import'
 import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase'
