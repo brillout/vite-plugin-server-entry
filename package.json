@@ -9,6 +9,7 @@
     "./plugin": "./dist/plugin/index.js",
     "./runtime": "./dist/runtime/index.js",
     "./plugin.js": "./dist/plugin/index.js",
+    "./importServerEntry": "./dist/runtime/index.js",
     "./importServerEntry.js": "./dist/runtime/index.js"
   },
   "scripts": {
@@ -46,6 +47,9 @@
       ],
       "plugin.js": [
         "./dist/plugin/index.d.ts"
+      ],
+      "importServerEntry": [
+        "./dist/runtime/index.d.ts"
       ],
       "importServerEntry.js": [
         "./dist/runtime/index.d.ts"
