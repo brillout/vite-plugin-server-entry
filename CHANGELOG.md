@@ -1,3 +1,12 @@
+## [0.4.12](https://github.com/brillout/vite-plugin-server-entry/compare/v0.4.11...v0.4.12) (2024-08-25)
+
+
+### Bug Fixes
+
+* define package.json["exports"]["importServerEntry"] ([14ae910](https://github.com/brillout/vite-plugin-server-entry/commit/14ae9102fc92dd14fd7779e88c5d6e3b014699c8))
+
+
+
 ## [0.4.11](https://github.com/brillout/vite-plugin-server-entry/compare/v0.4.10...v0.4.11) (2024-08-24)
 
 
