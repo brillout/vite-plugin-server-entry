@@ -18,7 +18,7 @@
 
 Most of the time `@brillout/vite-plugin-server-entry` is able to automatically import the server entry `dist/server/entry.js` &mdash; there is nothing for you to do.
 
-But `@brillout/vite-plugin-server-entry` doesn't work if you use Yarn PnP and you'll keep getting following error.
+But it doesn't work with Yarn PnP and certain Docker configurations. You'll keep getting the following error.
 
 ```bash
 [@brillout/vite-plugin-server-entry][Wrong Usage] Cannot find server entry. (Re-)build your app
@@ -26,7 +26,10 @@ and try again. If you still get this error, then you may need to manually import
 ```
 
 > [!WARNING]
-> If you aren't using Yarn PnP and you keep getting this error, then it's a bug that should be fixed &mdash; [file a bug report](https://github.com/brillout/vite-plugin-server-entry/issues/new).
+> If you aren't using Yarn PnP nor Docker and you keep getting this error, then it's most likely a bug &mdash; [please file a bug report](https://github.com/brillout/vite-plugin-server-entry/issues/new).
+
+> [!NOTE]
+> More precisely, it doesn't work if your `node_modules/` directory is immutable or if you remove/reset `node_modules/` *after* building your app for production. For more information, see [What it does](#what-it-does).
 
 The workaround is to manually import the server entry:
 
