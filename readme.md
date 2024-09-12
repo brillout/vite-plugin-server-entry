@@ -18,10 +18,9 @@
 
 Most of the time `@brillout/vite-plugin-server-entry` is able to automatically import the server entry `dist/server/entry.js` &mdash; there is nothing for you to do.
 
-But `@brillout/vite-plugin-server-entry` doesn't work if you use Yarn PnP and you'll keep getting following error. The workaround is to manually import the server entry.
+But `@brillout/vite-plugin-server-entry` doesn't work if you use Yarn PnP and you'll keep getting following error.
 
 ```bash
-# Yarn PnP users always get this error:
 [@brillout/vite-plugin-server-entry][Wrong Usage] Cannot find server entry. (Re-)build your app
 and try again. If you still get this error, then you may need to manually import the server entry.
 ```
@@ -29,7 +28,7 @@ and try again. If you still get this error, then you may need to manually import
 > [!WARNING]
 > If you aren't using Yarn PnP and you keep getting this error, then it's a bug that should be fixed &mdash; [file a bug report](https://github.com/brillout/vite-plugin-server-entry/issues/new).
 
-To manually import the server entry:
+The workaround is to manually import the server entry:
 
 ```js
 // server.js
@@ -41,7 +40,7 @@ import './path/to/dist/server/entry.js'
 // ...
 ```
 
-Make sure to import `dist/server/entry.js` only in production. See [Conditional manual import](https://github.com/brillout/vite-plugin-server-entry/issues/6) if your production and development share the same server.
+Make sure to import `dist/server/entry.js` only in production, see [Conditional manual import](https://github.com/brillout/vite-plugin-server-entry/issues/6).
 
 If the file extension is `entry.mjs`, import accordingly:
 
@@ -58,7 +57,7 @@ If you use [`vite.config.js` > `build.outDir`](https://vitejs.dev/config/build-o
 ## What it does
 
 > [!NOTE]
-> This section is meant for library authors. As a user, you don't need to read this. If you have a problem, read [Manual import](#Manual-import) instead or reach out to maintainers.
+> You usually don't need to read this. If you have a problem, reading [Manual import](#Manual-import) is usually enough.
 
 `@brillout/vite-plugin-server-entry` does two things:
  - Generates a "server entry" file at `dist/server/entry.js`.
