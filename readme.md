@@ -18,7 +18,7 @@
 
 Usually `@brillout/vite-plugin-server-entry` is able to automatically import the server entry `dist/server/entry.js`.
 
-But it doesn't work with Yarn PnP and certain Docker configurations. You'll keep getting the following error.
+But it doesn't work with Yarn PnP and certain Docker configurations. You'll keep getting the following error:
 
 ```bash
 [@brillout/vite-plugin-server-entry][Wrong Usage] Cannot find server entry. (Re-)build your
