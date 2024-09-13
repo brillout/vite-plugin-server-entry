@@ -49,7 +49,7 @@ import './path/to/dist/server/entry.js'
 Make sure to import `dist/server/entry.js` only in production, see [Conditional manual import](https://github.com/brillout/vite-plugin-server-entry/issues/6).
 
 > [!NOTE]
-> The file extension may be different (e.g. `.mjs` instead of `.js`), and the build directory may be located somewhere else (e.g. `build/` instead of `dist/`) for example if you use [`vite.config.js` > `build.outDir`](https://vitejs.dev/config/build-options.html#build-outdir).
+> The file extension may be different than `.js` (e.g. `.mjs`), and the build directory location is determined by [`vite.config.js` > `build.outDir`](https://vitejs.dev/config/build-options.html#build-outdir) which may be different than `dist/` (e.g. `build/`).
 >
 > ```diff
 > - import './path/to/dist/server/entry.js
