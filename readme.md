@@ -18,7 +18,7 @@
 
 ## Manual import
 
-Normally, the `dist/server/entry.js` file is automatically imported.
+Normally the `dist/server/entry.js` file is automatically imported.
 
 But this automatic importing doesn't work with Yarn PnP and certain Docker configurations, and you'll keep getting the following error:
 
@@ -36,9 +36,12 @@ The workaround is to manually import `dist/server/entry.js` in your server code.
 // Add this import at the begining of your server code
 import './path/to/dist/server/entry.js'
 
-// Your server code (Express.js, Hono, Vercel Serverless/Edge Function, Cloudflare Worker, ...)
+// Your server code (Express.js, Hono, Cloudflare Worker, Vercel, ...)
 // ...
 ```
+
+> [!NOTE]
+> If you use [Vike](https://vike.dev/) then make sure to import `dist/server/entry.js` before running [`renderPage()`](https://vike.dev/renderPage).
 
 Make sure to import `dist/server/entry.js` only in production, see [Conditional manual import](https://github.com/brillout/vite-plugin-server-entry/issues/6).
 
@@ -46,8 +49,8 @@ Make sure to import `dist/server/entry.js` only in production, see [Conditional 
 > The file extension may be different than `.js` (e.g. `dist/server/entry.mjs`), and the build directory location is determined by [`vite.config.js` > `build.outDir`](https://vitejs.dev/config/build-options.html#build-outdir) which may be different than `dist/` (e.g. `build/server/entry.js`). Adjust your import accordingly:
 >
 > ```diff
-> - import './path/to/dist/server/entry.js
-> + import './path/to/build/server/entry.mjs
+> - import '../dist/server/entry.js
+> + import '../build/server/entry.mjs
 > ```
 
 > [!NOTE]
