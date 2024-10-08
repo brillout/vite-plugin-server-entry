@@ -1,3 +1,12 @@
+## [0.4.13](https://github.com/brillout/vite-plugin-server-entry/compare/v0.4.12...v0.4.13) (2024-10-08)
+
+
+### Bug Fixes
+
+* improve manual import instructions ([fab34c2](https://github.com/brillout/vite-plugin-server-entry/commit/fab34c296a1ca81c550cfd65772ddb509bb049ac))
+
+
+
 ## [0.4.12](https://github.com/brillout/vite-plugin-server-entry/compare/v0.4.11...v0.4.12) (2024-08-25)
 
 
