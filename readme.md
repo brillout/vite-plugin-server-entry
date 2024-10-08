@@ -36,7 +36,8 @@ The workaround is to manually import `dist/server/entry.js` in your server code.
 // Add this import at the begining of your server code
 import './path/to/dist/server/entry.js'
 
-// Your server code (Express.js, Hono, Cloudflare Worker, Vercel, ...)
+// ...
+// your server code (Express.js, Hono, Cloudflare Worker, Vercel, ...)
 // ...
 ```
 
@@ -57,7 +58,11 @@ Make sure to import `dist/server/entry.js` only in production, see [Conditional 
 > If you aren't using Yarn PnP nor Docker and you keep getting this error, then it's most likely a bug and please [file a bug report](https://github.com/brillout/vite-plugin-server-entry/issues/new).
 
 > [!NOTE]
-> Technically, the automatic importing doesn't work when your `node_modules/` directory is immutable or if you remove/reset `node_modules/` **after** you build your app for production. If you want to know more, see [How it works](#how-it-works).
+> Technically, the automatic importing doesn't work if:
+>  - your `node_modules/` directory is immutable, or
+>  - you remove/re-install `node_modules/` *after* building your app for production.
+>
+> If you want to know more, see [How it works](#how-it-works).
 
 
 <p align="center"><sup><a href="#readme"><b>&#8679;</b> <b>TOP</b> <b>&#8679;</b></a></sup></p><br/>
