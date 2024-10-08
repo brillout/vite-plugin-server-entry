@@ -58,7 +58,7 @@ Make sure to import `dist/server/entry.js` only in production, see [Conditional 
 > If you aren't using Yarn PnP nor Docker and you keep getting this error, then it's most likely a bug and please [file a bug report](https://github.com/brillout/vite-plugin-server-entry/issues/new).
 
 > [!NOTE]
-> Technically, the automatic importing doesn't work if:
+> Technically, the automatic importing doesn't work and you need to manually import if:
 >  - your `node_modules/` directory is immutable, or
 >  - you remove/re-install `node_modules/` *after* building your app for production.
 >
