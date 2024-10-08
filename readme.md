@@ -40,10 +40,10 @@ import './path/to/dist/server/entry.js'
 // ...
 ```
 
-> [!NOTE]
-> If you use [Vike](https://vike.dev/) then make sure to import `dist/server/entry.js` before running [`renderPage()`](https://vike.dev/renderPage).
-
 Make sure to import `dist/server/entry.js` only in production, see [Conditional manual import](https://github.com/brillout/vite-plugin-server-entry/issues/6).
+
+> [!NOTE]
+> If you use [Vike](https://vike.dev/) then make sure to import `dist/server/entry.js` before calling [`renderPage()`](https://vike.dev/renderPage).
 
 > [!NOTE]
 > The file extension may be different than `.js` (e.g. `dist/server/entry.mjs`), and the build directory location is determined by [`vite.config.js` > `build.outDir`](https://vitejs.dev/config/build-options.html#build-outdir) which may be different than `dist/` (e.g. `build/server/entry.js`). Adjust your import accordingly:
