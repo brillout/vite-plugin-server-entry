@@ -23,9 +23,9 @@ Normally the `dist/server/entry.js` file is automatically imported.
 But this automatic importing doesn't work with Yarn PnP and certain Docker configurations, and you'll keep getting the following error:
 
 ```
-[@brillout/vite-plugin-server-entry][Wrong Usage] The server production entry is missing
-or wasn't imported. (Re-)build your app and try again. If you still get this error,
-then you need to manually import the server production entry.
+[@brillout/vite-plugin-server-entry][Wrong Usage] The server production entry is missing.
+(Re-)build your app and try again. If you still get this error, then you need to manually
+import the server production entry.
 ```
 
 The workaround is to manually import `dist/server/entry.js` in your server code.
