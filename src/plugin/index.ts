@@ -33,7 +33,7 @@ const apiVersion = 5
 
 // Config set by library using @brillout/vite-plugin-server-entry (e.g. Vike or Telefunc)
 type PluginConfigProvidedByLibrary = {
-  getImporterCode: () => string
+  getServerProductionEntry: () => string
   libraryName: string
   inject?: boolean | string[]
 }
@@ -53,7 +53,7 @@ type Library = {
   libraryName: string
   apiVersion: number
   pluginVersion: string
-  getImporterCode: () => string
+  getServerProductionEntry: () => string
 }
 type ConfigVitePluginServerEntry = {
   vitePluginServerEntry?: PluginConfigProvidedByUser
@@ -220,7 +220,7 @@ function resolveConfig(
   setInjectConfig(pluginConfigResolved, pluginConfigProvidedByLibrary.inject)
 
   const library = {
-    getImporterCode: pluginConfigProvidedByLibrary.getImporterCode,
+    getServerProductionEntry: pluginConfigProvidedByLibrary.getServerProductionEntry,
     libraryName: pluginConfigProvidedByLibrary.libraryName,
     pluginVersion: projectInfo.projectVersion,
     apiVersion
@@ -277,7 +277,13 @@ function getServerProductionEntryAll(config: ConfigResolved) {
     ...config._vitePluginServerEntry.libraries.map((library) => {
       // Should be true because of assertApiVersions()
       assert(getLibraryApiVersion(library) === apiVersion)
-      const entryCode = library.getImporterCode()
+      const entryCode = (
+        library.getServerProductionEntry ??
+        // Support old `getServerProductionEntry()` name: it was previously called `getImporterCode()`.
+        // TODO/api-version-bump: We'll be able to remove this next time we bump `apiVersion`.
+        // @ts-expect-error
+        library.getImporterCode
+      )()
       return entryCode
     })
   ].join('\n')
