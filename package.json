@@ -7,10 +7,7 @@
   },
   "exports": {
     "./plugin": "./dist/plugin/index.js",
-    "./runtime": "./dist/runtime/index.js",
-    "./plugin.js": "./dist/plugin/index.js",
-    "./importServerProductionEntry": "./dist/runtime/index.js",
-    "./importServerProductionEntry.js": "./dist/runtime/index.js"
+    "./runtime": "./dist/runtime/index.js"
   },
   "scripts": {
     "========= Dev": "",
@@ -43,15 +40,6 @@
         "./dist/plugin/index.d.ts"
       ],
       "runtime": [
-        "./dist/runtime/index.d.ts"
-      ],
-      "plugin.js": [
-        "./dist/plugin/index.d.ts"
-      ],
-      "importServerProductionEntry": [
-        "./dist/runtime/index.d.ts"
-      ],
-      "importServerProductionEntry.js": [
         "./dist/runtime/index.d.ts"
       ]
     }
