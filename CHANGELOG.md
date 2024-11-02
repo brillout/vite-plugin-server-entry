@@ -1,3 +1,12 @@
+## [0.5.1](https://github.com/brillout/vite-plugin-server-entry/compare/v0.5.0...v0.5.1) (2024-11-02)
+
+
+### Bug Fixes
+
+* fix type of `tolerateNotFound` ([3c26229](https://github.com/brillout/vite-plugin-server-entry/commit/3c262294ef47776c8e8c067a259e948ef59fa89c))
+
+
+
 # [0.5.0](https://github.com/brillout/vite-plugin-server-entry/compare/v0.4.13...v0.5.0) (2024-11-02)
 
 
