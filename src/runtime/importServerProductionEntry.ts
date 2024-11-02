@@ -9,7 +9,7 @@ import { crawlServerEntry } from './crawlServerEntry'
 async function importServerProductionEntry({
   tolerateNotFound,
   outDir
-}: { tolerateNotFound?: true; outDir?: string } = {}): Promise<null | boolean> {
+}: { tolerateNotFound?: boolean; outDir?: string } = {}): Promise<null | boolean> {
   const autoImporter: AutoImporter = require('./autoImporter.js')
 
   debugLogsRuntimePre(autoImporter)
