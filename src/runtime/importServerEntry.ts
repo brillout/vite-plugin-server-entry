@@ -6,7 +6,10 @@ import { debugLogsRuntimePost, debugLogsRuntimePre } from './debugLogsRuntime'
 import { DEBUG } from '../shared/debug'
 import { crawlServerEntry } from './crawlServerEntry'
 
-async function importServerEntry(outDir?: string): Promise<void | undefined> {
+async function importServerEntry({
+  tolerateNotFound,
+  outDir
+}: { tolerateNotFound?: true; outDir?: string } = {}): Promise<null | boolean> {
   const autoImporter: AutoImporter = require('./autoImporter.js')
 
   debugLogsRuntimePre(autoImporter)
@@ -44,10 +47,15 @@ async function importServerEntry(outDir?: string): Promise<void | undefined> {
   //  - When the user directly imports dist/server/entry.js because we assume that Vike and Telefunc don't call importServerEntry() in that case
 
   debugLogsRuntimePost({ success, requireError, isOutsideOfCwd, outDir })
-  assertUsage(
-    success,
-    'The server production entry is missing. (Re-)build your app and try again. If you still get this error, then you need to manually import the server production entry, see https://github.com/brillout/vite-plugin-server-entry#manual-import'
-  )
+  if (tolerateNotFound) {
+    return success
+  } else {
+    assertUsage(
+      success,
+      'The server production entry is missing. (Re-)build your app and try again. If you still get this error, then you need to manually import the server production entry, see https://github.com/brillout/vite-plugin-server-entry#manual-import'
+    )
+    return null
+  }
 }
 
 // dist/server/entry.js may not belong to process.cwd() if e.g. Vike is linked => autoImporter.js can potentially be shared between multiple projects
