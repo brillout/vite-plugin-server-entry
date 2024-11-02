@@ -1,3 +1,31 @@
+# [0.5.0](https://github.com/brillout/vite-plugin-server-entry/compare/v0.4.13...v0.5.0) (2024-11-02)
+
+
+### Bug Fixes
+
+* improve error message ([9889d97](https://github.com/brillout/vite-plugin-server-entry/commit/9889d9711185dbc1506e7996203129eb5df62c9d))
+* remove workaround that isn't needed anymore ([0b04058](https://github.com/brillout/vite-plugin-server-entry/commit/0b0405806cef2c77caf3eb8324a74c62197af06b))
+* rename `getImporterCode()` => `getServerProductionEntry()` ([be81708](https://github.com/brillout/vite-plugin-server-entry/commit/be8170896813e426a1528ed46597b7044fc171c2))
+* rename importServerEntry => importServerProductionEntry ([b8045df](https://github.com/brillout/vite-plugin-server-entry/commit/b8045dfc95437186459353b1f43ee24cea979da4))
+* rename serverEntryPlugin => serverProductionEntryPlugin ([ef3db53](https://github.com/brillout/vite-plugin-server-entry/commit/ef3db538cc62bb121d20dc75689d2e1078f71dd1))
+* simplify export ([3da8c94](https://github.com/brillout/vite-plugin-server-entry/commit/3da8c94d5823046f9a3d9e19f793970d59320244))
+
+
+### Features
+
+* new option `importServerEntry({ tolerateNotFound })` ([59899ac](https://github.com/brillout/vite-plugin-server-entry/commit/59899ac1d226a22b7d1c140f9a02d82dcb418813))
+
+
+### BREAKING CHANGES
+
+* `serverEntryPlugin()` was renamed `serverProductionEntryPlugin()`
+* `getImporterCode()` was renamed `getServerProductionEntry()`
+* Make sure to import from either `@brillout/vite-plugin-server-entry/plugin` or `@brillout/vite-plugin-server-entry/runtime`.
+* `importServerEntry()` renamed to `importServerProductionEntry()`
+* `importServerEntry(outDir)` => `importServerEntry({ outDir })`
+
+
+
 ## [0.4.13](https://github.com/brillout/vite-plugin-server-entry/compare/v0.4.12...v0.4.13) (2024-10-08)
 
 
