@@ -218,8 +218,6 @@ function resolveConfig(
     inject: false
   }
   setInjectConfig(pluginConfigResolved, pluginConfigProvidedByLibrary.inject)
-  // @ts-expect-error workaround for previously broken api version assertion
-  pluginConfigResolved.configVersion = 1
 
   const library = {
     getImporterCode: pluginConfigProvidedByLibrary.getImporterCode,
