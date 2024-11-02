@@ -1,4 +1,4 @@
-export { importServerEntry }
+export { importServerProductionEntry }
 
 import { getCwd, assertUsage, toPosixPath, assertPosixPath, isWebpackResolve } from './utils'
 import type { AutoImporter, AutoImporterPaths } from './AutoImporter'
@@ -6,7 +6,7 @@ import { debugLogsRuntimePost, debugLogsRuntimePre } from './debugLogsRuntime'
 import { DEBUG } from '../shared/debug'
 import { crawlServerEntry } from './crawlServerEntry'
 
-async function importServerEntry({
+async function importServerProductionEntry({
   tolerateNotFound,
   outDir
 }: { tolerateNotFound?: true; outDir?: string } = {}): Promise<null | boolean> {
@@ -16,7 +16,7 @@ async function importServerEntry({
 
   assertUsage(
     autoImporter.status !== 'DISABLED_BY_INJECT',
-    "As a library author, make sure your library doesn't call importServerEntry() when using `inject: true`"
+    "As a library author, make sure your library doesn't call importServerProductionEntry() when using `inject: true`"
   )
 
   let success = false
@@ -44,7 +44,7 @@ async function importServerEntry({
   }
 
   // We don't handle the following case:
-  //  - When the user directly imports dist/server/entry.js because we assume that Vike and Telefunc don't call importServerEntry() in that case
+  //  - When the user directly imports dist/server/entry.js because we assume that Vike and Telefunc don't call importServerProductionEntry() in that case
 
   debugLogsRuntimePost({ success, requireError, isOutsideOfCwd, outDir })
   if (tolerateNotFound) {

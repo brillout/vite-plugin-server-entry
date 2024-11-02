@@ -433,11 +433,11 @@ function getLibraryApiVersion(library: Library) {
 // - Remove `export { findServerEntry }` since Vike doesn't / no one needs it anymore
 // - Also remove:
 //   - package.json#exports["./plugin.js"]
-//   - package.json#exports["./importServerEntry"]
-//   - package.json#exports["./importServerEntry.js"]
+//   - package.json#exports["./importServerProductionEntry"]
+//   - package.json#exports["./importServerProductionEntry.js"]
 //   - typesVersions["*"]["./plugin.js"]
-//   - typesVersions["*"]["./importServerEntry"]
-//   - typesVersions["*"]["./importServerEntry.js"]
+//   - typesVersions["*"]["./importServerProductionEntry"]
+//   - typesVersions["*"]["./importServerProductionEntry.js"]
 // - Not sure when will be the best time to remove these exports as bumping the semver from @brillout/vite-plugin-server-entry@0.4.x to @brillout/vite-plugin-server-entry@0.5.x will disrupt users (forcing them to upgrade both Vike and Telefunc at the same time in order to synchronize the `apiVersion`).
 //   - We can wait until `apiVersion === 5` has been around for a long time (it was first published in August 2024), so we disrupt only the few users that are using very old versions.
 export { findServerEntry }

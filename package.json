@@ -9,8 +9,8 @@
     "./plugin": "./dist/plugin/index.js",
     "./runtime": "./dist/runtime/index.js",
     "./plugin.js": "./dist/plugin/index.js",
-    "./importServerEntry": "./dist/runtime/index.js",
-    "./importServerEntry.js": "./dist/runtime/index.js"
+    "./importServerProductionEntry": "./dist/runtime/index.js",
+    "./importServerProductionEntry.js": "./dist/runtime/index.js"
   },
   "scripts": {
     "========= Dev": "",
@@ -48,10 +48,10 @@
       "plugin.js": [
         "./dist/plugin/index.d.ts"
       ],
-      "importServerEntry": [
+      "importServerProductionEntry": [
         "./dist/runtime/index.d.ts"
       ],
-      "importServerEntry.js": [
+      "importServerProductionEntry.js": [
         "./dist/runtime/index.d.ts"
       ]
     }
