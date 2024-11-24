@@ -44,11 +44,16 @@ async function crawlServerEntry(outDir?: string): Promise<boolean> {
   } catch {
     // __filename isn't defined when this file is bundled into an ESM bundle
   }
+  /* The try-catch doesn't work as the following is still thrown:
+   * ```
+   * SyntaxError: Cannot use 'import.meta' outside a module
+   * ```
   try {
     // import.meta.filename is defined when this file is bundled into an ESM module
     // @ts-ignore
     filename = import.meta.filename
   } catch {}
+  */
   if (!filename) {
     return false
   }
