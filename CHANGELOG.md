@@ -1,3 +1,12 @@
+## [0.5.4](https://github.com/brillout/vite-plugin-server-entry/compare/v0.5.3...v0.5.4) (2024-11-24)
+
+
+### Bug Fixes
+
+* support crawling when inside ESM bundle [second attempt] (fix [#13](https://github.com/brillout/vite-plugin-server-entry/issues/13)) ([7309c32](https://github.com/brillout/vite-plugin-server-entry/commit/7309c32ffa6812656ddc23e1865776eab36d4bb0))
+
+
+
 ## [0.5.3](https://github.com/brillout/vite-plugin-server-entry/compare/v0.5.2...v0.5.3) (2024-11-24)
 
 
