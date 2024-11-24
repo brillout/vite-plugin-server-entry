@@ -1,6 +1,6 @@
 export { crawlServerEntry }
 
-import { getCwdSafe, assert, assertUsage, assertPosixPath, requireResolve, isWebpackResolve } from './utils'
+import { assert, assertUsage, assertPosixPath, requireResolve, isWebpackResolve } from './utils'
 import { import_ } from '@brillout/import'
 import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase'
 
@@ -16,6 +16,7 @@ async function crawlServerEntry(outDir?: string): Promise<boolean> {
   } catch {
     return false
   }
+  const cwd = process.cwd()
 
   const isPathAbsolute = (p: string) => {
     if (process.platform === 'win32') {
@@ -30,34 +31,12 @@ async function crawlServerEntry(outDir?: string): Promise<boolean> {
     assertPosixPath(outDir)
     assert(isPathAbsolute(outDir), outDir)
   } else {
-    const cwd = getCwdSafe()
     if (!cwd) return false
     // The SSR server doesn't have access to config.build.outDir so the only option we've left is to shoot in the dark by trying with 'dist/'
     outDir = path.posix.join(cwd, 'dist')
   }
   const serverEntryFileDir = path.posix.join(outDir, 'server')
   if (!fs.existsSync(serverEntryFileDir)) return false
-
-  let filename: string | undefined
-  try {
-    filename = __filename
-  } catch {
-    // __filename isn't defined when this file is bundled into an ESM bundle
-  }
-  /* There doens't seem to be a way to safely/conditionally access `import.meta`.
-   * - The try-catch below doesn't work as the following is still thrown:
-   *   ```
-   *   SyntaxError: Cannot use 'import.meta' outside a module
-   *   ```
-  try {
-    // import.meta.filename is defined when this file is bundled into an ESM module
-    // @ts-ignore
-    filename = import.meta.filename
-  } catch {}
-  */
-  if (!filename) {
-    return false
-  }
 
   let serverEntryFilePath: string | null = null
   const entryFileCandidates = [
@@ -70,8 +49,15 @@ async function crawlServerEntry(outDir?: string): Promise<boolean> {
   ]
   for (const entryFileName of entryFileCandidates) {
     const serverEntryFilePathSpeculative = path.posix.join(serverEntryFileDir, entryFileName)
+    assert(isPathAbsolute(serverEntryFilePathSpeculative))
     try {
-      serverEntryFilePath = await requireResolve(serverEntryFilePathSpeculative, filename)
+      serverEntryFilePath = await requireResolve(
+        serverEntryFilePathSpeculative,
+        // Since `serverEntryFilePathSpeculative` is absolute, we can pass a wrong `currentFilePath` argument value.
+        // - We avoid using `__filename` because it isn't defined when this file is included in an ESM bundle.
+        // - We cannot use `import.meta.filename` (nor `import.meta.url`) because there doesn't seem to be a way to safely/conditionally access `import.meta`.
+        cwd
+      )
     } catch {}
   }
   assertUsage(
