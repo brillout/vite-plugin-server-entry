@@ -1,13 +1,12 @@
 export { crawlServerEntry }
 
-// Use Node.js to search for the file dist/server/entry.js which we use only as fallback if:
-// - the server entry isn't injected (the setting `inject` is `false`), and
-// - the auto importer doesn't work (Yarn PnP users and pnpm edge cases).
-
 import { getCwd, assert, assertUsage, assertPosixPath, requireResolve, isWebpackResolve } from './utils'
 import { import_ } from '@brillout/import'
 import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase'
 
+// Use Node.js to search for the file dist/server/entry.js which we use only as fallback if:
+// - the server entry isn't injected (the setting `inject` is `false`), and
+// - the auto importer doesn't work.
 async function crawlServerEntry(outDir?: string): Promise<boolean> {
   const cwd = getCwd()
   if (!cwd) return false
@@ -34,7 +33,7 @@ async function crawlServerEntry(outDir?: string): Promise<boolean> {
     assertPosixPath(outDir)
     assert(isPathAbsolute(outDir), outDir)
   } else {
-    // The SSR server doesn't have access to config.build.outDir so we shoot in the dark by trying with 'dist/'
+    // The SSR server doesn't have access to config.build.outDir so the only option we've left is to shoot in the dark by trying with 'dist/'
     outDir = path.posix.join(cwd, 'dist')
   }
   const serverEntryFileDir = path.posix.join(outDir, 'server')
@@ -44,7 +43,7 @@ async function crawlServerEntry(outDir?: string): Promise<boolean> {
   try {
     filename = __filename
   } catch {
-    // __filename isn't defined when this file is being bundled into an ESM bundle
+    // __filename isn't defined when this file is bundled into an ESM bundle
     return false
   }
 

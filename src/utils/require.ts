@@ -2,7 +2,7 @@ export { requireResolve }
 
 import { import_ } from '@brillout/import'
 
-// Workaround for webpack static analysis warnings: (Some users use webpack to bundle their VPS app's server code.)
+// Workaround for webpack static analysis warnings: (Some users use webpack to bundle their Vike app's server code.)
 // ```
 // Critical dependency: require function is used in a way in which dependencies cannot be statically extracted
 // Critical dependency: the request of a dependency is an expression
