@@ -8,20 +8,20 @@ import { import_ } from '@brillout/import'
 // Critical dependency: the request of a dependency is an expression
 // ```
 // Just `console.log(require)` already triggers the warnings, so the following seems to be the only way (using eval() shows a warning when using esbuild).
-async function requireResolve(id: string, currentFilename: string) {
-  const req = await getRequire(currentFilename)
+async function requireResolve(id: string, currentFilePath: string) {
+  const req = await getRequire(currentFilePath)
   return req.resolve(id)
 }
 /* Not needed since using import_() is equivalent
 export { require_ }
-async function require_(id: string, currentFilename: string) {
-  const req = await getRequire(currentFilename)
+async function require_(id: string, currentFilePath: string) {
+  const req = await getRequire(currentFilePath)
   return req(id)
 }
 */
-async function getRequire(currentFilename: string) {
+async function getRequire(currentFilePath: string) {
   const { createRequire } = (await import_('module')) as typeof import('module')
-  const req = createRequire(currentFilename)
+  const req = createRequire(currentFilePath)
   return req
 }
 /* Debug:
