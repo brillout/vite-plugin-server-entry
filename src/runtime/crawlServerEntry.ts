@@ -38,11 +38,18 @@ async function crawlServerEntry(outDir?: string): Promise<boolean> {
   const serverEntryFileDir = path.posix.join(outDir, 'server')
   if (!fs.existsSync(serverEntryFileDir)) return false
 
-  let filename: string
+  let filename: string | undefined
   try {
     filename = __filename
   } catch {
     // __filename isn't defined when this file is bundled into an ESM bundle
+  }
+  try {
+    // import.meta.filename is defined when this file is bundled into an ESM module
+    // @ts-ignore
+    filename = import.meta.filename
+  } catch {}
+  if (!filename) {
     return false
   }
 
