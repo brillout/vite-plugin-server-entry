@@ -1,6 +1,6 @@
 export { crawlServerEntry }
 
-import { getCwd, assert, assertUsage, assertPosixPath, requireResolve, isWebpackResolve } from './utils'
+import { getCwdSafe, assert, assertUsage, assertPosixPath, requireResolve, isWebpackResolve } from './utils'
 import { import_ } from '@brillout/import'
 import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase'
 
@@ -30,7 +30,7 @@ async function crawlServerEntry(outDir?: string): Promise<boolean> {
     assertPosixPath(outDir)
     assert(isPathAbsolute(outDir), outDir)
   } else {
-    const cwd = getCwd()
+    const cwd = getCwdSafe()
     if (!cwd) return false
     // The SSR server doesn't have access to config.build.outDir so the only option we've left is to shoot in the dark by trying with 'dist/'
     outDir = path.posix.join(cwd, 'dist')

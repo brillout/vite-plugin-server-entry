@@ -1,6 +1,6 @@
 export { importServerProductionEntry }
 
-import { getCwd, assertUsage, toPosixPath, assertPosixPath, isWebpackResolve } from './utils'
+import { getCwdSafe, assertUsage, toPosixPath, assertPosixPath, isWebpackResolve } from './utils'
 import type { AutoImporter, AutoImporterPaths } from './AutoImporter'
 import { debugLogsRuntimePost, debugLogsRuntimePre } from './debugLogsRuntime'
 import { DEBUG } from '../shared/debug'
@@ -60,7 +60,7 @@ async function importServerProductionEntry({
 
 // dist/server/entry.js may not belong to process.cwd() if e.g. Vike is linked => autoImporter.js can potentially be shared between multiple projects
 function isServerEntryOutsideOfCwd(paths: AutoImporterPaths): boolean | null {
-  const cwd = getCwd()
+  const cwd = getCwdSafe()
 
   // We cannot check edge environments. Upon edge deployment the server code is usually bundled right after `$ vite build`, so it's unlikley that the resolved serverEntryFilePath doesn't belong to cwd
   if (!cwd) return null

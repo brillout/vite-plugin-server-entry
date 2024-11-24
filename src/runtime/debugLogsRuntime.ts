@@ -1,7 +1,7 @@
 export { debugLogsRuntimePre }
 export { debugLogsRuntimePost }
 
-import { getCwd } from '../shared/utils'
+import { getCwdSafe } from '../shared/utils'
 import type { AutoImporter } from './AutoImporter'
 import { DEBUG, logDebug } from '../shared/debug'
 
@@ -25,7 +25,7 @@ function debugLogsRuntimePre(autoImporter: AutoImporter): undefined | void {
   } catch {
     logDebug('navigator', 'undefined')
   }
-  logDebug('cwd', getCwd())
+  logDebug('cwd', getCwdSafe())
   logDebug('importer.status', autoImporter.status)
   if (autoImporter.status === 'SET') {
     logDebug('importer.paths.autoImporterFilePathOriginal', autoImporter.paths.autoImporterFilePathOriginal)

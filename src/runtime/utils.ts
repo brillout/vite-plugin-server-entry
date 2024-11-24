@@ -1,5 +1,5 @@
 export * from '../utils/assert'
-export * from '../utils/getCwd'
+export * from '../utils/getCwdSafe'
 export * from '../utils/filesystemPathHandling'
 export * from '../utils/require'
 export * from '../utils/isWebpackResolve'
