@@ -1,3 +1,13 @@
+## [0.5.2](https://github.com/brillout/vite-plugin-server-entry/compare/v0.5.1...v0.5.2) (2024-11-24)
+
+
+### Bug Fixes
+
+* support crawling when inside ESM bundle (fix [#13](https://github.com/brillout/vite-plugin-server-entry/issues/13)) ([d58442c](https://github.com/brillout/vite-plugin-server-entry/commit/d58442c48f0a672cc1a924012c7376efeba8adc4))
+* tolerate missing cwd ([dc56716](https://github.com/brillout/vite-plugin-server-entry/commit/dc567167278328680e67e3009e4e38c6dff5ef27))
+
+
+
 ## [0.5.1](https://github.com/brillout/vite-plugin-server-entry/compare/v0.5.0...v0.5.1) (2024-11-02)
 
 
