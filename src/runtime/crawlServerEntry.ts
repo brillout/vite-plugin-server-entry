@@ -8,9 +8,6 @@ import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../
 // - the server entry isn't injected (the setting `inject` is `false`), and
 // - the auto importer doesn't work.
 async function crawlServerEntry(outDir?: string): Promise<boolean> {
-  const cwd = getCwd()
-  if (!cwd) return false
-
   let path: typeof import('path')
   let fs: typeof import('fs')
   try {
@@ -33,6 +30,8 @@ async function crawlServerEntry(outDir?: string): Promise<boolean> {
     assertPosixPath(outDir)
     assert(isPathAbsolute(outDir), outDir)
   } else {
+    const cwd = getCwd()
+    if (!cwd) return false
     // The SSR server doesn't have access to config.build.outDir so the only option we've left is to shoot in the dark by trying with 'dist/'
     outDir = path.posix.join(cwd, 'dist')
   }
