@@ -73,13 +73,13 @@ Make sure to import `dist/server/entry.js` only in production, see [Conditional 
 ## How it works
 
 > [!NOTE]
-> You usually don't need to read this. If you have a problem, reading the section [Manual import](#Manual-import) is usually enough.
+> As a user, you usually don't need to read this. If you have a problem, reading the section [Manual import](#Manual-import) is usually enough.
 
 `@brillout/vite-plugin-server-entry` does two things:
  - Generates a "server production entry" file `dist/server/entry.js`.
  - Generates a "auto importer" file `node_modules/@brillout/vite-plugin-server-entry/dist/runtime/autoImporter.js`.
 
-The *server production entry*, which is located at `dist/server/entry.js`, enables tools such as Vike and Telefunc to consolidate their production entry into a single file. It loads the user files built for production which are located at `dist/**` (e.g. the built `.telefunc.js` user files for Telefunc, and the built `+Page.js` user files for Vike).
+The *server production entry*, which is located at `dist/server/entry.js`, enables tools such as Vike and Telefunc to consolidate their server production entry into a single file. It loads user files (e.g. Vike's `+Page.js` user files and/or Telefunc's `.telefunc.js` user files) built for production.
 
 The *auto importer* file, which is located at `node_modules/@brillout/vite-plugin-server-entry/dist/runtime/autoImporter.js`, automatically imports `dist/server/entry.js` on your behalf, so that you don't have to manually import `dist/server/entry.js` yourself as shown in the following. That's the only purpose of the auto importer.
 
