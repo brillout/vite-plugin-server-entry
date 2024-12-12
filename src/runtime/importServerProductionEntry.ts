@@ -9,7 +9,7 @@ import { crawlServerEntry, wrongUsageWithInject } from './crawlServerEntry'
 async function importServerProductionEntry({
   // Usage by Telefunc since Telefunc cannot assume/know whether the user is using Vite
   tolerateNotFound,
-  outDir
+  outDir,
 }: { tolerateNotFound?: boolean; outDir?: string } = {}): Promise<null | boolean> {
   const autoImporter: AutoImporter = require('./autoImporter.js')
 
@@ -50,7 +50,7 @@ async function importServerProductionEntry({
   } else {
     assertUsage(
       success,
-      'The server production entry is missing. (Re-)build your app and try again. If you still get this error, then you need to manually import the server production entry, see https://github.com/brillout/vite-plugin-server-entry#manual-import'
+      'The server production entry is missing. (Re-)build your app and try again. If you still get this error, then you need to manually import the server production entry, see https://github.com/brillout/vite-plugin-server-entry#manual-import',
     )
     return null
   }

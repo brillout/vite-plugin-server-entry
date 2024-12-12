@@ -45,7 +45,7 @@ function debugLogsRuntimePost({
   success,
   requireError,
   outDir,
-  isOutsideOfCwd
+  isOutsideOfCwd,
 }: {
   success: boolean
   requireError: unknown

@@ -9,7 +9,7 @@ function injectRollupInputs(inputsNew: Record<string, string>, config: ResolvedC
   const inputsCurrent = normalizeRollupInput(config.build.rollupOptions.input)
   const input = {
     ...inputsNew,
-    ...inputsCurrent
+    ...inputsCurrent,
   }
   return input
 }

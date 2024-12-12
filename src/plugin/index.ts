@@ -15,7 +15,7 @@ import {
   injectRollupInputs,
   normalizeRollupInput,
   findRollupBundleEntry,
-  assertUsage
+  assertUsage,
 } from './utils'
 import path from 'path'
 import { writeFileSync, readFileSync } from 'fs'
@@ -23,7 +23,7 @@ import type { AutoImporterCleared } from '../runtime/AutoImporter'
 import {
   serverEntryFileNameBase,
   serverEntryFileNameBaseAlternative,
-  serverIndexFileNameBase
+  serverIndexFileNameBase,
 } from '../shared/serverEntryFileNameBase'
 import { debugLogsBuildtime } from './debugLogsBuildTime'
 
@@ -162,15 +162,15 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
           "process.env.NODE_ENV = 'production';", */
           // Imports the entry of each tool, e.g. the Vike entry and the Telefunc entry.
           `import '${serverEntryVirtualId}';`,
-          code
+          code,
         ].join(
-          ''
+          '',
           /* We don't insert new lines, otherwise we break the source map.
         '\n'
         */
         )
         return code
-      }
+      },
     },
     {
       name: `${pluginName}:config`,
@@ -183,13 +183,13 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
         if (skip) return
         assertUsage(
           typeof configUnresolved.build.ssr !== 'string',
-          "Setting the server build entry over the Vite configuration `build.ssr` (i.e. `--ssr path/to/entry.js`) isn't supported (because of a Vite bug), see workaround at https://github.com/brillout/vite-plugin-server-entry/issues/9#issuecomment-2027641624"
+          "Setting the server build entry over the Vite configuration `build.ssr` (i.e. `--ssr path/to/entry.js`) isn't supported (because of a Vite bug), see workaround at https://github.com/brillout/vite-plugin-server-entry/issues/9#issuecomment-2027641624",
         )
         const resolved = resolveConfig(configUnresolved, pluginConfigProvidedByLibrary)
         config = resolved.config
         library = resolved.library
-      }
-    }
+      },
+    },
   ] as Plugin[]
 }
 // Avoid multiple Vite versions mismatch
@@ -199,7 +199,7 @@ function getServerEntryName(config: ConfigResolved) {
   const entries = normalizeRollupInput(config.build.rollupOptions.input)
   assert(
     entries[serverEntryFileNameBase] !== serverEntryVirtualId &&
-      entries[serverEntryFileNameBaseAlternative] !== serverEntryVirtualId
+      entries[serverEntryFileNameBaseAlternative] !== serverEntryVirtualId,
   )
   const serverEntryName = !entries[serverEntryFileNameBase]
     ? serverEntryFileNameBase
@@ -210,7 +210,7 @@ function getServerEntryName(config: ConfigResolved) {
 
 function resolveConfig(
   configUnresolved: ConfigUnresolved,
-  pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrary
+  pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrary,
 ) {
   assert(viteIsSSR(configUnresolved))
 
@@ -218,7 +218,7 @@ function resolveConfig(
     libraries: [],
     apiVersion,
     autoImport: true,
-    inject: false
+    inject: false,
   }
   setInjectConfig(pluginConfigResolved, pluginConfigProvidedByLibrary.inject)
 
@@ -226,12 +226,12 @@ function resolveConfig(
     getServerProductionEntry: pluginConfigProvidedByLibrary.getServerProductionEntry,
     libraryName: pluginConfigProvidedByLibrary.libraryName,
     pluginVersion: projectInfo.projectVersion,
-    apiVersion
+    apiVersion,
   }
   pluginConfigResolved.libraries.push(library)
 
   objectAssign(configUnresolved, {
-    _vitePluginServerEntry: pluginConfigResolved
+    _vitePluginServerEntry: pluginConfigResolved,
   })
   const config: ConfigResolved = configUnresolved
 
@@ -288,7 +288,7 @@ function getServerProductionEntryAll(config: ConfigResolved) {
         library.getImporterCode
       )()
       return entryCode
-    })
+    }),
   ].join('\n')
   return serverProductionEntry
 }
@@ -313,8 +313,8 @@ function writeAutoImporterFile(config: ConfigResolved, entryFileName: string) {
       `  serverEntryFilePathOriginal: ${JSON.stringify(serverEntryFilePathAbsolute)},`,
       `  serverEntryFilePathResolved: () => require.resolve(${JSON.stringify(serverEntryFilePathRelative)}),`,
       '};',
-      ''
-    ].join('\n')
+      '',
+    ].join('\n'),
   )
 }
 function clearAutoImporter(config: ConfigResolved) {
@@ -384,7 +384,7 @@ function getDistServerPathRelative(config: ConfigVite) {
   const distServerPathAbsolute = path.posix.join(root, outDir)
   debugLogsBuildtime({
     disabled: false,
-    paths: { importerDir, root, rootRelative, outDir, distServerPathRelative, distServerPathAbsolute }
+    paths: { importerDir, root, rootRelative, outDir, distServerPathRelative, distServerPathAbsolute },
   })
   return { distServerPathRelative, distServerPathAbsolute }
 }
@@ -425,7 +425,7 @@ function assertApiVersions(config: ConfigResolved, currentLibraryName: string) {
     const libs = joinEnglish(librariesNeedingUpdate, 'and')
     // We purposely use `throw new Error()` instead of `assertUsage()`, in order to not confuse the user with superfluous information
     throw new Error(
-      `Update ${libs} to its latest version and try again: ${currentLibraryName} requires a newer version of ${libs}.`
+      `Update ${libs} to its latest version and try again: ${currentLibraryName} requires a newer version of ${libs}.`,
     )
   }
 }
@@ -437,7 +437,7 @@ function getLibraryApiVersion(library: Library) {
 }
 
 function findServerEntry<OutputBundle extends Record<string, { name: string | undefined }>>(
-  bundle: OutputBundle
+  bundle: OutputBundle,
 ): OutputBundle[string] {
   const entry =
     findRollupBundleEntry(serverEntryFileNameBaseAlternative, bundle) ||
@@ -449,10 +449,10 @@ function findServerEntry<OutputBundle extends Record<string, { name: string | un
       [
         //
         serverEntryFileNameBase,
-        serverEntryFileNameBaseAlternative
+        serverEntryFileNameBaseAlternative,
       ],
-      Object.keys(bundle)
-    )
+      Object.keys(bundle),
+    ),
   )
 
   return entry
@@ -488,7 +488,7 @@ function errMsgEntryRemoved(entriesMissing: string[], entriesExisting: string[])
       ? `Cannot find build server entry '${entriesMissing[0]!}'.`
       : `Cannot find build server entry, searching for:  ${list(entriesMissing)} (none of them exist, but one of these should exist).`,
     `Make sure your Vite config (or that of a Vite plugin) doesn't remove/overwrite server build entries.`,
-    `(Found server entries: ${list(entriesExisting)}.)`
+    `(Found server entries: ${list(entriesExisting)}.)`,
   ].join(' ')
 }
 

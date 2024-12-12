@@ -6,7 +6,7 @@ import { import_ } from '@brillout/import'
 import {
   serverEntryFileNameBase,
   serverEntryFileNameBaseAlternative,
-  serverIndexFileNameBase
+  serverIndexFileNameBase,
 } from '../shared/serverEntryFileNameBase'
 import pc from '@brillout/picocolors'
 
@@ -57,7 +57,7 @@ async function crawlServerEntry(outDir?: string, tolerateNotFound?: boolean): Pr
     `${serverEntryFileNameBaseAlternative}.cjs`,
     `${serverIndexFileNameBase}.mjs`,
     `${serverIndexFileNameBase}.js`,
-    `${serverIndexFileNameBase}.cjs`
+    `${serverIndexFileNameBase}.cjs`,
   ] as const
   for (const distFileName of distFileNames) {
     const distFilePath = path.posix.join(serverEntryFileDir, distFileName)
@@ -68,7 +68,7 @@ async function crawlServerEntry(outDir?: string, tolerateNotFound?: boolean): Pr
         // Since `serverEntryFilePathSpeculative` is absolute, we can pass a wrong `currentFilePath` argument value.
         // - We avoid using `__filename` because it isn't defined when this file is included in an ESM bundle.
         // - We cannot use `import.meta.filename` (nor `import.meta.url`) because there doesn't seem to be a way to safely/conditionally access `import.meta`.
-        cwd
+        cwd,
       )
       distFileNameFound = distFileName
       break
@@ -78,14 +78,14 @@ async function crawlServerEntry(outDir?: string, tolerateNotFound?: boolean): Pr
     if (tolerateNotFound) return false
     assertUsage(
       false,
-      `Cannot find server production entry. If you are using rollupOptions.output.entryFileNames then make sure you don't change the name of the server entry file. One of the following is expected to exist: \n${distFileNames.map((e) => `  ${e}`).join('\n')}`
+      `Cannot find server production entry. If you are using rollupOptions.output.entryFileNames then make sure you don't change the name of the server entry file. One of the following is expected to exist: \n${distFileNames.map((e) => `  ${e}`).join('\n')}`,
     )
   }
   assert(
     distFileNameFound &&
       [serverIndexFileNameBase, serverEntryFileNameBase, serverEntryFileNameBaseAlternative].some((fileNameBase) =>
-        distFileNameFound.startsWith(fileNameBase)
-      )
+        distFileNameFound.startsWith(fileNameBase),
+      ),
   )
   if (distFileNameFound.startsWith(serverIndexFileNameBase)) {
     if (tolerateNotFound) return false
