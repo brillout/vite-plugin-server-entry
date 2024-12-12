@@ -1,3 +1,12 @@
+## [0.5.6](https://github.com/brillout/vite-plugin-server-entry/compare/v0.5.5...v0.5.6) (2024-12-12)
+
+
+### Bug Fixes
+
+* remove missing source map warning ([b800228](https://github.com/brillout/vite-plugin-server-entry/commit/b8002285b96da1a631baf5c127592055b4d5501a))
+
+
+
 ## [0.5.5](https://github.com/brillout/vite-plugin-server-entry/compare/v0.5.4...v0.5.5) (2024-12-12)
 
 
