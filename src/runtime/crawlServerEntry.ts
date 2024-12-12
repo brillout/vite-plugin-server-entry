@@ -32,7 +32,7 @@ async function crawlServerEntry(outDir?: string): Promise<boolean> {
     assert(isPathAbsolute(outDir), outDir)
   } else {
     if (!cwd) return false
-    // The SSR server doesn't have access to config.build.outDir so the only option we've left is to shoot in the dark by trying with 'dist/'
+    // The SSR server doesn't have access to config.build.outDir so the only option left is to shoot in the dark by trying with 'dist/'
     outDir = path.posix.join(cwd, 'dist')
   }
   const serverEntryFileDir = path.posix.join(outDir, 'server')

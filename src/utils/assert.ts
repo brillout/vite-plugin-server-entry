@@ -43,7 +43,7 @@ function assertUsage(condition: unknown, errorMessage: string): asserts conditio
   if (condition) {
     return
   }
-  const errMsg = `${usageErrorPrefix} ${errorMessage}`
+  const errMsg = `${usageErrorPrefix} ${errorMessage}` as const
   const usageError = createErrorWithCleanStackTrace(errMsg, numberOfStackTraceLinesToRemove)
   throw usageError
 }
