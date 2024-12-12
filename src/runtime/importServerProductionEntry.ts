@@ -7,6 +7,7 @@ import { DEBUG } from '../shared/debug'
 import { crawlServerEntry, wrongUsageWithInject } from './crawlServerEntry'
 
 async function importServerProductionEntry({
+  // Usage by Telefunc since Telefunc cannot assume/know whether the user is using Vite
   tolerateNotFound,
   outDir
 }: { tolerateNotFound?: boolean; outDir?: string } = {}): Promise<null | boolean> {
@@ -37,7 +38,7 @@ async function importServerProductionEntry({
   }
 
   if (!success) {
-    success = await crawlServerEntry(outDir)
+    success = await crawlServerEntry(outDir, tolerateNotFound)
   }
 
   // We don't handle the following case:

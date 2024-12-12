@@ -15,7 +15,7 @@ const wrongUsageWithInject = `Execute the server entry built for production (e.g
 // Use Node.js to search for the file dist/server/entry.js which we use only as fallback if:
 // - the server entry isn't injected (the setting `inject` is `false`), and
 // - the auto importer doesn't work.
-async function crawlServerEntry(outDir?: string): Promise<boolean> {
+async function crawlServerEntry(outDir?: string, tolerateNotFound?: boolean): Promise<boolean> {
   let path: typeof import('path')
   let fs: typeof import('fs')
   try {
@@ -74,17 +74,23 @@ async function crawlServerEntry(outDir?: string): Promise<boolean> {
       break
     } catch {}
   }
-  assertUsage(
-    distFilePathFound,
-    `Cannot find server production entry. If you are using rollupOptions.output.entryFileNames then make sure you don't change the name of the server entry file. One of the following is expected to exist: \n${distFileNames.map((e) => `  ${e}`).join('\n')}`
-  )
+  if (!distFilePathFound) {
+    if (tolerateNotFound) return false
+    assertUsage(
+      false,
+      `Cannot find server production entry. If you are using rollupOptions.output.entryFileNames then make sure you don't change the name of the server entry file. One of the following is expected to exist: \n${distFileNames.map((e) => `  ${e}`).join('\n')}`
+    )
+  }
   assert(
     distFileNameFound &&
       [serverIndexFileNameBase, serverEntryFileNameBase, serverEntryFileNameBaseAlternative].some((fileNameBase) =>
         distFileNameFound.startsWith(fileNameBase)
       )
   )
-  assertUsage(!distFileNameFound.startsWith(serverIndexFileNameBase), wrongUsageWithInject)
+  if (distFileNameFound.startsWith(serverIndexFileNameBase)) {
+    if (tolerateNotFound) return false
+    assertUsage(false, wrongUsageWithInject)
+  }
 
   // webpack couldn't have properly resolved `distFilePathFound` since there isn't any static import statement importing `distFilePathFound`
   if (isWebpackResolve(distFilePathFound)) {
