@@ -20,10 +20,13 @@ import {
 import path from 'path'
 import { writeFileSync, readFileSync } from 'fs'
 import type { AutoImporterCleared } from '../runtime/AutoImporter'
-import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase'
+import {
+  serverEntryFileNameBase,
+  serverEntryFileNameBaseAlternative,
+  serverIndexFileNameBase
+} from '../shared/serverEntryFileNameBase'
 import { debugLogsBuildtime } from './debugLogsBuildTime'
 
-const indexEntryName = 'index'
 const autoImporterFilePath = require.resolve('../runtime/autoImporter.js')
 const serverEntryVirtualId = 'virtual:@brillout/vite-plugin-server-entry:serverEntry'
 // https://vitejs.dev/guide/api-plugin.html#virtual-modules-convention
@@ -459,7 +462,7 @@ function getInjectEntries(config: ConfigResolved): string[] {
   assert(config._vitePluginServerEntry.inject !== false)
   const entries = normalizeRollupInput(config.build.rollupOptions.input)
   const injectEntryNames =
-    config._vitePluginServerEntry.inject === true ? [indexEntryName] : config._vitePluginServerEntry.inject
+    config._vitePluginServerEntry.inject === true ? [serverIndexFileNameBase] : config._vitePluginServerEntry.inject
   const injectEntries = injectEntryNames
     .map((entryName) => {
       let entryFilePath = entries[entryName]

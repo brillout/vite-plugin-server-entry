@@ -1,8 +1,16 @@
 export { crawlServerEntry }
+export { wrongUsageWithInject }
 
 import { assert, assertUsage, assertPosixPath, requireResolve, isWebpackResolve } from './utils'
 import { import_ } from '@brillout/import'
-import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase'
+import {
+  serverEntryFileNameBase,
+  serverEntryFileNameBaseAlternative,
+  serverIndexFileNameBase
+} from '../shared/serverEntryFileNameBase'
+import pc from '@brillout/picocolors'
+
+const wrongUsageWithInject = `Execute the server entry built for production (e.g. ${pc.cyan('$ node dist/server/index.mjs')}). Don't execute the original server entry (e.g. ${pc.cyan('$ ts-node server/index.ts')}) and don't run ${pc.cyan('$ vite preview')}.`
 
 // Use Node.js to search for the file dist/server/entry.js which we use only as fallback if:
 // - the server entry isn't injected (the setting `inject` is `false`), and
@@ -38,38 +46,51 @@ async function crawlServerEntry(outDir?: string): Promise<boolean> {
   const serverEntryFileDir = path.posix.join(outDir, 'server')
   if (!fs.existsSync(serverEntryFileDir)) return false
 
-  let serverEntryFilePath: string | null = null
-  const entryFileCandidates = [
+  let distFilePathFound: string | undefined
+  let distFileNameFound: (typeof distFileNames)[number] | undefined
+  const distFileNames = [
     `${serverEntryFileNameBase}.mjs`,
     `${serverEntryFileNameBase}.js`,
     `${serverEntryFileNameBase}.cjs`,
     `${serverEntryFileNameBaseAlternative}.mjs`,
     `${serverEntryFileNameBaseAlternative}.js`,
-    `${serverEntryFileNameBaseAlternative}.cjs`
-  ]
-  for (const entryFileName of entryFileCandidates) {
-    const serverEntryFilePathSpeculative = path.posix.join(serverEntryFileDir, entryFileName)
-    assert(isPathAbsolute(serverEntryFilePathSpeculative))
+    `${serverEntryFileNameBaseAlternative}.cjs`,
+    `${serverIndexFileNameBase}.mjs`,
+    `${serverIndexFileNameBase}.js`,
+    `${serverIndexFileNameBase}.cjs`
+  ] as const
+  for (const distFileName of distFileNames) {
+    const distFilePath = path.posix.join(serverEntryFileDir, distFileName)
+    assert(isPathAbsolute(distFilePath))
     try {
-      serverEntryFilePath = await requireResolve(
-        serverEntryFilePathSpeculative,
+      distFilePathFound = await requireResolve(
+        distFilePath,
         // Since `serverEntryFilePathSpeculative` is absolute, we can pass a wrong `currentFilePath` argument value.
         // - We avoid using `__filename` because it isn't defined when this file is included in an ESM bundle.
         // - We cannot use `import.meta.filename` (nor `import.meta.url`) because there doesn't seem to be a way to safely/conditionally access `import.meta`.
         cwd
       )
+      distFileNameFound = distFileName
+      break
     } catch {}
   }
   assertUsage(
-    serverEntryFilePath,
-    `Cannot find server entry. If you use rollupOptions.output.entryFileNames then make sure to not rename the server entry file. Make sure that one of the following exists: \n${entryFileCandidates.map((e) => `  ${e}`).join('\n')}`
+    distFilePathFound,
+    `Cannot find server production entry. If you are using rollupOptions.output.entryFileNames then make sure you don't change the name of the server entry file. One of the following is expected to exist: \n${distFileNames.map((e) => `  ${e}`).join('\n')}`
   )
+  assert(
+    distFileNameFound &&
+      [serverIndexFileNameBase, serverEntryFileNameBase, serverEntryFileNameBaseAlternative].some((fileNameBase) =>
+        distFileNameFound.startsWith(fileNameBase)
+      )
+  )
+  assertUsage(!distFileNameFound.startsWith(serverIndexFileNameBase), wrongUsageWithInject)
 
-  // webpack couldn't have properly resolved distImporterPath (since there is not static import statement)
-  if (isWebpackResolve(serverEntryFilePath)) {
+  // webpack couldn't have properly resolved `distFilePathFound` since there isn't any static import statement importing `distFilePathFound`
+  if (isWebpackResolve(distFilePathFound)) {
     return false
   }
 
-  await import_(serverEntryFilePath)
+  await import_(distFilePathFound)
   return true
 }

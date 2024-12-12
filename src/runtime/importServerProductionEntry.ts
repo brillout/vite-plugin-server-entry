@@ -4,7 +4,7 @@ import { getCwdSafe, assertUsage, toPosixPath, assertPosixPath, isWebpackResolve
 import type { AutoImporter, AutoImporterPaths } from './AutoImporter'
 import { debugLogsRuntimePost, debugLogsRuntimePre } from './debugLogsRuntime'
 import { DEBUG } from '../shared/debug'
-import { crawlServerEntry } from './crawlServerEntry'
+import { crawlServerEntry, wrongUsageWithInject } from './crawlServerEntry'
 
 async function importServerProductionEntry({
   tolerateNotFound,
@@ -14,10 +14,7 @@ async function importServerProductionEntry({
 
   debugLogsRuntimePre(autoImporter)
 
-  assertUsage(
-    autoImporter.status !== 'DISABLED_BY_INJECT',
-    "As a library author, make sure your library doesn't call importServerProductionEntry() when using `inject: true`"
-  )
+  assertUsage(autoImporter.status !== 'DISABLED_BY_INJECT', wrongUsageWithInject)
 
   let success = false
   let requireError: unknown
