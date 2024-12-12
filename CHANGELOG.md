@@ -1,3 +1,13 @@
+## [0.5.5](https://github.com/brillout/vite-plugin-server-entry/compare/v0.5.4...v0.5.5) (2024-12-12)
+
+
+### Bug Fixes
+
+* fix error message upon wrong usage with inject ([6969cd1](https://github.com/brillout/vite-plugin-server-entry/commit/6969cd1ac7fb22fc9939ccfab18ed457e77ec066))
+* improve tolerateNotFound flag ([1d05c3f](https://github.com/brillout/vite-plugin-server-entry/commit/1d05c3f582ff02b4e84c9be2d1751be798d7ca5e))
+
+
+
 ## [0.5.4](https://github.com/brillout/vite-plugin-server-entry/compare/v0.5.3...v0.5.4) (2024-11-24)
 
 
