@@ -26,6 +26,7 @@ import {
   serverIndexFileNameBase,
 } from '../shared/serverEntryFileNameBase'
 import { debugLogsBuildtime } from './debugLogsBuildTime'
+import { sourceMapPassthrough } from '../utils/rollupSourceMap'
 
 const autoImporterFilePath = require.resolve('../runtime/autoImporter.js')
 const serverEntryVirtualId = 'virtual:@brillout/vite-plugin-server-entry:serverEntry'
@@ -169,7 +170,7 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
         '\n'
         */
         )
-        return code
+        return sourceMapPassthrough(code)
       },
     },
     {
