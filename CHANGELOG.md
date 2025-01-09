@@ -1,3 +1,12 @@
+## [0.5.7](https://github.com/brillout/vite-plugin-server-entry/compare/v0.5.6...v0.5.7) (2025-01-09)
+
+
+### Bug Fixes
+
+* update error message ([d02b8d6](https://github.com/brillout/vite-plugin-server-entry/commit/d02b8d61bf39061c0b95f9d6f2e665cca06ccd17))
+
+
+
 ## [0.5.6](https://github.com/brillout/vite-plugin-server-entry/compare/v0.5.5...v0.5.6) (2024-12-12)
 
 
