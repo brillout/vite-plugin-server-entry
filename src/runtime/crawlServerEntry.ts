@@ -87,7 +87,7 @@ async function crawlServerEntry(outDir?: string, tolerateNotFound?: boolean): Pr
         distFileNameFound.startsWith(fileNameBase),
       ),
   )
-  if (distFileNameFound.startsWith(serverIndexFileNameBase)) {
+  if (!distFileNameFound.startsWith(serverIndexFileNameBase)) {
     if (tolerateNotFound) return false
     assertUsage(false, wrongUsageWithInject)
   }
