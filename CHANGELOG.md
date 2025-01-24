@@ -1,3 +1,14 @@
+## [0.5.8](https://github.com/brillout/vite-plugin-server-entry/compare/v0.5.7...v0.5.8) (2025-01-24)
+
+
+### Bug Fixes
+
+* improve debug logs ([4647375](https://github.com/brillout/vite-plugin-server-entry/commit/4647375689164cc0ea566509a8cfbc3762be3da4))
+* improve error message ([c33dd7d](https://github.com/brillout/vite-plugin-server-entry/commit/c33dd7d0d12e11e059a5bed070e90df10a5e36e3))
+* support inject + pre-rendering ([a9f0984](https://github.com/brillout/vite-plugin-server-entry/commit/a9f0984d34c75183786d6fd6f8cdba0fc244b151))
+
+
+
 ## [0.5.7](https://github.com/brillout/vite-plugin-server-entry/compare/v0.5.6...v0.5.7) (2025-01-09)
 
 

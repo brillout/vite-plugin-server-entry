@@ -1,6 +1,6 @@
 {
   "name": "@brillout/vite-plugin-server-entry",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "repository": "https://github.com/brillout/vite-plugin-server-entry",
   "dependencies": {
     "@brillout/import": "^0.2.3",
