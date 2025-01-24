@@ -59,8 +59,9 @@ async function crawlServerEntry(outDir?: string, tolerateNotFound?: boolean): Pr
     `${serverIndexFileNameBase}.js`,
     `${serverIndexFileNameBase}.cjs`,
   ] as const
+  const getDistFilePath = (distFileName: string) => path.posix.join(serverEntryFileDir, distFileName)
   for (const distFileName of distFileNames) {
-    const distFilePath = path.posix.join(serverEntryFileDir, distFileName)
+    const distFilePath = getDistFilePath(distFileName)
     assert(isPathAbsolute(distFilePath))
     try {
       distFilePathFound = await requireResolve(
@@ -78,7 +79,7 @@ async function crawlServerEntry(outDir?: string, tolerateNotFound?: boolean): Pr
     if (tolerateNotFound) return false
     assertUsage(
       false,
-      `Cannot find server production entry. If you are using rollupOptions.output.entryFileNames then make sure you don't change the name of the server entry file. One of the following is expected to exist: \n${distFileNames.map((e) => `  ${e}`).join('\n')}`,
+      `Cannot find server production entry. If you are using rollupOptions.output.entryFileNames then make sure you don't change the name of the server entry file. One of the following is expected to exist: \n${distFileNames.map((distFileName) => `  ${getDistFilePath(distFileName)}`).join('\n')}`,
     )
   }
   assert(
