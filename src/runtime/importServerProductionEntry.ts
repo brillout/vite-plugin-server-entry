@@ -64,7 +64,7 @@ async function importServerProductionEntry(
   // We don't handle the following case:
   //  - When the user directly imports dist/server/entry.js because we assume that Vike and Telefunc don't call importServerProductionEntry() in that case
 
-  debugLogsRuntimePost({ success, requireError, isOutsideOfCwd, outDir })
+  debugLogsRuntimePost({ success, requireError, isOutsideOfCwd, ...args })
   if (tolerateNotFound) {
     return success
   } else {

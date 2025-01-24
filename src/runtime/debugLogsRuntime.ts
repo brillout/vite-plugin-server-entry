@@ -41,21 +41,8 @@ function debugLogsRuntimePre(autoImporter: AutoImporter): undefined | void {
   }
 }
 
-function debugLogsRuntimePost({
-  success,
-  requireError,
-  outDir,
-  isOutsideOfCwd,
-}: {
-  success: boolean
-  requireError: unknown
-  outDir: undefined | string
-  isOutsideOfCwd: null | boolean
-}): undefined | void {
+function debugLogsRuntimePost(info: Record<string, unknown>): undefined | void {
   if (!DEBUG) return
-  logDebug('requireError', requireError)
-  logDebug('outDir', outDir)
-  logDebug('isOutsideOfCwd', isOutsideOfCwd)
-  logDebug('success', success)
+  for (var key in info) logDebug(key, info[key])
   logDebug('DEBUG_LOGS_RUNTIME [end]')
 }
