@@ -102,10 +102,9 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
 
         applyPluginConfigProvidedByUser(config)
 
-        if (!config._vitePluginServerEntry.inject) {
-          const serverEntryName = getServerEntryName(config)
-          config.build.rollupOptions.input = injectRollupInputs({ [serverEntryName]: serverEntryVirtualId }, config)
-        }
+        // We always generate dist/server/entry.mjs even if `inject: true` because it's needed for pre-rendering: the server shouldn't start when pre-rendering starts.
+        const serverEntryName = getServerEntryName(config)
+        config.build.rollupOptions.input = injectRollupInputs({ [serverEntryName]: serverEntryVirtualId }, config)
       },
       buildStart() {
         if (skip) return

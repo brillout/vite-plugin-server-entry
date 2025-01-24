@@ -15,7 +15,11 @@ const wrongUsageWithInject = `Execute the server entry built for production (e.g
 // Use Node.js to search for the file dist/server/entry.js which we use only as fallback if:
 // - the server entry isn't injected (the setting `inject` is `false`), and
 // - the auto importer doesn't work.
-async function crawlServerEntry(outDir?: string, tolerateNotFound?: boolean): Promise<boolean> {
+async function crawlServerEntry({
+  outDir,
+  tolerateNotFound,
+  doNotLoadServer,
+}: { outDir?: string; tolerateNotFound?: boolean; doNotLoadServer?: boolean }): Promise<boolean> {
   let path: typeof import('path')
   let fs: typeof import('fs')
   try {
@@ -55,10 +59,17 @@ async function crawlServerEntry(outDir?: string, tolerateNotFound?: boolean): Pr
     `${serverEntryFileNameBaseAlternative}.mjs`,
     `${serverEntryFileNameBaseAlternative}.js`,
     `${serverEntryFileNameBaseAlternative}.cjs`,
-    `${serverIndexFileNameBase}.mjs`,
-    `${serverIndexFileNameBase}.js`,
-    `${serverIndexFileNameBase}.cjs`,
-  ] as const
+  ]
+  if (!doNotLoadServer) {
+    distFileNames.push(
+      ...[
+        //
+        `${serverIndexFileNameBase}.mjs`,
+        `${serverIndexFileNameBase}.js`,
+        `${serverIndexFileNameBase}.cjs`,
+      ],
+    )
+  }
   const getDistFilePath = (distFileName: string) => path.posix.join(serverEntryFileDir, distFileName)
   for (const distFileName of distFileNames) {
     const distFilePath = getDistFilePath(distFileName)
