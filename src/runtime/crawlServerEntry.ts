@@ -52,8 +52,6 @@ async function crawlServerEntry({
   const outDirServerExists: boolean = fs.existsSync(outDirServer)
   if (!outDirServerExists) return false
 
-  let distFilePathFound: string | undefined
-  let distFileNameFound: (typeof distFileNames)[number] | undefined
   const distFileNames = [
     `${serverEntryFileNameBase}.mjs`,
     `${serverEntryFileNameBase}.js`,
@@ -72,6 +70,9 @@ async function crawlServerEntry({
       ],
     )
   }
+
+  let distFilePathFound: string | undefined
+  let distFileNameFound: (typeof distFileNames)[number] | undefined
   const getDistFilePath = (distFileName: string) => path.posix.join(outDirServer, distFileName)
   for (const distFileName of distFileNames) {
     const distFilePath = getDistFilePath(distFileName)
@@ -88,6 +89,7 @@ async function crawlServerEntry({
       break
     } catch {}
   }
+
   if (!distFilePathFound) {
     if (tolerateNotFound) return false
     assert(outDirServerExists)
