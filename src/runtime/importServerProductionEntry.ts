@@ -44,10 +44,10 @@ async function importServerProductionEntry(
         await autoImporter.loadServerEntry()
         success = true
       } catch (err) {
-        if (DEBUG) {
-          requireError = err
-        } else {
+        if (!DEBUG) {
           throw err
+        } else {
+          requireError = err
         }
       }
       isOutsideOfCwd = isServerEntryOutsideOfCwd(autoImporter.paths)
