@@ -16,7 +16,7 @@ async function importServerProductionEntry(
   } = {},
 ): Promise<null | boolean> {
   const autoImporter: AutoImporter = require('./autoImporter.js')
-  const { tolerateNotFound, outDir, doNotLoadServer } = args
+  const { tolerateNotFound, doNotLoadServer } = args
 
   debugLogsRuntimePre(autoImporter)
 
