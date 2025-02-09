@@ -6,6 +6,7 @@ import { debugLogsRuntimePost, debugLogsRuntimePre } from './debugLogsRuntime'
 import { DEBUG } from '../shared/debug'
 import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase'
 import { crawlServerEntry } from './crawlServerEntry'
+import { import_ } from '@brillout/import'
 
 async function importServerProductionEntry(
   args: {
@@ -52,10 +53,14 @@ async function importServerProductionEntry(
   }
 
   if (!success) {
-    success = await crawlServerEntry({
+    const outFilePath = await crawlServerEntry({
       ...args,
       outFileSearch: [serverEntryFileNameBase, serverEntryFileNameBaseAlternative],
     })
+    if (outFilePath) {
+      await import_(outFilePath)
+      success = true
+    }
   }
 
   // We don't handle the following case:

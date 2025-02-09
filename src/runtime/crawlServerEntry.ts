@@ -20,7 +20,7 @@ async function crawlServerEntry({
   outDir,
   tolerateNotFound,
   outFileSearch,
-}: { outDir?: string; tolerateNotFound?: boolean; outFileSearch: OutFileSearch }): Promise<boolean> {
+}: { outDir?: string; tolerateNotFound?: boolean; outFileSearch: OutFileSearch }): Promise<false | string> {
   let path: typeof import('path')
   let fs: typeof import('fs')
   try {
@@ -124,6 +124,5 @@ async function crawlServerEntry({
     return false
   }
 
-  await import_(outFileFound.outFilePath)
-  return true
+  return outFileFound.outFilePath
 }
