@@ -52,7 +52,7 @@ async function crawlServerEntry({
   const outDirServerExists: boolean = fs.existsSync(outDirServer)
   if (!outDirServerExists) return false
 
-  const distFileNames = [
+  const outFileNames = [
     `${serverEntryFileNameBase}.mjs`,
     `${serverEntryFileNameBase}.js`,
     `${serverEntryFileNameBase}.cjs`,
@@ -61,7 +61,7 @@ async function crawlServerEntry({
     `${serverEntryFileNameBaseAlternative}.cjs`,
   ]
   if (!doNotLoadServer) {
-    distFileNames.push(
+    outFileNames.push(
       ...[
         //
         `${serverIndexFileNameBase}.mjs`,
@@ -71,49 +71,49 @@ async function crawlServerEntry({
     )
   }
 
-  let distFilePathFound: string | undefined
-  let distFileNameFound: (typeof distFileNames)[number] | undefined
-  const getDistFilePath = (distFileName: string) => path.posix.join(outDirServer, distFileName)
-  for (const distFileName of distFileNames) {
-    const distFilePath = getDistFilePath(distFileName)
-    assert(isPathAbsolute(distFilePath))
+  let outFilePathFound: string | undefined
+  let outFileNameFound: (typeof outFileNames)[number] | undefined
+  const getDistFilePath = (outFileName: string) => path.posix.join(outDirServer, outFileName)
+  for (const outFileName of outFileNames) {
+    const outFilePath = getDistFilePath(outFileName)
+    assert(isPathAbsolute(outFilePath))
     try {
-      distFilePathFound = await requireResolve(
-        distFilePath,
-        // Since `distFilePath` is absolute, we can pass a wrong `currentFilePath` argument value.
+      outFilePathFound = await requireResolve(
+        outFilePath,
+        // Since `outFilePath` is absolute, we can pass a wrong `currentFilePath` argument value.
         // - We avoid using `__filename` because it isn't defined when this file is included in an ESM bundle.
         // - We cannot use `import.meta.filename` (nor `import.meta.url`) because there doesn't seem to be a way to safely/conditionally access `import.meta`.
         cwd,
       )
-      distFileNameFound = distFileName
+      outFileNameFound = outFileName
       break
     } catch {}
   }
 
-  if (!distFilePathFound) {
+  if (!outFilePathFound) {
     if (tolerateNotFound) return false
     assert(outDirServerExists)
     assertUsage(
       false,
-      `The server production entry is missing. If you are using rollupOptions.output.entryFileNames then make sure you don't change the file name of the production server entry. One of the following is expected to exist: \n${distFileNames.map((distFileName) => `  ${getDistFilePath(distFileName)}`).join('\n')}`,
+      `The server production entry is missing. If you are using rollupOptions.output.entryFileNames then make sure you don't change the file name of the production server entry. One of the following is expected to exist: \n${outFileNames.map((outFileName) => `  ${getDistFilePath(outFileName)}`).join('\n')}`,
     )
   }
-  assert(distFileNameFound)
+  assert(outFileNameFound)
   assert(
     [serverIndexFileNameBase, serverEntryFileNameBase, serverEntryFileNameBaseAlternative].some((fileNameBase) =>
-      distFileNameFound.startsWith(fileNameBase),
+      outFileNameFound.startsWith(fileNameBase),
     ),
   )
-  if (distFileNameFound.startsWith(serverIndexFileNameBase)) {
+  if (outFileNameFound.startsWith(serverIndexFileNameBase)) {
     if (tolerateNotFound) return false
     assertUsage(false, wrongUsageWithInject)
   }
 
-  // webpack couldn't have properly resolved `distFilePathFound` since there isn't any static import statement importing `distFilePathFound`
-  if (isWebpackResolve(distFilePathFound)) {
+  // webpack couldn't have properly resolved `outFilePathFound` since there isn't any static import statement importing `outFilePathFound`
+  if (isWebpackResolve(outFilePathFound)) {
     return false
   }
 
-  await import_(distFilePathFound)
+  await import_(outFilePathFound)
   return true
 }
