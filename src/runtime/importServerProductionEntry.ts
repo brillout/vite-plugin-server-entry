@@ -13,16 +13,18 @@ import {
 import { crawlServerEntry } from './crawlServerEntry'
 import { import_ } from '@brillout/import'
 
+const wrongUsageNotBuilt =
+  'The server production entry is missing. (Re-)build your app and try again. If you still get this error, then you need to manually import the server production entry, see https://github.com/brillout/vite-plugin-server-entry#manual-import'
+
 /** To be used only for `$ vike preview`. */
-async function importServerProductionIndex(args: { outDir?: string }): Promise<boolean> {
+async function importServerProductionIndex(args: { outDir: string }): Promise<void> {
   // We don't need autoImporter — we can just crawl dist/server/index.mjs as we have both `outDir` and `node:fs`. Because `$ vike preview` isn't supposed to be called in edge environments, we can load Node.js as well as Vite (thus we know `outDir`).
   const outFilePath = await crawlServerEntry({
     ...args,
     outFileSearch: [serverIndexFileNameBase],
   })
-  if (!outFilePath) return false
+  assertUsage(outFilePath, wrongUsageNotBuilt)
   await import_(outFilePath)
-  return true
 }
 
 async function importServerProductionEntry(
@@ -75,10 +77,7 @@ async function importServerProductionEntry(
   if (args.tolerateDoesNotExist) {
     return success
   } else {
-    assertUsage(
-      success,
-      'The server production entry is missing. (Re-)build your app and try again. If you still get this error, then you need to manually import the server production entry, see https://github.com/brillout/vite-plugin-server-entry#manual-import',
-    )
+    assertUsage(success, wrongUsageNotBuilt)
     return null
   }
 }
