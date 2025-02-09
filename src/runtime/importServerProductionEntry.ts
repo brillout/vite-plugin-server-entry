@@ -10,7 +10,7 @@ import { import_ } from '@brillout/import'
 
 async function importServerProductionEntry(
   args: {
-    // Used by Telefunc, since Telefunc cannot assume/know whether the user is using Vite.
+    // Used by Telefunc, since Telefunc doesn't know whether the user is using Vite.
     tolerateDoesNotExist?: boolean
     outDir?: string
   } = {},
