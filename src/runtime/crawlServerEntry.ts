@@ -1,17 +1,23 @@
 // TODO/eventually: rename to `crawlOutDir`
 
 export { crawlServerEntry }
-export { wrongUsageWithInject }
 
 import { assert, assertUsage, assertPosixPath, requireResolve, isWebpackResolve } from './utils'
 import { import_ } from '@brillout/import'
-import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase'
-import pc from '@brillout/picocolors'
+import {
+  serverEntryFileNameBase,
+  serverEntryFileNameBaseAlternative,
+  serverIndexFileNameBase,
+} from '../shared/serverEntryFileNameBase'
 
+/* TODO: were should move this?
 const wrongUsageWithInject =
   `Run the server production build (e.g. ${pc.cyan('$ node dist/server/index.mjs')}) instead of running the original server entry (e.g. ${pc.cyan('$ ts-node server/index.ts')})` as const
+*/
 
-type OutFileSearch = [typeof serverEntryFileNameBase, typeof serverEntryFileNameBaseAlternative]
+type OutFileSearch =
+  | [typeof serverEntryFileNameBase, typeof serverEntryFileNameBaseAlternative]
+  | [typeof serverIndexFileNameBase]
 
 // Use Node.js to search for the file dist/server/entry.js which we use only as fallback if:
 // - the server entry isn't injected (the setting `inject` is `false`), and
@@ -63,18 +69,6 @@ async function crawlServerEntry({
       ],
     )
   })
-  /* TODO/now
-  if (!doNotLoadServer) {
-    outFileNameList.push(
-      ...[
-        //
-        `${serverIndexFileNameBase}.mjs`,
-        `${serverIndexFileNameBase}.js`,
-        `${serverIndexFileNameBase}.cjs`,
-      ],
-    )
-  }
-  */
 
   let outFileFound: undefined | { outFilePath: string; outFileName: string }
   const getOutFilePath = (outFileName: string) => path.posix.join(outDirServer, outFileName)
@@ -112,12 +106,6 @@ async function crawlServerEntry({
     }
   }
   assert(outFileSearch.some((outFileNameBase) => outFileFound.outFileName.startsWith(outFileNameBase)))
-  /* TODO/now
-  if (outFileFound.outFileName.startsWith(serverIndexFileNameBase)) {
-    if (tolerateNotFound) return false
-    assertUsage(false, wrongUsageWithInject)
-  }
-  */
 
   // webpack couldn't have properly resolved `outFilePathFound` since there isn't any static import statement importing `outFilePathFound`
   if (isWebpackResolve(outFileFound.outFilePath)) {

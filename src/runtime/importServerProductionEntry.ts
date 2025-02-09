@@ -1,12 +1,29 @@
 export { importServerProductionEntry }
+export { importServerProductionIndex }
 
 import { getCwdSafe, assertUsage, toPosixPath, assertPosixPath, isWebpackResolve } from './utils'
 import type { AutoImporter, AutoImporterPaths } from './AutoImporter'
 import { debugLogsRuntimePost, debugLogsRuntimePre } from './debugLogsRuntime'
 import { DEBUG } from '../shared/debug'
-import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase'
+import {
+  serverEntryFileNameBase,
+  serverEntryFileNameBaseAlternative,
+  serverIndexFileNameBase,
+} from '../shared/serverEntryFileNameBase'
 import { crawlServerEntry } from './crawlServerEntry'
 import { import_ } from '@brillout/import'
+
+/** To be used only for `$ vike preview`. */
+async function importServerProductionIndex(args: { outDir?: string }): Promise<boolean> {
+  // We don't need autoImporter — we can just crawl dist/server/index.mjs as we have both `outDir` and `node:fs`. Because `$ vike preview` isn't supposed to be called in edge environments, we can load Node.js as well as Vite (thus we know `outDir`).
+  const outFilePath = await crawlServerEntry({
+    ...args,
+    outFileSearch: [serverIndexFileNameBase],
+  })
+  if (!outFilePath) return false
+  await import_(outFilePath)
+  return true
+}
 
 async function importServerProductionEntry(
   args: {
@@ -18,18 +35,6 @@ async function importServerProductionEntry(
   const autoImporter: AutoImporter = require('./autoImporter.js')
 
   debugLogsRuntimePre(autoImporter)
-
-  /* TODO/now
-  assertUsage(
-    autoImporter.status !== 'DISABLED_BY_INJECT' ||
-      // Bypass this assertUsage() upon pre-rendering:
-      //  - Upon pre-rendering Vike doesn't load dist/server/index.mjs but loads dist/server/entry.mjs instead: the server shouldn't start when pre-rendering starts.
-      //  - Upon pre-rendering Vite is loaded and thus we know `outDir` and, consequently, we don't need the whole autoImporter.js logic: we can just crawl dist/server/entry.mjs as we have both `outDir` and `node:fs`.
-      //    - This may change once we allow users to implement ISR in a Cloudflare Worker by using the Vike API `prerender()` without needing to load Vite.
-      doNotLoadServer,
-    wrongUsageWithInject,
-  )
-  */
 
   let success = false
   let requireError: unknown
