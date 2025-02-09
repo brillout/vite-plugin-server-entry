@@ -4,22 +4,20 @@ import { getCwdSafe, assertUsage, toPosixPath, assertPosixPath, isWebpackResolve
 import type { AutoImporter, AutoImporterPaths } from './AutoImporter'
 import { debugLogsRuntimePost, debugLogsRuntimePre } from './debugLogsRuntime'
 import { DEBUG } from '../shared/debug'
-import { crawlServerEntry, wrongUsageWithInject } from './crawlServerEntry'
+import { crawlServerEntry } from './crawlServerEntry'
 
 async function importServerProductionEntry(
   args: {
     // Used by Telefunc, since Telefunc cannot assume/know whether the user is using Vite.
     tolerateNotFound?: boolean
     outDir?: string
-    // Used by Vike for pre-rendering.
-    doNotLoadServer?: boolean
   } = {},
 ): Promise<null | boolean> {
   const autoImporter: AutoImporter = require('./autoImporter.js')
-  const { tolerateNotFound, doNotLoadServer } = args
 
   debugLogsRuntimePre(autoImporter)
 
+  /* TODO/now
   assertUsage(
     autoImporter.status !== 'DISABLED_BY_INJECT' ||
       // Bypass this assertUsage() upon pre-rendering:
@@ -29,6 +27,7 @@ async function importServerProductionEntry(
       doNotLoadServer,
     wrongUsageWithInject,
   )
+  */
 
   let success = false
   let requireError: unknown
@@ -59,7 +58,7 @@ async function importServerProductionEntry(
   //  - When the user directly imports dist/server/entry.js because we assume that Vike and Telefunc don't call importServerProductionEntry() in that case
 
   debugLogsRuntimePost({ success, requireError, isOutsideOfCwd, ...args })
-  if (tolerateNotFound) {
+  if (args.tolerateNotFound) {
     return success
   } else {
     assertUsage(

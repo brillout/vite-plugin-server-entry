@@ -3,11 +3,7 @@ export { wrongUsageWithInject }
 
 import { assert, assertUsage, assertPosixPath, requireResolve, isWebpackResolve } from './utils'
 import { import_ } from '@brillout/import'
-import {
-  serverEntryFileNameBase,
-  serverEntryFileNameBaseAlternative,
-  serverIndexFileNameBase,
-} from '../shared/serverEntryFileNameBase'
+import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase'
 import pc from '@brillout/picocolors'
 
 const wrongUsageWithInject =
@@ -19,8 +15,7 @@ const wrongUsageWithInject =
 async function crawlServerEntry({
   outDir,
   tolerateNotFound,
-  doNotLoadServer,
-}: { outDir?: string; tolerateNotFound?: boolean; doNotLoadServer?: boolean }): Promise<boolean> {
+}: { outDir?: string; tolerateNotFound?: boolean }): Promise<boolean> {
   let path: typeof import('path')
   let fs: typeof import('fs')
   try {
@@ -60,6 +55,7 @@ async function crawlServerEntry({
     `${serverEntryFileNameBaseAlternative}.js`,
     `${serverEntryFileNameBaseAlternative}.cjs`,
   ]
+  /* TODO/now
   if (!doNotLoadServer) {
     outFileNameList.push(
       ...[
@@ -70,6 +66,7 @@ async function crawlServerEntry({
       ],
     )
   }
+  */
 
   let outFileFound: undefined | { outFilePath: string; outFileName: string }
   const getDistFilePath = (outFileName: string) => path.posix.join(outDirServer, outFileName)
@@ -107,14 +104,15 @@ async function crawlServerEntry({
     }
   }
   assert(
-    [serverIndexFileNameBase, serverEntryFileNameBase, serverEntryFileNameBaseAlternative].some((fileNameBase) =>
-      outFileFound.outFileName.startsWith(fileNameBase),
-    ),
+    outFileFound.outFileName.startsWith(serverEntryFileNameBase) ||
+      outFileFound.outFileName.startsWith(serverEntryFileNameBaseAlternative),
   )
+  /* TODO/now
   if (outFileFound.outFileName.startsWith(serverIndexFileNameBase)) {
     if (tolerateNotFound) return false
     assertUsage(false, wrongUsageWithInject)
   }
+  */
 
   // webpack couldn't have properly resolved `outFilePathFound` since there isn't any static import statement importing `outFilePathFound`
   if (isWebpackResolve(outFileFound.outFilePath)) {
