@@ -4,6 +4,7 @@ import { getCwdSafe, assertUsage, toPosixPath, assertPosixPath, isWebpackResolve
 import type { AutoImporter, AutoImporterPaths } from './AutoImporter'
 import { debugLogsRuntimePost, debugLogsRuntimePre } from './debugLogsRuntime'
 import { DEBUG } from '../shared/debug'
+import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase'
 import { crawlServerEntry } from './crawlServerEntry'
 
 async function importServerProductionEntry(
@@ -51,7 +52,10 @@ async function importServerProductionEntry(
   }
 
   if (!success) {
-    success = await crawlServerEntry(args)
+    success = await crawlServerEntry({
+      ...args,
+      outFileSearch: [serverEntryFileNameBase, serverEntryFileNameBaseAlternative],
+    })
   }
 
   // We don't handle the following case:

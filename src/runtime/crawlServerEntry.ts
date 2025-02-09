@@ -11,13 +11,16 @@ import pc from '@brillout/picocolors'
 const wrongUsageWithInject =
   `Run the server production build (e.g. ${pc.cyan('$ node dist/server/index.mjs')}) instead of running the original server entry (e.g. ${pc.cyan('$ ts-node server/index.ts')})` as const
 
+type OutFileSearch = [typeof serverEntryFileNameBase, typeof serverEntryFileNameBaseAlternative]
+
 // Use Node.js to search for the file dist/server/entry.js which we use only as fallback if:
 // - the server entry isn't injected (the setting `inject` is `false`), and
 // - the auto importer doesn't work.
 async function crawlServerEntry({
   outDir,
   tolerateNotFound,
-}: { outDir?: string; tolerateNotFound?: boolean }): Promise<boolean> {
+  outFileSearch,
+}: { outDir?: string; tolerateNotFound?: boolean; outFileSearch: OutFileSearch }): Promise<boolean> {
   let path: typeof import('path')
   let fs: typeof import('fs')
   try {
@@ -49,14 +52,17 @@ async function crawlServerEntry({
   const outDirServerExists: boolean = fs.existsSync(outDirServer)
   if (!outDirServerExists) return false
 
-  const outFileNameList = [
-    `${serverEntryFileNameBase}.mjs`,
-    `${serverEntryFileNameBase}.js`,
-    `${serverEntryFileNameBase}.cjs`,
-    `${serverEntryFileNameBaseAlternative}.mjs`,
-    `${serverEntryFileNameBaseAlternative}.js`,
-    `${serverEntryFileNameBaseAlternative}.cjs`,
-  ]
+  const outFileNameList: `${string}.${'mjs' | 'js' | 'cjs'}`[] = []
+  outFileSearch.forEach((outFileNameBase) => {
+    outFileNameList.push(
+      ...[
+        //
+        `${outFileNameBase}.mjs` as const,
+        `${outFileNameBase}.js` as const,
+        `${outFileNameBase}.cjs` as const,
+      ],
+    )
+  })
   /* TODO/now
   if (!doNotLoadServer) {
     outFileNameList.push(
@@ -105,10 +111,7 @@ async function crawlServerEntry({
       )
     }
   }
-  assert(
-    outFileFound.outFileName.startsWith(serverEntryFileNameBase) ||
-      outFileFound.outFileName.startsWith(serverEntryFileNameBaseAlternative),
-  )
+  assert(outFileSearch.some((outFileNameBase) => outFileFound.outFileName.startsWith(outFileNameBase)))
   /* TODO/now
   if (outFileFound.outFileName.startsWith(serverIndexFileNameBase)) {
     if (tolerateNotFound) return false
