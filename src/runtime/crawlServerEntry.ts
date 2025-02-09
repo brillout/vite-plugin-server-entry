@@ -71,26 +71,31 @@ async function crawlServerEntry({
     )
   }
 
-  let outFilePathFound: string | undefined
-  let outFileNameFound: (typeof outFileNameList)[number] | undefined
+  let outFileFound: undefined | { outFilePath: string; outFileName: string }
   const getDistFilePath = (outFileName: string) => path.posix.join(outDirServer, outFileName)
   for (const outFileName of outFileNameList) {
     const outFilePath = getDistFilePath(outFileName)
     assert(isPathAbsolute(outFilePath))
+    let outFilePathResolved: string | undefined
     try {
-      outFilePathFound = await requireResolve(
+      outFilePathResolved = await requireResolve(
         outFilePath,
         // Since `outFilePath` is absolute, we can pass a wrong `currentFilePath` argument value.
         // - We avoid using `__filename` because it isn't defined when this file is included in an ESM bundle.
         // - We cannot use `import.meta.filename` (nor `import.meta.url`) because there doesn't seem to be a way to safely/conditionally access `import.meta`.
         cwd,
       )
-      outFileNameFound = outFileName
-      break
-    } catch {}
+    } catch {
+      continue
+    }
+    assert(outFilePathResolved)
+    outFileFound = {
+      outFilePath: outFilePathResolved,
+      outFileName,
+    }
   }
 
-  if (!outFilePathFound) {
+  if (!outFileFound) {
     if (tolerateNotFound) return false
     assert(outDirServerExists)
     assertUsage(
@@ -98,22 +103,21 @@ async function crawlServerEntry({
       `The server production entry is missing. If you are using rollupOptions.output.entryFileNames then make sure you don't change the file name of the production server entry. One of the following is expected to exist: \n${outFileNameList.map((outFileName) => `  ${getDistFilePath(outFileName)}`).join('\n')}`,
     )
   }
-  assert(outFileNameFound)
   assert(
     [serverIndexFileNameBase, serverEntryFileNameBase, serverEntryFileNameBaseAlternative].some((fileNameBase) =>
-      outFileNameFound.startsWith(fileNameBase),
+      outFileFound.outFileName.startsWith(fileNameBase),
     ),
   )
-  if (outFileNameFound.startsWith(serverIndexFileNameBase)) {
+  if (outFileFound.outFileName.startsWith(serverIndexFileNameBase)) {
     if (tolerateNotFound) return false
     assertUsage(false, wrongUsageWithInject)
   }
 
   // webpack couldn't have properly resolved `outFilePathFound` since there isn't any static import statement importing `outFilePathFound`
-  if (isWebpackResolve(outFilePathFound)) {
+  if (isWebpackResolve(outFileFound.outFilePath)) {
     return false
   }
 
-  await import_(outFilePathFound)
+  await import_(outFileFound.outFilePath)
   return true
 }
