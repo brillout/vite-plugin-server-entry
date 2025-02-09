@@ -34,12 +34,10 @@ async function importServerProductionEntry(
   let requireError: unknown
   let isOutsideOfCwd: boolean | null = null
 
-  if (doNotLoadServer) {
-    success = await crawlServerEntry(args)
-  }
-
-  if (!success) {
-    if (autoImporter.status === 'SET') {
+  if (autoImporter.status === 'SET') {
+    // In a monorepo the autoImporter can be that of another project => don't use autoImporter if it's that case
+    isOutsideOfCwd = isServerEntryOutsideOfCwd(autoImporter.paths)
+    if (isOutsideOfCwd === false || isOutsideOfCwd === null) {
       try {
         await autoImporter.loadServerEntry()
         success = true
@@ -49,10 +47,6 @@ async function importServerProductionEntry(
         } else {
           requireError = err
         }
-      }
-      isOutsideOfCwd = isServerEntryOutsideOfCwd(autoImporter.paths)
-      if (isOutsideOfCwd) {
-        success = false
       }
     }
   }
