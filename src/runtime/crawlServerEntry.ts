@@ -47,8 +47,8 @@ async function crawlServerEntry({
     // The SSR server doesn't have access to config.build.outDir so the only option left is to shoot in the dark by trying with 'dist/'
     outDir = path.posix.join(cwd, 'dist')
   }
-  const serverEntryFileDir = path.posix.join(outDir, 'server')
-  if (!fs.existsSync(serverEntryFileDir)) return false
+  const outDirServer = path.posix.join(outDir, 'server')
+  if (!fs.existsSync(outDirServer)) return false
 
   let distFilePathFound: string | undefined
   let distFileNameFound: (typeof distFileNames)[number] | undefined
@@ -70,7 +70,7 @@ async function crawlServerEntry({
       ],
     )
   }
-  const getDistFilePath = (distFileName: string) => path.posix.join(serverEntryFileDir, distFileName)
+  const getDistFilePath = (distFileName: string) => path.posix.join(outDirServer, distFileName)
   for (const distFileName of distFileNames) {
     const distFilePath = getDistFilePath(distFileName)
     assert(isPathAbsolute(distFilePath))
