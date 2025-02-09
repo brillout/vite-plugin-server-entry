@@ -87,8 +87,9 @@ function isServerEntryOutsideOfCwd(paths: AutoImporterPaths): boolean | null {
   try {
     serverEntryFilePath = paths.serverEntryFilePathResolved()
   } catch {
-    // Edge environments usually(/always?) don't support require.resolve()
-    //  - This code block is called for edge environments that return a dummy process.cwd(), e.g. Cloudflare Workers: process.cwd() === '/'
+    // serverEntryFilePathResolved() calls require.resolve()
+    // - Edge environments don't support require.resolve()
+    // - This code block is executed on edge environments that implement a dummy `process.cwd()` e.g. on Cloudflare Workers `process.cwd() === '/'`
     return null
   }
 
