@@ -89,9 +89,10 @@ async function crawlServerEntry({
   }
   if (!distFilePathFound) {
     if (tolerateNotFound) return false
+    assert(outDirServerExists)
     assertUsage(
       false,
-      `Cannot find server production entry. If you are using rollupOptions.output.entryFileNames then make sure you don't change the name of the server entry file. One of the following is expected to exist: \n${distFileNames.map((distFileName) => `  ${getDistFilePath(distFileName)}`).join('\n')}`,
+      `The server production entry is missing. If you are using rollupOptions.output.entryFileNames then make sure you don't change the file name of the production server entry. One of the following is expected to exist: \n${distFileNames.map((distFileName) => `  ${getDistFilePath(distFileName)}`).join('\n')}`,
     )
   }
   assert(distFileNameFound)
