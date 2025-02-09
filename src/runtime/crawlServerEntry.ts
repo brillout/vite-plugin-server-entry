@@ -10,7 +10,8 @@ import {
 } from '../shared/serverEntryFileNameBase'
 import pc from '@brillout/picocolors'
 
-const wrongUsageWithInject = `Execute the server entry built for production (e.g. ${pc.cyan('$ node dist/server/index.mjs')}). Don't execute the original server entry (e.g. ${pc.cyan('$ ts-node server/index.ts')}) nor run ${pc.cyan('$ vike preview')}.` as const
+const wrongUsageWithInject =
+  `Execute the server entry built for production (e.g. ${pc.cyan('$ node dist/server/index.mjs')}). Don't execute the original server entry (e.g. ${pc.cyan('$ ts-node server/index.ts')}) nor run ${pc.cyan('$ vike preview')}.` as const
 
 // Use Node.js to search for the file dist/server/entry.js which we use only as fallback if:
 // - the server entry isn't injected (the setting `inject` is `false`), and
@@ -97,9 +98,9 @@ async function crawlServerEntry({
   }
   assert(distFileNameFound)
   assert(
-      [serverIndexFileNameBase, serverEntryFileNameBase, serverEntryFileNameBaseAlternative].some((fileNameBase) =>
-        distFileNameFound.startsWith(fileNameBase),
-      ),
+    [serverIndexFileNameBase, serverEntryFileNameBase, serverEntryFileNameBaseAlternative].some((fileNameBase) =>
+      distFileNameFound.startsWith(fileNameBase),
+    ),
   )
   if (distFileNameFound.startsWith(serverIndexFileNameBase)) {
     if (tolerateNotFound) return false
