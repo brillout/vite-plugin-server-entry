@@ -18,9 +18,9 @@ type OutFileSearch = [typeof serverEntryFileNameBase, typeof serverEntryFileName
 // - the auto importer doesn't work.
 async function crawlServerEntry({
   outDir,
-  tolerateNotFound,
+  tolerateDoesNotExist,
   outFileSearch,
-}: { outDir?: string; tolerateNotFound?: boolean; outFileSearch: OutFileSearch }): Promise<false | string> {
+}: { outDir?: string; tolerateDoesNotExist?: boolean; outFileSearch: OutFileSearch }): Promise<false | string> {
   let path: typeof import('path')
   let fs: typeof import('fs')
   try {
@@ -101,7 +101,7 @@ async function crawlServerEntry({
   }
 
   if (!outFileFound) {
-    if (tolerateNotFound) {
+    if (tolerateDoesNotExist) {
       return false
     } else {
       assert(outDirServerExists)

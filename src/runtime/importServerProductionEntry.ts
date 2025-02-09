@@ -11,7 +11,7 @@ import { import_ } from '@brillout/import'
 async function importServerProductionEntry(
   args: {
     // Used by Telefunc, since Telefunc cannot assume/know whether the user is using Vite.
-    tolerateNotFound?: boolean
+    tolerateDoesNotExist?: boolean
     outDir?: string
   } = {},
 ): Promise<null | boolean> {
@@ -67,7 +67,7 @@ async function importServerProductionEntry(
   //  - When the user directly imports dist/server/entry.js because we assume that Vike and Telefunc don't call importServerProductionEntry() in that case
 
   debugLogsRuntimePost({ success, requireError, isOutsideOfCwd, ...args })
-  if (args.tolerateNotFound) {
+  if (args.tolerateDoesNotExist) {
     return success
   } else {
     assertUsage(
