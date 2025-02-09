@@ -77,9 +77,9 @@ async function crawlServerEntry({
   */
 
   let outFileFound: undefined | { outFilePath: string; outFileName: string }
-  const getDistFilePath = (outFileName: string) => path.posix.join(outDirServer, outFileName)
+  const getOutFilePath = (outFileName: string) => path.posix.join(outDirServer, outFileName)
   for (const outFileName of outFileNameList) {
-    const outFilePath = getDistFilePath(outFileName)
+    const outFilePath = getOutFilePath(outFileName)
     assert(isPathAbsolute(outFilePath))
     let outFilePathResolved: string | undefined
     try {
@@ -107,7 +107,7 @@ async function crawlServerEntry({
       assert(outDirServerExists)
       assertUsage(
         false,
-        `The server production entry is missing. If you are using rollupOptions.output.entryFileNames then make sure you don't change the file name of the production server entry. One of the following is expected to exist: \n${outFileNameList.map((outFileName) => `  ${getDistFilePath(outFileName)}`).join('\n')}`,
+        `The server production entry is missing. If you are using rollupOptions.output.entryFileNames then make sure you don't change the file name of the production server entry. One of the following is expected to exist: \n${outFileNameList.map((outFileName) => `  ${getOutFilePath(outFileName)}`).join('\n')}`,
       )
     }
   }
