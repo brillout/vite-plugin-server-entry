@@ -294,7 +294,7 @@ function getServerProductionEntryAll(config: ConfigResolved) {
 }
 
 function writeAutoImporterFile(config: ConfigResolved, entryFileName: string) {
-  const { distServerPathRelative, distServerPathAbsolute, outDir } = getDistServerPathRelative(config)
+  const { distServerPathRelative, distServerPathAbsolute } = getDistServerPathRelative(config)
   const serverEntryFilePathRelative = path.posix.join(distServerPathRelative, entryFileName)
   const serverEntryFilePathAbsolute = path.posix.join(distServerPathAbsolute, entryFileName)
   const { root } = config
@@ -309,7 +309,6 @@ function writeAutoImporterFile(config: ConfigResolved, entryFileName: string) {
       'exports.paths = {',
       `  autoImporterFilePathOriginal: ${JSON.stringify(autoImporterFilePath)},`,
       '  autoImporterFileDirActual: (() => { try { return __dirname } catch { return null } })(),',
-      `  outDir: ${JSON.stringify(outDir)},`,
       `  serverEntryFilePathRelative: ${JSON.stringify(serverEntryFilePathRelative)},`,
       `  serverEntryFilePathOriginal: ${JSON.stringify(serverEntryFilePathAbsolute)},`,
       `  serverEntryFilePathResolved: () => require.resolve(${JSON.stringify(serverEntryFilePathRelative)}),`,
@@ -377,22 +376,17 @@ function getDistServerPathRelative(config: ConfigVite) {
   let { outDir } = config.build
   // SvelteKit doesn't set config.build.outDir to a posix path
   outDir = toPosixPath(outDir)
-  let outDirServerAbsolute: string
   if (isAbsolutePath(outDir)) {
-    outDirServerAbsolute = outDir
     outDir = path.posix.relative(root, outDir)
     assert(!isAbsolutePath(outDir))
-  } else {
-    outDirServerAbsolute = path.posix.join(root, outDir)
   }
-  assert(isAbsolutePath(outDirServerAbsolute))
   const distServerPathRelative = path.posix.join(rootRelative, outDir)
   const distServerPathAbsolute = path.posix.join(root, outDir)
   debugLogsBuildtime({
     disabled: false,
     paths: { importerDir, root, rootRelative, outDir, distServerPathRelative, distServerPathAbsolute },
   })
-  return { distServerPathRelative, distServerPathAbsolute, outDir }
+  return { distServerPathRelative, distServerPathAbsolute }
 }
 
 function getDirname() {
