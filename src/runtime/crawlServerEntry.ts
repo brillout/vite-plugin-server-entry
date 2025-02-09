@@ -93,8 +93,8 @@ async function crawlServerEntry({
       `Cannot find server production entry. If you are using rollupOptions.output.entryFileNames then make sure you don't change the name of the server entry file. One of the following is expected to exist: \n${distFileNames.map((distFileName) => `  ${getDistFilePath(distFileName)}`).join('\n')}`,
     )
   }
+  assert(distFileNameFound)
   assert(
-    distFileNameFound &&
       [serverIndexFileNameBase, serverEntryFileNameBase, serverEntryFileNameBaseAlternative].some((fileNameBase) =>
         distFileNameFound.startsWith(fileNameBase),
       ),
