@@ -48,7 +48,8 @@ async function crawlServerEntry({
     outDir = path.posix.join(cwd, 'dist')
   }
   const outDirServer = path.posix.join(outDir, 'server')
-  if (!fs.existsSync(outDirServer)) return false
+  const outDirServerExists: boolean = fs.existsSync(outDirServer)
+  if (!outDirServerExists) return false
 
   let distFilePathFound: string | undefined
   let distFileNameFound: (typeof distFileNames)[number] | undefined
