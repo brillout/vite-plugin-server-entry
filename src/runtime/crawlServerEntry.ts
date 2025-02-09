@@ -77,7 +77,7 @@ async function crawlServerEntry({
     try {
       distFilePathFound = await requireResolve(
         distFilePath,
-        // Since `serverEntryFilePathSpeculative` is absolute, we can pass a wrong `currentFilePath` argument value.
+        // Since `distFilePath` is absolute, we can pass a wrong `currentFilePath` argument value.
         // - We avoid using `__filename` because it isn't defined when this file is included in an ESM bundle.
         // - We cannot use `import.meta.filename` (nor `import.meta.url`) because there doesn't seem to be a way to safely/conditionally access `import.meta`.
         cwd,
