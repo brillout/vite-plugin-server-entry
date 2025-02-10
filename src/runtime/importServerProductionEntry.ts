@@ -25,6 +25,9 @@ async function importServerProductionIndex(args: { outDir: string }): Promise<vo
   })
   assertUsage(outFilePath, wrongUsageNotBuilt)
   await import_(outFilePath)
+  /* TODO/soon
+  return outFilePathRelaive
+  */
 }
 
 async function importServerProductionEntry(

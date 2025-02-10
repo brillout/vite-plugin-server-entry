@@ -10,11 +10,6 @@ import {
   serverIndexFileNameBase,
 } from '../shared/serverEntryFileNameBase'
 
-/* TODO: were should move this?
-const wrongUsageWithInject =
-  `Run the server production build (e.g. ${pc.cyan('$ node dist/server/index.mjs')}) instead of running the original server entry (e.g. ${pc.cyan('$ ts-node server/index.ts')})` as const
-*/
-
 type OutFileSearch =
   | [typeof serverEntryFileNameBase, typeof serverEntryFileNameBaseAlternative]
   | [typeof serverIndexFileNameBase]
