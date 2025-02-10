@@ -1,1 +1,1 @@
-export { importServerProductionEntry } from './importServerProductionEntry'
+export { importServerProductionEntry, importServerProductionIndex } from './importServerProductionEntry'
