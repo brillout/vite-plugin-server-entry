@@ -1,3 +1,26 @@
+# [0.6.0](https://github.com/brillout/vite-plugin-server-entry/compare/v0.5.8...v0.6.0) (2025-02-10)
+
+
+### Bug Fixes
+
+* eagerly use auto importer ([11b5d9b](https://github.com/brillout/vite-plugin-server-entry/commit/11b5d9bfba27a75a8df2c3cffd3b2e19d1bf7cfa))
+* enforce importServerProductionIndex() success ([1012043](https://github.com/brillout/vite-plugin-server-entry/commit/1012043760f868b57f412896b055b5e15267a689))
+* improve error message ([ce973e2](https://github.com/brillout/vite-plugin-server-entry/commit/ce973e23069b1c25875b09ec7d2cbefb6e7d1f0f))
+* option `tolerateNotFound` renamed to `tolerateDoesNotExist` ([c12dbb1](https://github.com/brillout/vite-plugin-server-entry/commit/c12dbb1c079f0ad008d605d6327403c1cb4a7533))
+* remove doNotLoadServer ([8fec3d2](https://github.com/brillout/vite-plugin-server-entry/commit/8fec3d29d87dfce0d8e1fb866b1665e73d1ef99c))
+
+
+### Features
+
+* `importServerProductionIndex()` ([d734bdd](https://github.com/brillout/vite-plugin-server-entry/commit/d734bddaa53d1bfb0ed072a576742b5582f8b07b))
+
+
+### BREAKING CHANGES
+
+* option `tolerateNotFound` renamed to `tolerateDoesNotExist`
+
+
+
 ## [0.5.8](https://github.com/brillout/vite-plugin-server-entry/compare/v0.5.7...v0.5.8) (2025-01-24)
 
 
