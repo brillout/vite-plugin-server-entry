@@ -27,8 +27,21 @@ import {
 } from '../shared/serverEntryFileNameBase.js'
 import { debugLogsBuildtime } from './debugLogsBuildTime.js'
 import { sourceMapPassthrough } from '../utils/rollupSourceMap.js'
+import { removeFilePrefix } from '../shared/removeFilePrefix.js'
+import { fileURLToPath } from 'url'
+const importMetaUrl: string =
+  // @ts-ignore import.meta is shimmed by dist-cjs-fixup.js for CJS build.
+  import.meta.url +
+  // trick to avoid `@vercel/ncc` to glob import
+  (() => '')()
+const __dirname_ = path.dirname(fileURLToPath(importMetaUrl))
+const isCJS = 'import.meta.resolve' === ('require.resolve' as string) // see dist-cjs-fixup.js
+const exportStatement = isCJS ? 'exports.' : 'export const '
 
-const autoImporterFilePath = require.resolve('../runtime/autoImporter.js')
+const autoImporterFilePath = removeFilePrefix(
+  // @ts-ignore import.meta is shimmed by dist-cjs-fixup.js for CJS build.
+  import.meta.resolve('../runtime/autoImporter.js'),
+)
 const serverEntryVirtualId = 'virtual:@brillout/vite-plugin-server-entry:serverEntry'
 // https://vitejs.dev/guide/api-plugin.html#virtual-modules-convention
 const virtualIdPrefix = '\0'
@@ -304,14 +317,14 @@ function writeAutoImporterFile(config: ConfigResolved, entryFileName: string) {
   writeFileSync(
     autoImporterFilePath,
     [
-      "exports.status = 'SET';",
-      `exports.loadServerEntry = async () => { await import(${JSON.stringify(serverEntryFilePathRelative)}); };`,
-      'exports.paths = {',
+      `${exportStatement}status = 'SET';`,
+      `${exportStatement}loadServerEntry = async () => { await import(${JSON.stringify(serverEntryFilePathRelative)}); };`,
+      `${exportStatement}paths = {`,
       `  autoImporterFilePathOriginal: ${JSON.stringify(autoImporterFilePath)},`,
       '  autoImporterFileDirActual: (() => { try { return __dirname } catch { return null } })(),',
       `  serverEntryFilePathRelative: ${JSON.stringify(serverEntryFilePathRelative)},`,
       `  serverEntryFilePathOriginal: ${JSON.stringify(serverEntryFilePathAbsolute)},`,
-      `  serverEntryFilePathResolved: () => require.resolve(${JSON.stringify(serverEntryFilePathRelative)}),`,
+      `  serverEntryFilePathResolved: () => import.meta.resolve(${JSON.stringify(serverEntryFilePathRelative)}),`,
       '};',
       '',
     ].join('\n'),
@@ -336,7 +349,7 @@ function clearAutoImporter(config: ConfigResolved) {
   const autoImporterContent = readFileSync(autoImporterFilePath)
   if (autoImporterContent.includes(status)) return
   assert(!isYarnPnP())
-  writeFileSync(autoImporterFilePath, [`exports.status = '${status}';`, ''].join('\n'))
+  writeFileSync(autoImporterFilePath, [`${exportStatement}status = '${status}';`, ''].join('\n'))
 }
 
 /** Is `semver1` higher than `semver2`?*/
@@ -371,7 +384,7 @@ function getDistServerPathRelative(config: ConfigVite) {
   const { root } = config
   assertPosixPath(root)
   assert(isAbsolutePath(root))
-  const importerDir = getDirname()
+  const importerDir = __dirname_
   const rootRelative = path.posix.relative(importerDir, root) // To `require()` an absolute path doesn't seem to work on Vercel
   let { outDir } = config.build
   // SvelteKit doesn't set config.build.outDir to a posix path
@@ -387,11 +400,6 @@ function getDistServerPathRelative(config: ConfigVite) {
     paths: { importerDir, root, rootRelative, outDir, distServerPathRelative, distServerPathAbsolute },
   })
   return { distServerPathRelative, distServerPathAbsolute }
-}
-
-function getDirname() {
-  const dirname = toPosixPath(__dirname + (() => '')()) // trick to avoid `@vercel/ncc` to glob import
-  return dirname
 }
 
 function assertApiVersions(config: ConfigResolved, currentLibraryName: string) {
@@ -467,7 +475,10 @@ function getInjectEntries(config: ConfigResolved): string[] {
     .map((entryName) => {
       let entryFilePath = entries[entryName]
       if (!entryFilePath) return null
-      entryFilePath = require.resolve(entryFilePath)
+      entryFilePath = removeFilePrefix(
+        // @ts-ignore import.meta is shimmed by dist-cjs-fixup.js for CJS build.
+        import.meta.resolve(entryFilePath),
+      )
       // Needs to be absolute, otherwise it won't match the `id` in `transform(id)`
       assert(path.isAbsolute(entryFilePath))
       entryFilePath = toPosixPath(entryFilePath)

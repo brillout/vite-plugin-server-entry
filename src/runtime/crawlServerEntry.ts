@@ -103,7 +103,7 @@ async function crawlServerEntry({
   assert(outFileSearch.some((outFileNameBase) => outFileFound.outFileName.startsWith(outFileNameBase)))
 
   // webpack couldn't have properly resolved `outFilePathFound` since there isn't any static import statement importing `outFilePathFound`
-  if (isWebpackResolve(outFileFound.outFilePath)) {
+  if (isWebpackResolve(outFileFound.outFilePath, cwd)) {
     return false
   }
 
