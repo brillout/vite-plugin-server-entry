@@ -1,3 +1,12 @@
+## [0.6.2](https://github.com/brillout/vite-plugin-server-entry/compare/v0.6.1...v0.6.2) (2025-02-19)
+
+
+### Bug Fixes
+
+* Revert "fix: dual publish ESM + CJS" ([498ef2a](https://github.com/brillout/vite-plugin-server-entry/commit/498ef2ab34a483db9b10416c156a6c65c915ce3c))
+
+
+
 ## [0.6.1](https://github.com/brillout/vite-plugin-server-entry/compare/v0.6.0...v0.6.1) (2025-02-19)
 
 
