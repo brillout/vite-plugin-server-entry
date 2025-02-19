@@ -2,7 +2,7 @@ export { toPosixPath }
 export { assertPosixPath }
 export { toSystemPath }
 
-import { assert } from './assert'
+import { assert } from './assert.js'
 
 const sepPosix = '/'
 const sepWin32 = '\\'

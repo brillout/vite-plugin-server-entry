@@ -2,8 +2,8 @@ export { assert }
 export { assertUsage }
 export { logLabel }
 
-import { createErrorWithCleanStackTrace } from './createErrorWithCleanStackTrace'
-import { projectInfo } from './projectInfo'
+import { createErrorWithCleanStackTrace } from './createErrorWithCleanStackTrace.js'
+import { projectInfo } from './projectInfo.js'
 
 const logLabel = `[${projectInfo.npmPackageName}@${projectInfo.projectVersion}]` as const
 const internalErrorPrefix = `${logLabel}[Bug]` as const

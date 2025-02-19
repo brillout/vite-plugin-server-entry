@@ -2,13 +2,13 @@
 
 export { crawlServerEntry }
 
-import { assert, assertUsage, assertPosixPath, requireResolve, isWebpackResolve } from './utils'
+import { assert, assertUsage, assertPosixPath, requireResolve, isWebpackResolve } from './utils.js'
 import { import_ } from '@brillout/import'
 import {
   serverEntryFileNameBase,
   serverEntryFileNameBaseAlternative,
   serverIndexFileNameBase,
-} from '../shared/serverEntryFileNameBase'
+} from '../shared/serverEntryFileNameBase.js'
 
 type OutFileSearch =
   | [typeof serverEntryFileNameBase, typeof serverEntryFileNameBaseAlternative]

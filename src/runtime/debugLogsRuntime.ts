@@ -1,9 +1,9 @@
 export { debugLogsRuntimePre }
 export { debugLogsRuntimePost }
 
-import { getCwdSafe } from '../shared/utils'
-import type { AutoImporter } from './AutoImporter'
-import { DEBUG, logDebug } from '../shared/debug'
+import { getCwdSafe } from '../shared/utils.js'
+import type { AutoImporter } from './AutoImporter.js'
+import { DEBUG, logDebug } from '../shared/debug.js'
 
 function debugLogsRuntimePre(autoImporter: AutoImporter): undefined | void {
   if (!DEBUG) return

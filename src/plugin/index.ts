@@ -16,17 +16,17 @@ import {
   normalizeRollupInput,
   findRollupBundleEntry,
   assertUsage,
-} from './utils'
+} from './utils.js'
 import path from 'path'
 import { writeFileSync, readFileSync } from 'fs'
-import type { AutoImporterCleared } from '../runtime/AutoImporter'
+import type { AutoImporterCleared } from '../runtime/AutoImporter.js'
 import {
   serverEntryFileNameBase,
   serverEntryFileNameBaseAlternative,
   serverIndexFileNameBase,
-} from '../shared/serverEntryFileNameBase'
-import { debugLogsBuildtime } from './debugLogsBuildTime'
-import { sourceMapPassthrough } from '../utils/rollupSourceMap'
+} from '../shared/serverEntryFileNameBase.js'
+import { debugLogsBuildtime } from './debugLogsBuildTime.js'
+import { sourceMapPassthrough } from '../utils/rollupSourceMap.js'
 
 const autoImporterFilePath = require.resolve('../runtime/autoImporter.js')
 const serverEntryVirtualId = 'virtual:@brillout/vite-plugin-server-entry:serverEntry'

@@ -1,2 +1,2 @@
-export * from '../utils/assert'
-export * from '../utils/getCwdSafe'
+export * from '../utils/assert.js'
+export * from '../utils/getCwdSafe.js'

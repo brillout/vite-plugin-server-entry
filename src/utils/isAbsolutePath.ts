@@ -1,7 +1,7 @@
 export { isAbsolutePath }
 
 import path from 'path'
-import { assertPosixPath } from './filesystemPathHandling'
+import { assertPosixPath } from './filesystemPathHandling.js'
 
 // Workaround for:
 // ```

@@ -1,7 +1,7 @@
 export { DEBUG }
 export { logDebug }
 
-import { logLabel } from './utils'
+import { logLabel } from './utils.js'
 
 const DEBUG: boolean = false
 

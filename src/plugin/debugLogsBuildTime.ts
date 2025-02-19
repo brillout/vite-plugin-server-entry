@@ -1,6 +1,6 @@
 export { debugLogsBuildtime }
 
-import { DEBUG, logDebug } from '../shared/debug'
+import { DEBUG, logDebug } from '../shared/debug.js'
 
 function debugLogsBuildtime({
   disabled,

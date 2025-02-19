@@ -1,16 +1,16 @@
 export { importServerProductionEntry }
 export { importServerProductionIndex }
 
-import { getCwdSafe, assertUsage, toPosixPath, assertPosixPath, isWebpackResolve } from './utils'
-import type { AutoImporter, AutoImporterPaths } from './AutoImporter'
-import { debugLogsRuntimePost, debugLogsRuntimePre } from './debugLogsRuntime'
-import { DEBUG } from '../shared/debug'
+import { getCwdSafe, assertUsage, toPosixPath, assertPosixPath, isWebpackResolve } from './utils.js'
+import type { AutoImporter, AutoImporterPaths } from './AutoImporter.js'
+import { debugLogsRuntimePost, debugLogsRuntimePre } from './debugLogsRuntime.js'
+import { DEBUG } from '../shared/debug.js'
 import {
   serverEntryFileNameBase,
   serverEntryFileNameBaseAlternative,
   serverIndexFileNameBase,
-} from '../shared/serverEntryFileNameBase'
-import { crawlServerEntry } from './crawlServerEntry'
+} from '../shared/serverEntryFileNameBase.js'
+import { crawlServerEntry } from './crawlServerEntry.js'
 import { import_ } from '@brillout/import'
 
 const wrongUsageNotBuilt =
