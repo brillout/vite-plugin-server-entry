@@ -3,7 +3,7 @@
   "version": "0.6.2",
   "repository": "https://github.com/brillout/vite-plugin-server-entry",
   "dependencies": {
-    "@brillout/import": "^0.2.3",
+    "@brillout/import": "^0.2.4",
     "@brillout/picocolors": "^1.0.14"
   },
   "exports": {
