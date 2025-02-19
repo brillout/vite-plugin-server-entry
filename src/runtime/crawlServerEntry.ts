@@ -2,7 +2,7 @@
 
 export { crawlServerEntry }
 
-import { assert, assertUsage, assertPosixPath, requireResolve, isWebpackResolve } from './utils.js'
+import { assert, assertUsage, assertPosixPath, requireResolve, isWebpackResolve, toPosixPath } from './utils.js'
 import { import_ } from '@brillout/import'
 import {
   serverEntryFileNameBase,
@@ -30,7 +30,7 @@ async function crawlServerEntry({
   } catch {
     return false
   }
-  const cwd = process.cwd()
+  const cwd = toPosixPath(process.cwd())
 
   const isPathAbsolute = (p: string) => {
     if (process.platform === 'win32') {
@@ -82,6 +82,7 @@ async function crawlServerEntry({
     } catch {
       continue
     }
+    outFilePathResolved = toPosixPath(outFilePathResolved)
     assert(outFilePathResolved)
     outFileFound = {
       outFilePath: outFilePathResolved,
