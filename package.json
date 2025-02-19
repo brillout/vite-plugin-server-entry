@@ -32,7 +32,7 @@
     "@brillout/release-me": "^0.4.0",
     "@types/node": "^15.12.2",
     "prettier": "^3.3.3",
-    "typescript": "^5.5.4",
+    "typescript": "^5.7.3",
     "vite": "^4.5.1"
   },
   "typesVersions": {
