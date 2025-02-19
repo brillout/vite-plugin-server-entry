@@ -1,14 +1,13 @@
 {
   "compilerOptions": {
-    "esModuleInterop": true,
-    "outDir": "./dist/esm/",
-    "module": "Node16",
+    "outDir": "./dist/",
     "target": "ES2020",
-    "moduleResolution": "Node16",
-    "declaration": true,
+    "module": "CommonJS",
     "skipLibCheck": true,
+    "esModuleInterop": true,
     "strict": true,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "declaration": true
   },
   "rootDir": "./src/",
   "include": ["src/**/*"]
