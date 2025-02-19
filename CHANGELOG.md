@@ -1,3 +1,13 @@
+## [0.6.1](https://github.com/brillout/vite-plugin-server-entry/compare/v0.6.0...v0.6.1) (2025-02-19)
+
+
+### Bug Fixes
+
+* dual publish ESM + CJS ([d248363](https://github.com/brillout/vite-plugin-server-entry/commit/d248363e8cdc03351df648d7094fce248be91d11))
+* expose importServerProductionIndex() ([d6f2f1e](https://github.com/brillout/vite-plugin-server-entry/commit/d6f2f1ea3e0ecccfd39f418cb76985dfdcf2b3f7))
+
+
+
 # [0.6.0](https://github.com/brillout/vite-plugin-server-entry/compare/v0.5.8...v0.6.0) (2025-02-10)
 
 
