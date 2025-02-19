@@ -1,6 +1,6 @@
 export { isWebpackResolve }
 
-import { assertPosixPath } from './filesystemPathHandling.js'
+import { toPosixPath } from './filesystemPathHandling.js'
 
 function isWebpackResolve(moduleResolve: string, cwd: string) {
   return (
@@ -12,6 +12,5 @@ function isWebpackResolve(moduleResolve: string, cwd: string) {
 }
 
 function getFirstDir(path: string): string {
-  assertPosixPath(path)
-  return path.split('/').filter(Boolean)[0]!
+  return toPosixPath(path).split('/').filter(Boolean)[0]!
 }
