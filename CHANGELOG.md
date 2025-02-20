@@ -1,3 +1,16 @@
+## [0.6.3](https://github.com/brillout/vite-plugin-server-entry/compare/v0.6.2...v0.6.3) (2025-02-20)
+
+
+### Bug Fixes
+
+* dual publish ESM + CJS [second-attempt] ([#17](https://github.com/brillout/vite-plugin-server-entry/issues/17)) ([53ddd34](https://github.com/brillout/vite-plugin-server-entry/commit/53ddd342b194dd074ed98be1c1d9a821a1925779))
+* update @brillout/import ([224c3d6](https://github.com/brillout/vite-plugin-server-entry/commit/224c3d6bec3fed9da329ad1061da1f04257b9093))
+* update @brillout/import ([e743bf0](https://github.com/brillout/vite-plugin-server-entry/commit/e743bf0eaa8e1f8cad14a4c5cc7864c364aed3fa))
+* update @brillout/picocolors ([8374096](https://github.com/brillout/vite-plugin-server-entry/commit/83740961a9ed136a484b90ff503a200fced5d480))
+* update @brillout/picocolors ([082dfa0](https://github.com/brillout/vite-plugin-server-entry/commit/082dfa0e7a3e2d210f6890e21612891c38457986))
+
+
+
 ## [0.6.2](https://github.com/brillout/vite-plugin-server-entry/compare/v0.6.1...v0.6.2) (2025-02-19)
 
 
