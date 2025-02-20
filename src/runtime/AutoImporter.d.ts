@@ -2,6 +2,7 @@ export type AutoImporter =
   | AutoImporterCleared
   | {
       status: 'SET'
+      pluginVersion: string
       loadServerEntry: () => Promise<void>
       paths: AutoImporterPaths
     }

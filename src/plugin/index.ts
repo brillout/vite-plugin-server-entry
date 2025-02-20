@@ -316,6 +316,7 @@ function writeAutoImporterFile(config: ConfigResolved, entryFileName: string) {
     autoImporterFilePath,
     [
       `${exportStatement}status = 'SET';`,
+      `${exportStatement}pluginVersion = ${JSON.stringify(projectInfo.projectVersion)};`,
       `${exportStatement}loadServerEntry = async () => { await import(${JSON.stringify(serverEntryFilePathRelative)}); };`,
       `${exportStatement}paths = {`,
       `  autoImporterFilePathOriginal: ${JSON.stringify(autoImporterFilePath)},`,
