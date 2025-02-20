@@ -177,8 +177,8 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
         ].join(
           '',
           /* We don't insert new lines, otherwise we break the source map.
-        '\n'
-        */
+          '\n'
+          */
         )
         return sourceMapPassthrough(code)
       },
