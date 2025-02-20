@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       '@brillout/import':
-        specifier: ^0.2.4
-        version: 0.2.4
+        specifier: ^0.2.6
+        version: 0.2.6
       '@brillout/picocolors':
-        specifier: ^1.0.14
-        version: 1.0.15
+        specifier: ^1.0.25
+        version: 1.0.25
     devDependencies:
       '@biomejs/biome':
         specifier: ^1.8.3
@@ -101,11 +101,11 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@brillout/import@0.2.4':
-    resolution: {integrity: sha512-piDl7ziOC9ANNKIUoRnzikz5wv0MuzGeof1sb9ETbddR3iS7AVeFgEPUvsTAbmNk2GUBxY+ZJdNfR1NjWCQghQ==}
+  '@brillout/import@0.2.6':
+    resolution: {integrity: sha512-1GUTmADc8trUC1YSW2lp9r6PmwluMoEyHajnE1kxVdbKGD0wJOlq/DvTWMUqLtBDCnQR+n//qgMtz6HwA/lotA==}
 
-  '@brillout/picocolors@1.0.15':
-    resolution: {integrity: sha512-VrgvPtfnKP/i8kxCAyQVd0DWg6xU8OZJndbLf/lrywd96UdMhnGL/PK42HhHhhwkDSkaiQU+zc+OPWpvqOe4Cg==}
+  '@brillout/picocolors@1.0.25':
+    resolution: {integrity: sha512-O/yzJsSGEQyGbRpZBZeGScBjUgHsp9atr/QejTIC7igjnlP6PLIvDHfDNa1BWbop47xOxJ+7vMPc+5l+nIZ8ZQ==}
 
   '@brillout/release-me@0.4.0':
     resolution: {integrity: sha512-V4YwITguHK3zOy9B4606lc9PQiFDp3p3Ifeq4KF7V8o9fs7OmcrfTWBE0EWFtiLhG2JeKb2RzM0t6Y4tLgXd6w==}
@@ -720,13 +720,13 @@ snapshots:
   '@biomejs/cli-win32-x64@1.8.3':
     optional: true
 
-  '@brillout/import@0.2.4': {}
+  '@brillout/import@0.2.6': {}
 
-  '@brillout/picocolors@1.0.15': {}
+  '@brillout/picocolors@1.0.25': {}
 
   '@brillout/release-me@0.4.0':
     dependencies:
-      '@brillout/picocolors': 1.0.15
+      '@brillout/picocolors': 1.0.25
       commander: 11.1.0
       conventional-changelog: 5.1.0
       execa: 5.1.1
