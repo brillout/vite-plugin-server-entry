@@ -320,7 +320,7 @@ function writeAutoImporterFile(config: ConfigResolved, entryFileName: string) {
       `${exportStatement}loadServerEntry = async () => { await import(${JSON.stringify(serverEntryFilePathRelative)}); };`,
       `${exportStatement}paths = {`,
       `  autoImporterFilePathOriginal: ${JSON.stringify(autoImporterFilePath)},`,
-      '  autoImporterFileDirActual: (() => { try { return import.meta.url } catch { return null } })(),',
+      '  autoImporterFilePathActual: (() => { try { return import.meta.url } catch { return null } })(),',
       `  serverEntryFilePathRelative: ${JSON.stringify(serverEntryFilePathRelative)},`,
       `  serverEntryFilePathOriginal: ${JSON.stringify(serverEntryFilePathAbsolute)},`,
       `  serverEntryFilePathResolved: () => import.meta.resolve(${JSON.stringify(serverEntryFilePathRelative)}),`,

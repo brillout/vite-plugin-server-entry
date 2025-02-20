@@ -15,7 +15,7 @@ export type AutoImporterCleared =
   | { status: 'DISABLED_BY_USER' }
 export type AutoImporterPaths = {
   autoImporterFilePathOriginal: string
-  autoImporterFileDirActual: string
+  autoImporterFilePathActual: string
   serverEntryFilePathRelative: string
   serverEntryFilePathOriginal: string
   serverEntryFilePathResolved: () => string
