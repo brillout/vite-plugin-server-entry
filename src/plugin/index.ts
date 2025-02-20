@@ -29,6 +29,7 @@ import { debugLogsBuildtime } from './debugLogsBuildTime.js'
 import { sourceMapPassthrough } from '../utils/rollupSourceMap.js'
 import { removeFilePrefix } from '../shared/removeFilePrefix.js'
 import { fileURLToPath } from 'url'
+import { createRequire } from 'module'
 const importMetaUrl: string =
   // @ts-ignore import.meta is shimmed by dist-cjs-fixup.js for CJS build.
   import.meta.url +
@@ -37,11 +38,14 @@ const importMetaUrl: string =
 const __dirname_ = path.dirname(fileURLToPath(importMetaUrl))
 const isCJS = 'import.meta.resolve' === ('require.resolve' as string) // see dist-cjs-fixup.js
 const exportStatement = isCJS ? 'exports.' : 'export const '
+const require_ = createRequire(importMetaUrl)
 
 const autoImporterFilePath = removeFilePrefix(
   // @ts-ignore import.meta is shimmed by dist-cjs-fixup.js for CJS build.
   import.meta.resolve('../runtime/autoImporter.js'),
 )
+console.log('autoImporterFilePath', autoImporterFilePath)
+console.log('autoImporterFilePath - require.resolve()', require_.resolve('../runtime/autoImporter.js'))
 const serverEntryVirtualId = 'virtual:@brillout/vite-plugin-server-entry:serverEntry'
 // https://vitejs.dev/guide/api-plugin.html#virtual-modules-convention
 const virtualIdPrefix = '\0'
@@ -475,10 +479,13 @@ function getInjectEntries(config: ConfigResolved): string[] {
     .map((entryName) => {
       let entryFilePath = entries[entryName]
       if (!entryFilePath) return null
+      console.log('entryFilePath 1', entryFilePath)
+      console.log('entryFilePath 2 - require.resolve', require_.resolve(entryFilePath))
       entryFilePath = removeFilePrefix(
         // @ts-ignore import.meta is shimmed by dist-cjs-fixup.js for CJS build.
         import.meta.resolve(entryFilePath),
       )
+      console.log('entryFilePath 3', entryFilePath)
       // Needs to be absolute, otherwise it won't match the `id` in `transform(id)`
       assert(path.isAbsolute(entryFilePath))
       entryFilePath = toPosixPath(entryFilePath)
