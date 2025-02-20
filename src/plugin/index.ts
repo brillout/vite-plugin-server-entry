@@ -220,7 +220,7 @@ function resolveConfig(
     autoImport: true,
     inject: false,
   }
-  setInjectConfig(pluginConfigResolved, pluginConfigProvidedByLibrary.inject)
+  resolveInjectConfig(pluginConfigResolved, pluginConfigProvidedByLibrary.inject)
 
   const library = {
     getServerProductionEntry: pluginConfigProvidedByLibrary.getServerProductionEntry,
@@ -240,12 +240,12 @@ function resolveConfig(
 function applyPluginConfigProvidedByUser(config: ConfigResolved & ConfigUnresolved) {
   const pluginConfigResolved: PluginConfigResolved = config._vitePluginServerEntry
   const pluginConfigProvidedByUser = config.vitePluginServerEntry ?? {}
-  setInjectConfig(pluginConfigResolved, pluginConfigProvidedByUser.inject)
+  resolveInjectConfig(pluginConfigResolved, pluginConfigProvidedByUser.inject)
   if (pluginConfigProvidedByUser.autoImport !== undefined) {
     pluginConfigResolved.autoImport = pluginConfigProvidedByUser.autoImport
   }
 }
-function setInjectConfig(pluginConfigResolved: PluginConfigResolved, inject?: boolean | string[]) {
+function resolveInjectConfig(pluginConfigResolved: PluginConfigResolved, inject?: boolean | string[]) {
   if (!inject) return
   if (inject === true) {
     if (!pluginConfigResolved.inject) {
