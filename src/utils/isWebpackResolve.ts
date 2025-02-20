@@ -1,8 +1,10 @@
 export { isWebpackResolve }
 
+import { assert } from './assert.js'
 import { toPosixPath } from './filesystemPathHandling.js'
 
 function isWebpackResolve(moduleResolve: string, cwd: string) {
+  assert(process) // We are in a Node.js-like environment
   return (
     // Upon `require.resolve()` webpack returns a number
     typeof moduleResolve === 'number' ||

@@ -1,7 +1,7 @@
 export { importServerProductionEntry }
 export { importServerProductionIndex }
 
-import { getCwdSafe, assertUsage, toPosixPath, assertPosixPath, isWebpackResolve, removeFilePrefix } from './utils.js'
+import { getCwdSafe, assertUsage, toPosixPath, assertPosixPath, isWebpackResolve, assert } from './utils.js'
 import type { AutoImporter, AutoImporterPaths } from './AutoImporter.js'
 import { debugLogsRuntimePost, debugLogsRuntimePre } from './debugLogsRuntime.js'
 import { DEBUG } from '../shared/debug.js'
@@ -108,4 +108,12 @@ function isServerEntryOutsideOfCwd(paths: AutoImporterPaths): boolean | null {
   serverEntryFilePath = toPosixPath(serverEntryFilePath)
   assertPosixPath(cwd)
   return !serverEntryFilePath.startsWith(cwd)
+}
+
+// Needed for import.meta.resolve()
+function removeFilePrefix(filePath: string) {
+  assert(process) // We are in a Node.js-like environment
+  const filePrefix = process.platform === 'win32' ? 'file:///' : 'file://'
+  if (filePath.startsWith(filePrefix)) filePath = filePath.slice(filePrefix.length)
+  return filePath
 }
