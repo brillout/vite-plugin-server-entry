@@ -27,7 +27,6 @@ import {
 } from '../shared/serverEntryFileNameBase.js'
 import { debugLogsBuildtime } from './debugLogsBuildTime.js'
 import { sourceMapPassthrough } from '../utils/rollupSourceMap.js'
-import { removeFilePrefix } from '../shared/removeFilePrefix.js'
 import { fileURLToPath } from 'url'
 import { createRequire } from 'module'
 const importMetaUrl: string =
@@ -40,14 +39,6 @@ const isCJS = 'import.meta.resolve' === ('require.resolve' as string) // see dis
 const exportStatement = isCJS ? 'exports.' : 'export const '
 const require_ = createRequire(importMetaUrl)
 
-/*
-const autoImporterFilePath = removeFilePrefix(
-  // @ts-ignore import.meta is shimmed by dist-cjs-fixup.js for CJS build.
-  import.meta.resolve('../runtime/autoImporter.js'),
-)
-console.log('autoImporterFilePath', autoImporterFilePath)
-console.log('autoImporterFilePath - require.resolve()', require_.resolve('../runtime/autoImporter.js'))
-*/
 const autoImporterFilePath = require_.resolve('../runtime/autoImporter.js')
 const serverEntryVirtualId = 'virtual:@brillout/vite-plugin-server-entry:serverEntry'
 // https://vitejs.dev/guide/api-plugin.html#virtual-modules-convention
@@ -328,7 +319,7 @@ function writeAutoImporterFile(config: ConfigResolved, entryFileName: string) {
       `${exportStatement}loadServerEntry = async () => { await import(${JSON.stringify(serverEntryFilePathRelative)}); };`,
       `${exportStatement}paths = {`,
       `  autoImporterFilePathOriginal: ${JSON.stringify(autoImporterFilePath)},`,
-      '  autoImporterFileDirActual: (() => { try { return __dirname } catch { return null } })(),',
+      '  autoImporterFileDirActual: (() => { try { return import.meta.url } catch { return null } })(),',
       `  serverEntryFilePathRelative: ${JSON.stringify(serverEntryFilePathRelative)},`,
       `  serverEntryFilePathOriginal: ${JSON.stringify(serverEntryFilePathAbsolute)},`,
       `  serverEntryFilePathResolved: () => import.meta.resolve(${JSON.stringify(serverEntryFilePathRelative)}),`,
@@ -484,15 +475,6 @@ function getInjectEntries(config: ConfigResolved): string[] {
     .map((entryName) => {
       let entryFilePath = entries[entryName]
       if (!entryFilePath) return null
-      /*
-      console.log('entryFilePath 1', entryFilePath)
-      console.log('entryFilePath 2 - require.resolve', require_.resolve(entryFilePath))
-      entryFilePath = removeFilePrefix(
-        // @ts-ignore import.meta is shimmed by dist-cjs-fixup.js for CJS build.
-        import.meta.resolve(entryFilePath),
-      )
-      console.log('entryFilePath 3', entryFilePath)
-      */
       entryFilePath = require_.resolve(entryFilePath)
       // Needs to be absolute, otherwise it won't match the `id` in `transform(id)`
       assert(path.isAbsolute(entryFilePath))

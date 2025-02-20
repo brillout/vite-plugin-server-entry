@@ -1,7 +1,7 @@
 export { importServerProductionEntry }
 export { importServerProductionIndex }
 
-import { getCwdSafe, assertUsage, toPosixPath, assertPosixPath, isWebpackResolve } from './utils.js'
+import { getCwdSafe, assertUsage, toPosixPath, assertPosixPath, isWebpackResolve, removeFilePrefix } from './utils.js'
 import type { AutoImporter, AutoImporterPaths } from './AutoImporter.js'
 import { debugLogsRuntimePost, debugLogsRuntimePre } from './debugLogsRuntime.js'
 import { DEBUG } from '../shared/debug.js'
@@ -12,7 +12,6 @@ import {
 } from '../shared/serverEntryFileNameBase.js'
 import { crawlServerEntry } from './crawlServerEntry.js'
 import { import_ } from '@brillout/import'
-import { removeFilePrefix } from '../shared/removeFilePrefix.js'
 
 const wrongUsageNotBuilt =
   'The server production entry is missing. (Re-)build your app and try again. If you still get this error, then you need to manually import the server production entry, see https://github.com/brillout/vite-plugin-server-entry#manual-import'
@@ -102,14 +101,11 @@ function isServerEntryOutsideOfCwd(paths: AutoImporterPaths): boolean | null {
     // - This code block is executed on edge environments that implement a dummy `process.cwd()` e.g. on Cloudflare Workers `process.cwd() === '/'`
     return null
   }
-  console.log('serverEntryFilePath - 1', serverEntryFilePath)
   serverEntryFilePath = removeFilePrefix(serverEntryFilePath)
-  console.log('serverEntryFilePath - 2', serverEntryFilePath, cwd)
 
   if (isWebpackResolve(serverEntryFilePath, cwd)) return null
 
   serverEntryFilePath = toPosixPath(serverEntryFilePath)
   assertPosixPath(cwd)
-  console.log('serverEntryFilePath - 3', serverEntryFilePath)
   return !serverEntryFilePath.startsWith(cwd)
 }
