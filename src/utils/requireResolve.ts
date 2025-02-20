@@ -1,4 +1,3 @@
-// TODO/now: rename file
 export { requireResolve }
 
 import { import_ } from '@brillout/import'
