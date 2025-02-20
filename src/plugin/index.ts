@@ -30,7 +30,7 @@ import { sourceMapPassthrough } from '../utils/rollupSourceMap.js'
 import { fileURLToPath } from 'url'
 import { createRequire } from 'module'
 const importMetaUrl: string =
-  // @ts-ignore import.meta is shimmed by dist-cjs-fixup.js for CJS build.
+  // @ts-ignore import.meta is shimmed at dist/cjs by dist-cjs-fixup.js
   import.meta.url +
   // trick to avoid `@vercel/ncc` to glob import
   (() => '')()
