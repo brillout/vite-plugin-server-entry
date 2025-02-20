@@ -22,5 +22,6 @@ function getSecondDir(path: string) {
   return getDirs(path)[1]
 }
 function getDirs(path: string) {
+  assert(!path.startsWith('file:')) // `file://` should already have been removed
   return toPosixPath(path).split('/').filter(Boolean)
 }
