@@ -35,7 +35,7 @@ const importMetaUrl: string =
   import.meta.url +
   // trick to avoid `@vercel/ncc` to glob import
   (() => '')()
-const __dirname_ = path.dirname(fileURLToPath(importMetaUrl))
+const __dirname_ = toPosixPath(path.dirname(fileURLToPath(importMetaUrl)))
 const isCJS = 'import.meta.resolve' === ('require.resolve' as string) // see dist-cjs-fixup.js
 const exportStatement = isCJS ? 'exports.' : 'export const '
 const require_ = createRequire(importMetaUrl)
@@ -389,9 +389,11 @@ function parseSemver(semver: string): { parts: number[]; isPreRelease: boolean }
 function getDistServerPathRelative(config: ConfigVite) {
   assert(viteIsSSR(config))
   const { root } = config
+  const importerDir = __dirname_
+  assertPosixPath(importerDir)
+  assert(isAbsolutePath(importerDir))
   assertPosixPath(root)
   assert(isAbsolutePath(root))
-  const importerDir = __dirname_
   const rootRelative = path.posix.relative(importerDir, root) // To `require()` an absolute path doesn't seem to work on Vercel
   let { outDir } = config.build
   // SvelteKit doesn't set config.build.outDir to a posix path
