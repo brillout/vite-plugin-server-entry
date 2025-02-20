@@ -28,8 +28,9 @@ function debugLogsRuntimePre(autoImporter: AutoImporter): undefined | void {
   logDebug('cwd', getCwdSafe())
   logDebug('importer.status', autoImporter.status)
   if (autoImporter.status === 'SET') {
+    logDebug('importer.pluginVersion', autoImporter.pluginVersion)
     logDebug('importer.paths.autoImporterFilePathOriginal', autoImporter.paths.autoImporterFilePathOriginal)
-    logDebug('importer.paths.autoImporterFileDirActual', autoImporter.paths.autoImporterFileDirActual)
+    logDebug('importer.paths.autoImporterFilePathActual', autoImporter.paths.autoImporterFilePathActual)
     logDebug('importer.paths.serverEntryFilePathRelative', autoImporter.paths.serverEntryFilePathRelative)
     logDebug('importer.paths.serverEntryFilePathOriginal', autoImporter.paths.serverEntryFilePathOriginal)
     try {

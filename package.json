@@ -7,14 +7,25 @@
     "@brillout/picocolors": "^1.0.26"
   },
   "exports": {
-    "./plugin": "./dist/plugin/index.js",
-    "./runtime": "./dist/runtime/index.js"
+    "./plugin": {
+      "require": "./dist/cjs/plugin/index.js",
+      "default": "./dist/esm/plugin/index.js"
+    },
+    "./runtime": {
+      "require": "./dist/cjs/runtime/index.js",
+      "default": "./dist/esm/runtime/index.js"
+    }
   },
+  "type": "module",
   "scripts": {
     "========= Dev": "",
     "dev": "tsc --watch",
     "========= Build": "",
-    "build": "rm -rf dist/ && tsc",
+    "build": "rm -rf dist/ && pnpm run build:esm && pnpm run build:cjs",
+    "build:esm": "tsc",
+    "build:cjs": "pnpm run build:cjs:ts && pnpm run build:cjs:fixup",
+    "build:cjs:ts": "tsc --project ./tsconfig.cjs.json",
+    "build:cjs:fixup": "node ./dist-cjs-fixup.mjs",
     "========= Formatting": "",
     "format": "pnpm run format:biome",
     "format:prettier": "git ls-files | egrep '\\.(json|js|jsx|css|ts|tsx|vue|mjs|cjs)$' | grep --invert-match package.json | xargs pnpm exec prettier --write",
@@ -38,10 +49,10 @@
   "typesVersions": {
     "*": {
       "plugin": [
-        "./dist/plugin/index.d.ts"
+        "./dist/esm/plugin/index.d.ts"
       ],
       "runtime": [
-        "./dist/runtime/index.d.ts"
+        "./dist/esm/runtime/index.d.ts"
       ]
     }
   },

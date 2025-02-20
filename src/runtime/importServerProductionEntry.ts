@@ -1,7 +1,7 @@
 export { importServerProductionEntry }
 export { importServerProductionIndex }
 
-import { getCwdSafe, assertUsage, toPosixPath, assertPosixPath, isWebpackResolve } from './utils.js'
+import { getCwdSafe, assertUsage, toPosixPath, assertPosixPath, isWebpackResolve, assert } from './utils.js'
 import type { AutoImporter, AutoImporterPaths } from './AutoImporter.js'
 import { debugLogsRuntimePost, debugLogsRuntimePre } from './debugLogsRuntime.js'
 import { DEBUG } from '../shared/debug.js'
@@ -37,7 +37,7 @@ async function importServerProductionEntry(
     outDir?: string
   } = {},
 ): Promise<null | boolean> {
-  const autoImporter: AutoImporter = require('./autoImporter.js')
+  const autoImporter: AutoImporter = (await import('./autoImporter.js')) as any
 
   debugLogsRuntimePre(autoImporter)
 
@@ -96,15 +96,24 @@ function isServerEntryOutsideOfCwd(paths: AutoImporterPaths): boolean | null {
   try {
     serverEntryFilePath = paths.serverEntryFilePathResolved()
   } catch {
-    // serverEntryFilePathResolved() calls require.resolve()
-    // - Edge environments don't support require.resolve()
+    // serverEntryFilePathResolved() calls import.meta.resolve() / require.resolve()
+    // - Edge environments don't support import.meta.resolve() / require.resolve()
     // - This code block is executed on edge environments that implement a dummy `process.cwd()` e.g. on Cloudflare Workers `process.cwd() === '/'`
     return null
   }
+  serverEntryFilePath = removeFilePrefix(serverEntryFilePath)
 
-  if (isWebpackResolve(serverEntryFilePath)) return null
+  if (isWebpackResolve(serverEntryFilePath, cwd)) return null
 
   serverEntryFilePath = toPosixPath(serverEntryFilePath)
   assertPosixPath(cwd)
   return !serverEntryFilePath.startsWith(cwd)
+}
+
+// Needed for import.meta.resolve()
+function removeFilePrefix(filePath: string) {
+  assert(process) // We are in a Node.js-like environment
+  const filePrefix = process.platform === 'win32' ? 'file:///' : 'file://'
+  if (filePath.startsWith(filePrefix)) filePath = filePath.slice(filePrefix.length)
+  return filePath
 }
