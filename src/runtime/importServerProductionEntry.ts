@@ -102,11 +102,14 @@ function isServerEntryOutsideOfCwd(paths: AutoImporterPaths): boolean | null {
     // - This code block is executed on edge environments that implement a dummy `process.cwd()` e.g. on Cloudflare Workers `process.cwd() === '/'`
     return null
   }
+  console.log('serverEntryFilePath - 1', serverEntryFilePath)
   serverEntryFilePath = removeFilePrefix(serverEntryFilePath)
+  console.log('serverEntryFilePath - 2', serverEntryFilePath)
 
   if (isWebpackResolve(serverEntryFilePath, cwd)) return null
 
   serverEntryFilePath = toPosixPath(serverEntryFilePath)
   assertPosixPath(cwd)
+  console.log('serverEntryFilePath - 3', serverEntryFilePath)
   return !serverEntryFilePath.startsWith(cwd)
 }
