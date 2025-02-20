@@ -104,7 +104,7 @@ function isServerEntryOutsideOfCwd(paths: AutoImporterPaths): boolean | null {
   }
   console.log('serverEntryFilePath - 1', serverEntryFilePath)
   serverEntryFilePath = removeFilePrefix(serverEntryFilePath)
-  console.log('serverEntryFilePath - 2', serverEntryFilePath)
+  console.log('serverEntryFilePath - 2', serverEntryFilePath, cwd)
 
   if (isWebpackResolve(serverEntryFilePath, cwd)) return null
 
