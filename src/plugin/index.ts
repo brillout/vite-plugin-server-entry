@@ -90,7 +90,8 @@ type ConfigResolved = ConfigVite & {
  * See https://github.com/brillout/vite-plugin-server-entry#what-it-does for more information.
  */
 function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrary): Plugin_[] {
-  const pluginName = `@brillout/vite-plugin-server-entry:${pluginConfigProvidedByLibrary.libraryName.toLowerCase()}`
+  const pluginName =
+    `@brillout/vite-plugin-server-entry:${pluginConfigProvidedByLibrary.libraryName.toLowerCase()}` as const
   let config: ConfigResolved
   let injectEntries: string[] | null
   let library: Library
