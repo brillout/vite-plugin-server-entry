@@ -11,8 +11,6 @@ export type AutoImporter =
 export type AutoImporterCleared =
   | { status: 'UNSET' }
   | { status: 'BUILDING' }
-  | { status: 'DISABLED_BY_INJECT' }
-  | { status: 'DISABLED_BY_USER' }
 export type AutoImporterPaths = {
   autoImporterFilePathOriginal: string
   autoImporterFilePathActual: string

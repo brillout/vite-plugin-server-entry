@@ -1,4 +1,5 @@
 export { serverProductionEntryPlugin }
+export { serverEntryVirtualId }
 export type { ConfigVitePluginServerEntry }
 
 import type { Plugin, ResolvedConfig as ConfigVite } from 'vite'
@@ -20,13 +21,8 @@ import {
 import path from 'path'
 import { writeFileSync, readFileSync } from 'fs'
 import type { AutoImporterCleared } from '../runtime/AutoImporter.js'
-import {
-  serverEntryFileNameBase,
-  serverEntryFileNameBaseAlternative,
-  serverIndexFileNameBase,
-} from '../shared/serverEntryFileNameBase.js'
+import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase.js'
 import { debugLogsBuildtime } from './debugLogsBuildTime.js'
-import { sourceMapPassthrough } from '../utils/rollupSourceMap.js'
 import { fileURLToPath } from 'url'
 import { createRequire } from 'module'
 const importMetaUrl: string =
@@ -50,19 +46,20 @@ const apiVersion = 5
 type PluginConfigProvidedByLibrary = {
   getServerProductionEntry: () => string
   libraryName: string
-  inject?: boolean | string[]
 }
-// Config set by end user (e.g. Vike or Telefunc user)
+// Config set by:
+// - vike-server
+// - End user (although to my knowledge no user is using this)
 type PluginConfigProvidedByUser = {
-  autoImport?: boolean
-  inject?: boolean | string[]
+  inject?: boolean // No functionality whatsoever: only used to communicate between Vike and vike-server.
+  disableAutoImport?: boolean
 }
 // The resolved aggregation of the config set by the user, and all the configs set by libraries (e.g. the config set by Vike and the config set by Telefunc).
 type PluginConfigResolved = {
   libraries: Library[]
   apiVersion: number
-  autoImport: boolean
-  inject: boolean | string[]
+  inject: boolean
+  disableAutoImport: boolean
 }
 type Library = {
   libraryName: string
@@ -93,10 +90,8 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
   const pluginName =
     `@brillout/vite-plugin-server-entry:${pluginConfigProvidedByLibrary.libraryName.toLowerCase()}` as const
   let config: ConfigResolved
-  let injectEntries: string[] | null
   let library: Library
   let skip: boolean
-  let injectDone = false
   return [
     {
       name: pluginName,
@@ -114,14 +109,14 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
 
         applyPluginConfigProvidedByUser(config)
 
-        // We always generate dist/server/entry.mjs even if `inject: true` because it's needed for pre-rendering: the server shouldn't start when pre-rendering starts.
+        // TODO/now: new setting disableServerEntryEmit
         const serverEntryName = getServerEntryName(config)
+        // TODO/now: use this.emitFile() instead
         config.build.rollupOptions.input = injectRollupInputs({ [serverEntryName]: serverEntryVirtualId }, config)
       },
       buildStart() {
         if (skip) return
 
-        injectEntries = config._vitePluginServerEntry.inject ? getInjectEntries(config) : null
         clearAutoImporter(config)
       },
       resolveId(id) {
@@ -143,45 +138,16 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
       generateBundle(_rollupOptions, bundle) {
         if (skip) return
 
-        const { inject } = config._vitePluginServerEntry
-        if (inject) {
-          assert(injectDone)
-        }
-
         // Write node_modules/@brillout/vite-plugin-server-entry/dist/autoImporter.js
         if (!isAutoImportDisabled(config)) {
+          // TODO/now: use this.emitFile() instead
           const entry = findServerEntry(bundle)
-          assert(!inject && entry)
+          assert(entry)
           const entryFileName = entry.fileName
           writeAutoImporterFile(config, entryFileName)
         } else {
           debugLogsBuildtime({ disabled: true, paths: null })
         }
-      },
-      transform(code, id) {
-        if (skip) return
-
-        if (!config._vitePluginServerEntry.inject) return
-        assert(injectEntries)
-        if (!injectEntries.includes(id)) return
-        {
-          const moduleInfo = this.getModuleInfo(id)
-          assert(moduleInfo?.isEntry)
-        }
-        injectDone = true
-        code = [
-          /* We don't do this, instead let Vike's CLI handle the default process.env.NODE_ENV value.
-          "process.env.NODE_ENV = 'production';", */
-          // Imports the entry of each tool, e.g. the Vike entry and the Telefunc entry.
-          `import '${serverEntryVirtualId}';`,
-          code,
-        ].join(
-          '',
-          /* We don't insert new lines, otherwise we break the source map.
-          '\n'
-          */
-        )
-        return sourceMapPassthrough(code)
       },
     },
     {
@@ -229,10 +195,9 @@ function resolveConfig(
   const pluginConfigResolved: PluginConfigResolved = configUnresolved._vitePluginServerEntry ?? {
     libraries: [],
     apiVersion,
-    autoImport: true,
     inject: false,
+    disableAutoImport: false,
   }
-  resolveInjectConfig(pluginConfigResolved, pluginConfigProvidedByLibrary.inject)
 
   const library = {
     getServerProductionEntry: pluginConfigProvidedByLibrary.getServerProductionEntry,
@@ -252,23 +217,12 @@ function resolveConfig(
 function applyPluginConfigProvidedByUser(config: ConfigResolved & ConfigUnresolved) {
   const pluginConfigResolved: PluginConfigResolved = config._vitePluginServerEntry
   const pluginConfigProvidedByUser = config.vitePluginServerEntry ?? {}
-  resolveInjectConfig(pluginConfigResolved, pluginConfigProvidedByUser.inject)
-  if (pluginConfigProvidedByUser.autoImport !== undefined) {
-    pluginConfigResolved.autoImport = pluginConfigProvidedByUser.autoImport
+  if (pluginConfigProvidedByUser.inject !== undefined) {
+    pluginConfigResolved.inject = pluginConfigProvidedByUser.inject
   }
-}
-function resolveInjectConfig(pluginConfigResolved: PluginConfigResolved, inject?: boolean | string[]) {
-  if (!inject) return
-  if (inject === true) {
-    if (!pluginConfigResolved.inject) {
-      pluginConfigResolved.inject = true
-    }
-    return
+  if (pluginConfigProvidedByUser.disableAutoImport !== undefined) {
+    pluginConfigResolved.disableAutoImport = pluginConfigProvidedByUser.disableAutoImport
   }
-  if (!Array.isArray(pluginConfigResolved.inject)) {
-    pluginConfigResolved.inject = []
-  }
-  pluginConfigResolved.inject.push(...inject)
 }
 
 function isLeaderPluginInstance(config: ConfigResolved, library: Library) {
@@ -331,21 +285,10 @@ function writeAutoImporterFile(config: ConfigResolved, entryFileName: string) {
   )
 }
 function clearAutoImporter(config: ConfigResolved) {
-  let status: AutoImporterCleared['status']
-  if (!isAutoImportDisabled(config)) {
-    status = 'BUILDING'
-  } else {
-    const { inject, autoImport } = config._vitePluginServerEntry
-    if (isYarnPnP()) {
-      return
-    } else if (!autoImport) {
-      status = 'DISABLED_BY_USER'
-    } else {
-      assert(inject)
-      status = 'DISABLED_BY_INJECT'
-    }
+  if (isAutoImportDisabled(config)) {
+    return
   }
-  assert(status)
+  const status: AutoImporterCleared['status'] = 'BUILDING'
   const autoImporterContent = readFileSync(autoImporterFilePath)
   if (autoImporterContent.includes(status)) return
   assert(!isYarnPnP())
@@ -468,29 +411,6 @@ function findServerEntry<OutputBundle extends Record<string, { name: string | un
   return entry
 }
 
-function getInjectEntries(config: ConfigResolved): string[] {
-  assert(config._vitePluginServerEntry.inject !== false)
-  const entries = normalizeRollupInput(config.build.rollupOptions.input)
-  const injectEntryNames =
-    config._vitePluginServerEntry.inject === true ? [serverIndexFileNameBase] : config._vitePluginServerEntry.inject
-  const injectEntries = injectEntryNames
-    .map((entryName) => {
-      let entryFilePath = entries[entryName]
-      if (!entryFilePath) return null
-      entryFilePath = require_.resolve(entryFilePath)
-      // Needs to be absolute, otherwise it won't match the `id` in `transform(id)`
-      assert(path.isAbsolute(entryFilePath))
-      entryFilePath = toPosixPath(entryFilePath)
-      return entryFilePath
-    })
-    .filter((e) => e !== null)
-  if (injectEntries.length === 0) {
-    const entryNames = Object.keys(entries)
-    assertUsage(false, errMsgEntryRemoved(injectEntryNames, entryNames))
-  }
-  return injectEntries
-}
-
 function errMsgEntryRemoved(entriesMissing: string[], entriesExisting: string[]) {
   const list = (items: string[]) => '[' + items.map((e) => `'${e}'`).join(', ') + ']'
   return [
@@ -503,6 +423,6 @@ function errMsgEntryRemoved(entriesMissing: string[], entriesExisting: string[])
 }
 
 function isAutoImportDisabled(config: ConfigResolved): boolean {
-  const { inject, autoImport } = config._vitePluginServerEntry
-  return isYarnPnP() || !!inject || !autoImport
+  const { disableAutoImport } = config._vitePluginServerEntry
+  return isYarnPnP() || disableAutoImport
 }
