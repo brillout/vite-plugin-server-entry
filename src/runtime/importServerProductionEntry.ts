@@ -10,7 +10,7 @@ import {
   serverEntryFileNameBaseAlternative,
   serverIndexFileNameBase,
 } from '../shared/serverEntryFileNameBase.js'
-import { crawlServerEntry } from './crawlServerEntry.js'
+import { crawlOutDir } from './crawlOutDir.js'
 import { import_ } from '@brillout/import'
 
 const wrongUsageNotBuilt =
@@ -19,7 +19,7 @@ const wrongUsageNotBuilt =
 /** To be used only for `$ vike preview`. */
 async function importServerProductionIndex(args: { outDir: string }): Promise<{ outServerIndex: string }> {
   // We don't need autoImporter — we can just crawl dist/server/index.mjs as we have both `outDir` and `node:fs`. Because `$ vike preview` isn't supposed to be called in edge environments, we can load Node.js as well as Vite (thus we know `outDir`).
-  const outFilePath = await crawlServerEntry({
+  const outFilePath = await crawlOutDir({
     ...args,
     outFileSearch: [serverIndexFileNameBase],
   })
@@ -61,7 +61,7 @@ async function importServerProductionEntry(
   }
 
   if (!success) {
-    const outFilePath = await crawlServerEntry({
+    const outFilePath = await crawlOutDir({
       ...args,
       outFileSearch: [serverEntryFileNameBase, serverEntryFileNameBaseAlternative],
     })

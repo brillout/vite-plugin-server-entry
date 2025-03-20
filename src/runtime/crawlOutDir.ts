@@ -1,6 +1,4 @@
-// TODO/eventually: rename to `crawlOutDir`
-
-export { crawlServerEntry }
+export { crawlOutDir }
 
 import { assert, assertUsage, assertPosixPath, requireResolve, isWebpackResolve } from './utils.js'
 import { import_ } from '@brillout/import'
@@ -17,7 +15,7 @@ type OutFileSearch =
 // Use Node.js to search for the file dist/server/entry.js which we use only as fallback if:
 // - the server entry isn't injected (the setting `inject` is `false`), and
 // - the auto importer doesn't work.
-async function crawlServerEntry({
+async function crawlOutDir({
   outDir,
   tolerateDoesNotExist,
   outFileSearch,
