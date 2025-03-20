@@ -1,6 +1,6 @@
 export { serverProductionEntryPlugin }
 export { serverEntryVirtualId }
-export type { ConfigVitePluginServerEntry }
+export type { PluginConfigProvidedByUser as VitePluginServerEntryOptions }
 
 import type { Plugin, ResolvedConfig as ConfigVite } from 'vite'
 import {
@@ -66,9 +66,6 @@ type Library = {
   apiVersion: number
   pluginVersion: string
   getServerProductionEntry: () => string
-}
-type ConfigVitePluginServerEntry = {
-  vitePluginServerEntry?: PluginConfigProvidedByUser
 }
 
 type ConfigUnresolved = ConfigVite & {
