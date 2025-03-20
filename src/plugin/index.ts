@@ -13,8 +13,6 @@ import {
   projectInfo,
   objectAssign,
   joinEnglish,
-  injectRollupInputs,
-  normalizeRollupInput,
   findRollupBundleEntry,
   assertUsage,
 } from './utils.js'
@@ -53,6 +51,7 @@ type PluginConfigProvidedByLibrary = {
 type PluginConfigProvidedByUser = {
   inject?: boolean // No functionality whatsoever: only used to communicate between Vike and vike-server.
   disableAutoImport?: boolean
+  disableServerEntryEmit?: boolean
 }
 // The resolved aggregation of the config set by the user, and all the configs set by libraries (e.g. the config set by Vike and the config set by Telefunc).
 type PluginConfigResolved = {
@@ -60,6 +59,7 @@ type PluginConfigResolved = {
   apiVersion: number
   inject: boolean
   disableAutoImport: boolean
+  disableServerEntryEmit: boolean
 }
 type Library = {
   libraryName: string
@@ -89,6 +89,7 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
   let config: ConfigResolved
   let library: Library
   let skip: boolean
+  let entryIsEmitted = false
   return [
     {
       name: pluginName,
@@ -105,14 +106,19 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
         assertApiVersions(config, pluginConfigProvidedByLibrary.libraryName)
 
         applyPluginConfigProvidedByUser(config)
-
-        // TODO/now: new setting disableServerEntryEmit
-        const serverEntryName = getServerEntryName(config)
-        // TODO/now: use this.emitFile() instead
-        config.build.rollupOptions.input = injectRollupInputs({ [serverEntryName]: serverEntryVirtualId }, config)
       },
       buildStart() {
         if (skip) return
+
+        if (!config._vitePluginServerEntry.disableServerEntryEmit && !entryIsEmitted) {
+          entryIsEmitted = true
+          this.emitFile({
+            name: 'entry',
+            id: serverEntryVirtualId,
+            type: 'chunk',
+            importer: undefined,
+          })
+        }
 
         clearAutoImporter(config)
       },
@@ -137,7 +143,6 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
 
         // Write node_modules/@brillout/vite-plugin-server-entry/dist/autoImporter.js
         if (!isAutoImportDisabled(config)) {
-          // TODO/now: use this.emitFile() instead
           const entry = findServerEntry(bundle)
           assert(entry)
           const entryFileName = entry.fileName
@@ -170,19 +175,6 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
 // Avoid multiple Vite versions mismatch
 type Plugin_ = any
 
-function getServerEntryName(config: ConfigResolved) {
-  const entries = normalizeRollupInput(config.build.rollupOptions.input)
-  assert(
-    entries[serverEntryFileNameBase] !== serverEntryVirtualId &&
-      entries[serverEntryFileNameBaseAlternative] !== serverEntryVirtualId,
-  )
-  const serverEntryName = !entries[serverEntryFileNameBase]
-    ? serverEntryFileNameBase
-    : serverEntryFileNameBaseAlternative
-  assert(!entries[serverEntryName])
-  return serverEntryName
-}
-
 function resolveConfig(
   configUnresolved: ConfigUnresolved,
   pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrary,
@@ -194,6 +186,7 @@ function resolveConfig(
     apiVersion,
     inject: false,
     disableAutoImport: false,
+    disableServerEntryEmit: false,
   }
 
   const library = {
@@ -219,6 +212,9 @@ function applyPluginConfigProvidedByUser(config: ConfigResolved & ConfigUnresolv
   }
   if (pluginConfigProvidedByUser.disableAutoImport !== undefined) {
     pluginConfigResolved.disableAutoImport = pluginConfigProvidedByUser.disableAutoImport
+  }
+  if (pluginConfigProvidedByUser.disableServerEntryEmit !== undefined) {
+    pluginConfigResolved.disableServerEntryEmit = pluginConfigProvidedByUser.disableServerEntryEmit
   }
 }
 
