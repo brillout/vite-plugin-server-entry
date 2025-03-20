@@ -1,3 +1,12 @@
+## [0.7.1](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.0...v0.7.1) (2025-03-20)
+
+
+### Bug Fixes
+
+* ensure fileName of server entry ([3d64616](https://github.com/brillout/vite-plugin-server-entry/commit/3d64616f2481f2f47fbe62de7d98a7fa87dea51e))
+
+
+
 # [0.7.0](https://github.com/brillout/vite-plugin-server-entry/compare/v0.6.3...v0.7.0) (2025-03-20)
 
 
