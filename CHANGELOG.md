@@ -1,3 +1,28 @@
+# [0.7.0](https://github.com/brillout/vite-plugin-server-entry/compare/v0.6.3...v0.7.0) (2025-03-20)
+
+
+### Bug Fixes
+
+* `export { serverEntryVirtualId }` ([2e973cd](https://github.com/brillout/vite-plugin-server-entry/commit/2e973cd3e16a5c6d49b8ea6b00498aa26817ee88))
+* `export type { PluginConfigProvidedByUser as VitePluginServerEntryOptions }` ([f6974b7](https://github.com/brillout/vite-plugin-server-entry/commit/f6974b74b7704361aeeb43de9f470a9617e8834c))
+* rename crawlServerEntry => crawlOutDir ([399de09](https://github.com/brillout/vite-plugin-server-entry/commit/399de0961e3cdd84e3f1b96ee237deaca0603b08))
+* return outFilePath ([1f63878](https://github.com/brillout/vite-plugin-server-entry/commit/1f638782b2979e73a35c5946f447d572af8c794e))
+
+
+### Features
+
+* `disableServerEntryEmit` ([0c67c6a](https://github.com/brillout/vite-plugin-server-entry/commit/0c67c6ac1e7ce9610db407a438498b682f23714f))
+
+
+### BREAKING CHANGES
+
+* use `VitePluginServerEntryOptions` instead of `ConfigVitePluginServerEntry`
+*  - Changed `inject` option.
+ - Removed `autoImport` option.
+* crawlServerEntry => crawlOutDir
+
+
+
 ## [0.6.3](https://github.com/brillout/vite-plugin-server-entry/compare/v0.6.2...v0.6.3) (2025-02-20)
 
 
