@@ -17,8 +17,8 @@
 ### BREAKING CHANGES
 
 * use `VitePluginServerEntryOptions` instead of `ConfigVitePluginServerEntry`
-*  - Changed `inject` option.
- - Removed `autoImport` option.
+* Changed `inject` option.
+* Removed `autoImport` option.
 * crawlServerEntry => crawlOutDir
 
 
