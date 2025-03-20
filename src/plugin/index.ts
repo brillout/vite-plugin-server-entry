@@ -114,6 +114,7 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
           entryIsEmitted = true
           this.emitFile({
             name: 'entry',
+            fileName: 'entry.js',
             id: serverEntryVirtualId,
             type: 'chunk',
             importer: undefined,
