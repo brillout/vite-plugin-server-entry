@@ -1,3 +1,12 @@
+## [0.7.2](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.1...v0.7.2) (2025-04-02)
+
+
+### Bug Fixes
+
+* more robust entry resolving (fix [#18](https://github.com/brillout/vite-plugin-server-entry/issues/18)) ([25b3cee](https://github.com/brillout/vite-plugin-server-entry/commit/25b3cee9ebfbda1c231579efffcbde0173eb29ba))
+
+
+
 ## [0.7.1](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.0...v0.7.1) (2025-03-20)
 
 
