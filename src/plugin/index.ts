@@ -148,6 +148,7 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
           const entry = findServerEntry(bundle)
           assert(entry)
           const entryFileName = entry.fileName
+          if (!entryFileName) assert(false, { entry })
           writeAutoImporterFile(config, entryFileName)
         } else {
           debugLogsBuildtime({ disabled: true, paths: null })
