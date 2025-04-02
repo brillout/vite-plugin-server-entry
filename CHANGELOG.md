@@ -1,3 +1,13 @@
+## [0.7.4](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.3...v0.7.4) (2025-04-02)
+
+
+### Bug Fixes
+
+* [re-apply] more robust entry resolving ([#18](https://github.com/brillout/vite-plugin-server-entry/issues/18)) ([088587f](https://github.com/brillout/vite-plugin-server-entry/commit/088587fd205634c8d5178fc9bf5dcb18aba9c8e2))
+* use rollupOptions.input instead of this.emitFile() ([2c52810](https://github.com/brillout/vite-plugin-server-entry/commit/2c52810a4462e68f16cd7aced74b28d07716eeef))
+
+
+
 ## [0.7.3](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.2...v0.7.3) (2025-04-02)
 
 
