@@ -16,6 +16,8 @@ import {
   findRollupBundleEntry,
   assertUsage,
   isNotNullish,
+  injectRollupInputs,
+  normalizeRollupInput,
 } from './utils.js'
 import path from 'path'
 import { writeFileSync, readFileSync } from 'fs'
@@ -90,7 +92,6 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
   let config: ConfigResolved
   let library: Library
   let skip: boolean
-  let entryIsEmitted = false
   return [
     {
       name: pluginName,
@@ -107,20 +108,14 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
         assertApiVersions(config, pluginConfigProvidedByLibrary.libraryName)
 
         applyPluginConfigProvidedByUser(config)
+
+        if (!config._vitePluginServerEntry.disableServerEntryEmit) {
+          const serverEntryName = getServerEntryName(config)
+          config.build.rollupOptions.input = injectRollupInputs({ [serverEntryName]: serverEntryVirtualId }, config)
+        }
       },
       buildStart() {
         if (skip) return
-
-        if (!config._vitePluginServerEntry.disableServerEntryEmit && !entryIsEmitted) {
-          entryIsEmitted = true
-          this.emitFile({
-            name: 'entry',
-            fileName: 'entry.js',
-            id: serverEntryVirtualId,
-            type: 'chunk',
-            importer: undefined,
-          })
-        }
 
         clearAutoImporter(config)
       },
@@ -424,4 +419,17 @@ function errMsgEntryRemoved(entriesMissing: string[], entryKeys: string[], entry
 function isAutoImportDisabled(config: ConfigResolved): boolean {
   const { disableAutoImport } = config._vitePluginServerEntry
   return isYarnPnP() || disableAutoImport
+}
+
+function getServerEntryName(config: ConfigResolved) {
+  const entries = normalizeRollupInput(config.build.rollupOptions.input)
+  assert(
+    entries[serverEntryFileNameBase] !== serverEntryVirtualId &&
+      entries[serverEntryFileNameBaseAlternative] !== serverEntryVirtualId,
+  )
+  const serverEntryName = !entries[serverEntryFileNameBase]
+    ? serverEntryFileNameBase
+    : serverEntryFileNameBaseAlternative
+  assert(!entries[serverEntryName])
+  return serverEntryName
 }
