@@ -15,7 +15,6 @@ import {
   joinEnglish,
   findRollupBundleEntry,
   assertUsage,
-  isNotNullish,
 } from './utils.js'
 import path from 'path'
 import { writeFileSync, readFileSync } from 'fs'
@@ -401,23 +400,20 @@ function findServerEntry<OutputBundle extends Record<string, { name: string | un
         serverEntryFileNameBaseAlternative,
       ],
       Object.keys(bundle),
-      Object.values(bundle)
-        .map((entry) => entry.name)
-        .filter(isNotNullish),
     ),
   )
 
   return entry
 }
 
-function errMsgEntryRemoved(entriesMissing: string[], entryKeys: string[], entryNames: string[]) {
+function errMsgEntryRemoved(entriesMissing: string[], entriesExisting: string[]) {
   const list = (items: string[]) => '[' + items.map((e) => `'${e}'`).join(', ') + ']'
   return [
     entriesMissing.length === 1
       ? `Cannot find build server entry '${entriesMissing[0]!}'.`
       : `Cannot find build server entry, searching for:  ${list(entriesMissing)} (none of them exist, but one of these should exist).`,
     `Make sure your Vite config (or that of a Vite plugin) doesn't remove/overwrite server build entries.`,
-    `(Found entry names: ${list(entryNames)}, found entry keys: ${list(entryKeys)}.)`,
+    `(Found server entries: ${list(entriesExisting)}.)`,
   ].join(' ')
 }
 
