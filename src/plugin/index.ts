@@ -36,7 +36,7 @@ const isCJS = 'import.meta.resolve' === ('require.resolve' as string) // see dis
 const exportStatement = isCJS ? 'exports.' : 'export const '
 const require_ = createRequire(importMetaUrl)
 
-const autoImporterFilePath = require_.resolve('../runtime/autoImporter.js')
+const autoImporterFilePath = toPosixPath(require_.resolve('../runtime/autoImporter.js'))
 const serverEntryVirtualId = 'virtual:@brillout/vite-plugin-server-entry:serverEntry'
 // https://vitejs.dev/guide/api-plugin.html#virtual-modules-convention
 const virtualIdPrefix = '\0'
@@ -144,7 +144,7 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
           assert(entry)
           const entryFileName = entry.fileName
           if (!entryFileName) assert(false, { entry })
-          writeAutoImporterFile(config, entryFileName)
+          setAutoImporter(config, entryFileName)
         } else {
           debugLogsBuildtime({ disabled: true, paths: null })
         }
@@ -250,7 +250,7 @@ function getServerProductionEntryAll(config: ConfigResolved) {
   return serverProductionEntry
 }
 
-function writeAutoImporterFile(config: ConfigResolved, entryFileName: string) {
+function setAutoImporter(config: ConfigResolved, entryFileName: string) {
   const { distServerPathRelative, distServerPathAbsolute } = getDistServerPathRelative(config)
   const serverEntryFilePathRelative = path.posix.join(distServerPathRelative, entryFileName)
   const serverEntryFilePathAbsolute = path.posix.join(distServerPathAbsolute, entryFileName)
@@ -258,14 +258,13 @@ function writeAutoImporterFile(config: ConfigResolved, entryFileName: string) {
   assertPosixPath(root)
   assert(!isAutoImportDisabled(config))
   assert(!isYarnPnP())
-  writeFileSync(
-    autoImporterFilePath,
+  writeAutoImporterFile((autoImporterFilePathResolved) =>
     [
       `${exportStatement}status = 'SET';`,
       `${exportStatement}pluginVersion = ${JSON.stringify(projectInfo.projectVersion)};`,
       `${exportStatement}loadServerEntry = async () => { await import(${JSON.stringify(serverEntryFilePathRelative)}); };`,
       `${exportStatement}paths = {`,
-      `  autoImporterFilePathOriginal: ${JSON.stringify(autoImporterFilePath)},`,
+      `  autoImporterFilePathOriginal: ${JSON.stringify(autoImporterFilePathResolved)},`,
       '  autoImporterFilePathActual: (() => { try { return import.meta.url } catch { return null } })(),',
       `  serverEntryFilePathRelative: ${JSON.stringify(serverEntryFilePathRelative)},`,
       `  serverEntryFilePathOriginal: ${JSON.stringify(serverEntryFilePathAbsolute)},`,
@@ -281,7 +280,7 @@ function clearAutoImporter(config: ConfigResolved) {
   }
   assert(!isYarnPnP())
   const status: AutoImporterCleared['status'] = 'BUILDING'
-  writeFileSync(autoImporterFilePath, [`${exportStatement}status = '${status}';`, ''].join('\n'))
+  writeAutoImporterFile(() => [`${exportStatement}status = '${status}';`, ''].join('\n'))
 }
 
 /** Is `semver1` higher than `semver2`?*/
@@ -430,4 +429,17 @@ function getServerEntryName(config: ConfigResolved) {
     : serverEntryFileNameBaseAlternative
   assert(!entries[serverEntryName])
   return serverEntryName
+}
+
+function writeAutoImporterFile(fileContent: (autoImporterFilePathResolved?: string) => string) {
+  assertPosixPath(autoImporterFilePath)
+  assert(
+    (autoImporterFilePath.split('/dist/esm/').length === 2 && autoImporterFilePath.split('/dist/cjs/').length === 1) ||
+      (autoImporterFilePath.split('/dist/esm/').length === 1 && autoImporterFilePath.split('/dist/cjs/').length === 2),
+  )
+  const autoImporterFilePathEsm = autoImporterFilePath.replace('/dist/cjs/', '/dist/esm/')
+  const autoImporterFilePathCjs = autoImporterFilePath.replace('/dist/esm/', '/dist/cjs/')
+  ;[autoImporterFilePathEsm, autoImporterFilePathCjs].forEach((autoImporterFilePathResolved) => {
+    writeFileSync(autoImporterFilePathResolved, fileContent(autoImporterFilePathResolved))
+  })
 }
