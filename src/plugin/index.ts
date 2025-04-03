@@ -20,7 +20,7 @@ import {
   normalizeRollupInput,
 } from './utils.js'
 import path from 'path'
-import { writeFileSync, readFileSync } from 'fs'
+import { writeFileSync } from 'fs'
 import type { AutoImporterCleared } from '../runtime/AutoImporter.js'
 import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase.js'
 import { debugLogsBuildtime } from './debugLogsBuildTime.js'
@@ -279,10 +279,8 @@ function clearAutoImporter(config: ConfigResolved) {
   if (isAutoImportDisabled(config)) {
     return
   }
-  const status: AutoImporterCleared['status'] = 'BUILDING'
-  const autoImporterContent = readFileSync(autoImporterFilePath)
-  if (autoImporterContent.includes(status)) return
   assert(!isYarnPnP())
+  const status: AutoImporterCleared['status'] = 'BUILDING'
   writeFileSync(autoImporterFilePath, [`${exportStatement}status = '${status}';`, ''].join('\n'))
 }
 
