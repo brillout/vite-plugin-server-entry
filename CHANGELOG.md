@@ -1,3 +1,13 @@
+## [0.7.5](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.4...v0.7.5) (2025-04-03)
+
+
+### Bug Fixes
+
+* eagerly write BUILDING status ([ef9747a](https://github.com/brillout/vite-plugin-server-entry/commit/ef9747ad6efd848c7fbb74f1ba3f8144187427d1))
+* write autoImporter to both /dist/esm/ and /dist/cjs/ ([8ab8199](https://github.com/brillout/vite-plugin-server-entry/commit/8ab8199f4210d2abbcdc9cac2d26955172649d99))
+
+
+
 ## [0.7.4](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.3...v0.7.4) (2025-04-02)
 
 
