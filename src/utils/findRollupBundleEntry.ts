@@ -19,7 +19,7 @@ function findRollupBundleEntry<OutputBundle extends Record<string, { name: strin
       (name === 'entry' ||
         // https://github.com/brillout/vite-plugin-server-entry/issues/18
         !name)
-    )
+    ) {
       if (found) {
         assert(false, {
           entryName,
@@ -29,7 +29,8 @@ function findRollupBundleEntry<OutputBundle extends Record<string, { name: strin
           keys: Object.keys(bundle),
         })
       }
-    found = entry
+      found = entry
+    }
   }
   return found
 }
