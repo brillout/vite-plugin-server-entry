@@ -12,12 +12,14 @@ function findRollupBundleEntry<OutputBundle extends Record<string, { name: strin
     if (key.endsWith('.map')) continue // https://github.com/brillout/vite-plugin-ssr/issues/612
     const entry = bundle[key]!
     const { name } = entry
-    const entryNames = [
-      entryName,
-      // https://github.com/brillout/vite-plugin-server-entry/issues/18
-      entryName + '.js',
-    ]
-    if ((name && entryNames.includes(name)) || entryNames.includes(key)) {
+    if (
+      // Workaround weird randomness of entry being included twice: https://github.com/brillout/vite-plugin-server-entry/issues/20
+      // It also makes sense: the output file is expected to be dist/server/entry.{js,mjs,cjs}
+      key.startsWith('entry.') &&
+      (name === 'entry' ||
+        // https://github.com/brillout/vite-plugin-server-entry/issues/18
+        !name)
+    )
       if (found) {
         assert(false, {
           entryName,
@@ -27,8 +29,7 @@ function findRollupBundleEntry<OutputBundle extends Record<string, { name: strin
           keys: Object.keys(bundle),
         })
       }
-      found = entry
-    }
+    found = entry
   }
   return found
 }
