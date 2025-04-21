@@ -1,3 +1,12 @@
+## [0.7.7](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.6...v0.7.7) (2025-04-21)
+
+
+### Bug Fixes
+
+* fix typo bug ([558e64f](https://github.com/brillout/vite-plugin-server-entry/commit/558e64ffb2841a177e39807e4348a5fabcd50c2b))
+
+
+
 ## [0.7.6](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.5...v0.7.6) (2025-04-21)
 
 
