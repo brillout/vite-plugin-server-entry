@@ -140,7 +140,7 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
 
         // Write node_modules/@brillout/vite-plugin-server-entry/dist/autoImporter.js
         if (!isAutoImportDisabled(config)) {
-          const entry = findServerEntry(bundle)
+          const entry = findServerEntry(bundle, config.build.outDir)
           assert(entry)
           const entryFileName = entry.fileName
           if (!entryFileName) assert(false, { entry })
@@ -379,10 +379,11 @@ function getLibraryApiVersion(library: Library) {
 
 function findServerEntry<OutputBundle extends Record<string, { name: string | undefined }>>(
   bundle: OutputBundle,
+  outDir: string,
 ): OutputBundle[string] {
   const entry =
-    findRollupBundleEntry(serverEntryFileNameBaseAlternative, bundle) ||
-    findRollupBundleEntry(serverEntryFileNameBase, bundle)
+    findRollupBundleEntry(serverEntryFileNameBaseAlternative, bundle, outDir) ||
+    findRollupBundleEntry(serverEntryFileNameBase, bundle, outDir)
 
   assertUsage(
     entry,

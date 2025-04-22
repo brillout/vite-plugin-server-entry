@@ -7,6 +7,7 @@ import {
   serverEntryFileNameBaseAlternative,
   serverIndexFileNameBase,
 } from '../shared/serverEntryFileNameBase.js'
+import { usageHintRollupEntryNames } from '../shared/usageHints.js'
 
 type OutFileSearch =
   | [typeof serverEntryFileNameBase, typeof serverEntryFileNameBaseAlternative]
@@ -94,7 +95,7 @@ async function crawlOutDir({
       assert(outDirServerExists)
       assertUsage(
         false,
-        `The server production entry is missing. If you are using rollupOptions.output.entryFileNames then make sure you don't change the file name of the production server entry. One of the following is expected to exist: \n${outFileNameList.map((outFileName) => `  ${getOutFilePath(outFileName)}`).join('\n')}`,
+        `The server production entry is missing. ${usageHintRollupEntryNames}. One of the following is expected to exist: \n${outFileNameList.map((outFileName) => `  ${getOutFilePath(outFileName)}`).join('\n')}`,
       )
     }
   }
