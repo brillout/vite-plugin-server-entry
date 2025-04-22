@@ -1,3 +1,13 @@
+## [0.7.8](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.7...v0.7.8) (2025-04-22)
+
+
+### Bug Fixes
+
+* improve findRollupBundleEntry() ([98312f2](https://github.com/brillout/vite-plugin-server-entry/commit/98312f28d5a23502b5d563b4a21f660a8870b337))
+* rename entryOthers => entryLibraries ([31f36e9](https://github.com/brillout/vite-plugin-server-entry/commit/31f36e97457be8bc2ebb1c455794c942e17ef347))
+
+
+
 ## [0.7.7](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.6...v0.7.7) (2025-04-21)
 
 
