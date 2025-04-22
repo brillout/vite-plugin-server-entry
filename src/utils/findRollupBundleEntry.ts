@@ -16,7 +16,7 @@ import { usageHintRollupEntryNames } from '../shared/usageHints.js'
 //   - We use `key.startsWith(keyStart)` to pick the right one
 
 function findRollupBundleEntry<OutputBundle extends Record<string, { name: string | undefined }>>(
-  entryName: 'entry' | 'entryOthers',
+  entryName: 'entry' | 'entryLibraries',
   bundle: OutputBundle,
   outDir: string,
 ): OutputBundle[string] | null {
