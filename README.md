@@ -76,18 +76,17 @@ Make sure to import `dist/server/entry.js` only in production, see [Conditional 
 > As a user, you usually don't need to read this. If you have a problem, reading the section [Manual import](#Manual-import) is usually enough.
 
 `@brillout/vite-plugin-server-entry` does two things:
- - Generates a "server production entry" file `dist/server/entry.js`.
- - Generates a "auto importer" file `node_modules/@brillout/vite-plugin-server-entry/dist/runtime/autoImporter.js`.
+ - Generates a *server production entry*, the file `dist/server/entry.js`.
+ - Generates a *auto importer*, the file `node_modules/@brillout/vite-plugin-server-entry/dist/runtime/autoImporter.js`.
 
-The *server production entry*, which is located at `dist/server/entry.js`, enables tools such as Vike and Telefunc to consolidate their server production entry into a single file. It loads user files (e.g. Vike's `+Page.js` user files and/or Telefunc's `.telefunc.js` user files) built for production.
+The *server production entry* (`dist/server/entry.js`) enables tools like [Vike](https://vike.dev) and [Telefunc](https://telefunc.com) to combine their production entries into a single file.
 
-The *auto importer* file, which is located at `node_modules/@brillout/vite-plugin-server-entry/dist/runtime/autoImporter.js`, automatically imports `dist/server/entry.js` on your behalf, so that you don't have to manually import `dist/server/entry.js` yourself as shown in the following. That's the only purpose of the auto importer.
+The *auto importer* file (`node_modules/@brillout/vite-plugin-server-entry/dist/runtime/autoImporter.js`) automatically imports `dist/server/entry.js`, saving you the need to do it manually:
 
 ```js
-// server/index.js (*your* server entry)
+// server/index.js
 
-// Without the auto importer, you would have to manually import dist/server/entry.js
-// yourself, for example like this:
+// Without the auto importer, you need to manually import dist/server/entry.js
 if (process.env.NODE_ENV === 'production') {
   await import('../dist/server/entry.js')
 }
