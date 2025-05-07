@@ -59,12 +59,12 @@ Make sure to import `dist/server/entry.js` only in production, see [Conditional 
 > The `node_modules/.../autoImporter.js` file is generated at build-time. Consequently, it breaks if:
 >  - Your `node_modules/` directory is immutable (Yarn PnP): `node_modules/.../autoImporter.js` cannot be written.
 >  - You remove or (re-)install `node_modules/` *after* building your app for production: `node_modules/.../autoImporter.js` is lost.
->    - E.g. you build locally, copy `dist/` to the deployment server, and run `$ npm install` there.
+>    - E.g. you build locally, copy `dist/` to the deployment server, and then run `$ npm install` there.
 >    - Some Docker configurations move `dist/`, then re-install `node_modules/`.
 >
 > In those situations, you must manually import the server entry.
 >
-> If you aren't using Yarn PnP and you don't touch `node_modules/` after building, then you don't need to manually import and you shouldn't keep getting `The server production entry is missing`. If you do, then [file a bug report](https://github.com/brillout/vite-plugin-server-entry/issues/new).
+> If you aren't using Yarn PnP and you don't modify `node_modules/` after building, then you don't need to manually import and you shouldn't keep getting `The server production entry is missing`. If you do, then [file a bug report](https://github.com/brillout/vite-plugin-server-entry/issues/new).
 >
 > To learn more, see:
 > - [How it works](#how-it-works)
