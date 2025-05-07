@@ -28,12 +28,12 @@ But this automatic importing doesn't work with Yarn PnP, some Docker configurati
 import the server production entry.
 ```
 
-The workaround is to manually import `dist/server/entry.js` in your server entry:
+The workaround is to manually import `dist/server/entry.js` in your server entry (or somewhere else):
 
 ```js
 // server/index.js
 
-// Add this at the begining
+// Add this at the begining (or at least before receiving any HTTP request)
 import '../dist/server/entry.js' // or wherever the build directory is
 
 // ...
