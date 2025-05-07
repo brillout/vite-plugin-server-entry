@@ -28,16 +28,16 @@ But this automatic importing doesn't work with Yarn PnP, some Docker configurati
 import the server production entry.
 ```
 
-The workaround is to manually import `dist/server/entry.js` in your server code:
+The workaround is to manually import `dist/server/entry.js` in your server entry:
 
 ```js
-// server.js
+// server/index.js
 
-// Add this import at the begining of your server code
-import './path/to/dist/server/entry.js'
+// Add this at the begining
+import '../dist/server/entry.js' // or wherever the build directory is
 
 // ...
-// your server code (Express.js, Hono, Cloudflare Worker, Vercel, ...)
+// Your server code (Express.js, Hono, Cloudflare Worker, Vercel, ...)
 // ...
 ```
 
@@ -46,15 +46,12 @@ Make sure to import `dist/server/entry.js` only in production, see [Conditional 
 > [!NOTE]
 > The import path may be different:
 > - The file extension may differ from `.js` (e.g. `dist/server/entry.mjs`).
-> - The build directory location may differ from `dist/` (e.g. `build/server/entry.js` if you or your framework set [`vite.config.js` > `build.outDir`](https://vitejs.dev/config/build-options.html#build-outdir) to `build`).
+> - The build directory may be named and located differently than `dist/` (e.g. `build/server/entry.js` if you or your framework set [`vite.config.js` > `build.outDir`](https://vitejs.dev/config/build-options.html#build-outdir) to `build`).
 >
 > ```diff
 > - import '../dist/server/entry.js
 > + import '../build/server/entry.mjs
 > ```
-
-> [!NOTE]
-> If you use [Vike](https://vike.dev/) then make sure that you import `dist/server/entry.js` before calling [`renderPage()`](https://vike.dev/renderPage).
 
 > [!NOTE]
 > `@brillout/vite-plugin-server-entry` generates a file `node_modules/@brillout/vite-plugin-server-entry/dist/runtime/autoImporter.js`, which automatically imports `dist/server/entry.js`.
@@ -72,6 +69,9 @@ Make sure to import `dist/server/entry.js` only in production, see [Conditional 
 > To learn more, see:
 > - [How it works](#how-it-works)
 > - [How the auto importer works](https://github.com/brillout/vite-plugin-server-entry/issues/4)
+
+> [!NOTE]
+> If you use [Vike](https://vike.dev) then make sure that you import `dist/server/entry.js` before calling [`renderPage()`](https://vike.dev/renderPage).
 
 <p align="center"><sup><a href="#readme"><b>&#8679;</b> <b>TOP</b> <b>&#8679;</b></a></sup></p><br/>
 
