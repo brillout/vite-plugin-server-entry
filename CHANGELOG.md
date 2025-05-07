@@ -1,3 +1,12 @@
+## [0.7.9](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.8...v0.7.9) (2025-05-07)
+
+
+### Bug Fixes
+
+* add DEBUG flag ([#21](https://github.com/brillout/vite-plugin-server-entry/issues/21)) ([02b590c](https://github.com/brillout/vite-plugin-server-entry/commit/02b590c169a8db7028b1ee7bd4e014a4fd478a62))
+
+
+
 ## [0.7.8](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.7...v0.7.8) (2025-04-22)
 
 
