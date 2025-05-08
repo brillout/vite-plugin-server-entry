@@ -66,12 +66,10 @@ Make sure to import `dist/server/entry.js` only in production, see [Conditional 
 >
 > If you aren't using Yarn PnP and you don't modify `node_modules/` after building, then you don't need to manually import and you shouldn't keep getting `The server production entry is missing`. If you do, then [file a bug report](https://github.com/brillout/vite-plugin-server-entry/issues/new).
 >
-> To learn more, see:
-> - [How it works](#how-it-works)
-> - [How the auto importer works](https://github.com/brillout/vite-plugin-server-entry/issues/4)
+> To learn more, see [How it works](#how-it-works).
 
 > [!NOTE]
-> If you use [Vike](https://vike.dev) then make sure that you import `dist/server/entry.js` before calling [`renderPage()`](https://vike.dev/renderPage).
+> **If you use [Vike](https://vike.dev)**, then make sure to import `dist/server/entry.js` before calling [`renderPage()`](https://vike.dev/renderPage).
 
 <p align="center"><sup><a href="#readme"><b>&#8679;</b> <b>TOP</b> <b>&#8679;</b></a></sup></p><br/>
 
@@ -97,6 +95,9 @@ if (process.env.NODE_ENV === 'production') {
   await import('../dist/server/entry.js')
 }
 ```
+
+> [!NOTE]
+> The `autoImporter.js` file is generated inside `node_modules/` — not in the build directory (`dist/`) — because the whole point of the auto importer is to know where the build directory is. The runtime code of tools (e.g. Telefunc) lives in `node_modules/` and cannot know where the build directory is. The auto importer bridges that gap in the simplest and most minimal way possible.
 
 See [How the auto importer works](https://github.com/brillout/vite-plugin-server-entry/issues/4) for more information.
 
