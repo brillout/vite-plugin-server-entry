@@ -34,14 +34,16 @@ The workaround is to manually import `dist/server/entry.js` in your server entry
 // server/index.js
 
 // Add this at the begining (or at least before receiving any HTTP request)
-import '../dist/server/entry.js' // or wherever the build directory is
+if (process.env.NODE_ENV === 'production') {
+  await import('../dist/server/entry.js') // or wherever the build directory is
+}
 
 // ...
 // Your server code (Express.js, Hono, Cloudflare Worker, Vercel, ...)
 // ...
 ```
 
-Make sure to import `dist/server/entry.js` only in production, see [Conditional manual import](https://github.com/brillout/vite-plugin-server-entry/issues/6).
+For alternative approaches to conditionally import `dist/server/entry.js` only in production, see [Conditional manual import](https://github.com/brillout/vite-plugin-server-entry/issues/6).
 
 > [!NOTE]
 > The import path may be different:
