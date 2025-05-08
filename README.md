@@ -33,8 +33,8 @@ The workaround is to manually import `dist/server/entry.js` in your server code:
 ```js
 // server/index.js
 
-// Add this at the beginning of your server entry. (If you don't have a server entry
-// then somewhere at startup before receiving HTTP requests).
+// Add this at the beginning of your server entry, or elsewhere at server start
+// before receiving HTTP requests.
 if (process.env.NODE_ENV === 'production') {
   await import('../dist/server/entry.js') // Or wherever the build directory is
 }
@@ -71,9 +71,6 @@ if (process.env.NODE_ENV === 'production') {
 > If you aren't using Yarn PnP and you don't modify `node_modules/` after building, then you don't need to manually import and you shouldn't keep getting `The server production entry is missing`. If you do, then [file a bug report](https://github.com/brillout/vite-plugin-server-entry/issues/new).
 >
 > To learn more, see [How it works](#how-it-works).
-
-> [!NOTE]
-> **If you use [Vike](https://vike.dev)**, then make sure to import `dist/server/entry.js` before calling [`renderPage()`](https://vike.dev/renderPage).
 
 <p align="center"><sup><a href="#readme"><b>&#8679;</b> <b>TOP</b> <b>&#8679;</b></a></sup></p><br/>
 
