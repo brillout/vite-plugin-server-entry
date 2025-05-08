@@ -43,8 +43,6 @@ if (process.env.NODE_ENV === 'production') {
 // ...
 ```
 
-For alternative approaches to conditionally import `dist/server/entry.js` only in production, see [Conditional manual import](https://github.com/brillout/vite-plugin-server-entry/issues/6).
-
 > [!NOTE]
 > The import path may be different:
 > - The file extension may differ from `.js` (e.g. `dist/server/entry.mjs`).
@@ -54,6 +52,9 @@ For alternative approaches to conditionally import `dist/server/entry.js` only i
 > - import '../dist/server/entry.js
 > + import '../build/server/entry.mjs
 > ```
+
+> [!NOTE]
+> If top-level `await` isn't available, then check out the alternative approaches to conditionally import `dist/server/entry.js` only in production at [Conditional manual import](https://github.com/brillout/vite-plugin-server-entry/issues/6).
 
 > [!NOTE]
 > `@brillout/vite-plugin-server-entry` generates a file `node_modules/@brillout/vite-plugin-server-entry/dist/runtime/autoImporter.js`, which automatically imports `dist/server/entry.js`.
