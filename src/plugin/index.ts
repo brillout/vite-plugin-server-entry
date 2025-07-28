@@ -168,6 +168,19 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
         library = resolved.library
       },
     },
+    {
+      name: `${pluginName}:optimizeDeps`,
+      config() {
+        return {
+          ssr: {
+            optimizeDeps: {
+              // Needed for @cloudflare/vite-plugin
+              exclude: ['@brillout/vite-plugin-server-entry'],
+            },
+          },
+        }
+      },
+    },
   ] as Plugin[]
 }
 // Avoid multiple Vite versions mismatch
