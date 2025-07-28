@@ -174,7 +174,23 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
         return {
           ssr: {
             optimizeDeps: {
-              // Needed for @cloudflare/vite-plugin
+              // Needed for @cloudflare/vite-plugin to avoid following error during SSR optimizeDeps scanning:
+              // ```console
+              // ✘ [ERROR] Could not resolve "../../../../../../../../../examples/react-full/dist/server/entry.mjs"
+              //     ../../node_modules/.pnpm/@brillout+vite-plugin-server-entry@0.7.9/node_modules/@brillout/vite-plugin-server-entry/dist/esm/runtime/autoImporter.js:3:58:
+              //       3 │ export const loadServerEntry = async () => { await import("../../../../../../../../../examples/react-full/dist/server/entry.mjs"); };
+              //         ╵                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+              //
+              // Error: Build failed with 1 error:
+              // ../../node_modules/.pnpm/@brillout+vite-plugin-server-entry@0.7.9/node_modules/@brillout/vite-plugin-server-entry/dist/esm/runtime/autoImporter.js:3:58: ERROR: Could not resolve "../../../../../../../../../examples/react-full/dist/server/entry.mjs"
+              //     at failureErrorWithLog (/home/rom/code/vike/node_modules/.pnpm/esbuild@0.25.4/node_modules/esbuild/lib/main.js:1463:15)
+              //     at /home/rom/code/vike/node_modules/.pnpm/esbuild@0.25.4/node_modules/esbuild/lib/main.js:924:25
+              //     at /home/rom/code/vike/node_modules/.pnpm/esbuild@0.25.4/node_modules/esbuild/lib/main.js:1341:9
+              //     at processTicksAndRejections (node:internal/process/task_queues:105:5) {
+              //   errors: [Getter/Setter],
+              //   warnings: [Getter/Setter]
+              // }
+              // ```
               exclude: ['@brillout/vite-plugin-server-entry'],
             },
           },
