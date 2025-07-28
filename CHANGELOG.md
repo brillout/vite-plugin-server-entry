@@ -1,3 +1,12 @@
+## [0.7.10](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.9...v0.7.10) (2025-07-28)
+
+
+### Bug Fixes
+
+* exclude from SSR optimizeDeps ([b7ebd36](https://github.com/brillout/vite-plugin-server-entry/commit/b7ebd3660f45bd298d64674e4f5dac8fa7fd48ec))
+
+
+
 ## [0.7.9](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.8...v0.7.9) (2025-05-07)
 
 
