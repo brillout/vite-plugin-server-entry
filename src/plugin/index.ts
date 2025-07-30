@@ -304,11 +304,8 @@ function setAutoImporter(config: ConfigResolved, entryFileName: string) {
   )
 }
 function clearAutoImporter(config: ConfigResolved) {
-  if (isAutoImportDisabled(config)) {
-    return
-  }
-  assert(!isYarnPnP())
-  const status: AutoImporterCleared['status'] = 'BUILDING'
+  if (isYarnPnP()) return
+  const status: AutoImporterCleared['status'] = isAutoImportDisabled(config) ? 'DISABLED' : 'BUILDING'
   writeAutoImporterFile(() => [`${exportStatement}status = '${status}';`, ''].join('\n'))
 }
 
