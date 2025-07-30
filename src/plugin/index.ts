@@ -91,7 +91,9 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
     `@brillout/vite-plugin-server-entry:${pluginConfigProvidedByLibrary.libraryName.toLowerCase()}` as const
   let config: ConfigResolved
   let library: Library
-  let skip: boolean
+  let isClientBuild: boolean | undefined
+  let isNotLeaderInstance: boolean | undefined
+  const skip = () => isNotLeaderInstance || isClientBuild
   return [
     {
       name: pluginName,
@@ -99,11 +101,13 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
       // We need to run this plugin after other plugin instances, so that assertApiVersions() works also for libraries using older plugin versions
       enforce: 'post',
       configResolved() {
-        if (skip) return
-        if (!isLeaderPluginInstance(config, library)) {
-          skip = true
-          return
+        if (isClientBuild) return
+        {
+          const val = isNotLeaderInstance
+          isNotLeaderInstance = !isLeaderPluginInstance(config, library)
+          assert([undefined, isNotLeaderInstance].includes(val))
         }
+        if (skip()) return
 
         assertApiVersions(config, pluginConfigProvidedByLibrary.libraryName)
 
@@ -115,19 +119,19 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
         }
       },
       buildStart() {
-        if (skip) return
+        if (skip()) return
 
         clearAutoImporter(config)
       },
       resolveId(id) {
-        if (skip) return
+        if (skip()) return
 
         if (id === serverEntryVirtualId) {
           return virtualIdPrefix + serverEntryVirtualId
         }
       },
       load(id) {
-        if (skip) return
+        if (skip()) return
 
         assert(id !== serverEntryVirtualId)
         if (id === virtualIdPrefix + serverEntryVirtualId) {
@@ -136,7 +140,7 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
         }
       },
       generateBundle(_rollupOptions, bundle) {
-        if (skip) return
+        if (skip()) return
 
         // Write node_modules/@brillout/vite-plugin-server-entry/dist/autoImporter.js
         if (!isAutoImportDisabled(config)) {
@@ -156,9 +160,9 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
       // We need to run this plugin before in order to make isLeaderPluginInstance() work
       enforce: 'pre',
       configResolved(configUnresolved: ConfigUnresolved) {
-        // Upon the server-side build (`$ vite build --ssr`), we need to override the previous `skip` value set by the client-side build (`$ vite build`).
-        skip = !viteIsSSR(configUnresolved)
-        if (skip) return
+        isClientBuild = !viteIsSSR(configUnresolved)
+        if (skip()) return
+
         assertUsage(
           typeof configUnresolved.build.ssr !== 'string',
           "Setting the server build entry over the Vite configuration `build.ssr` (i.e. `--ssr path/to/entry.js`) isn't supported (because of a Vite bug), see workaround at https://github.com/brillout/vite-plugin-server-entry/issues/9#issuecomment-2027641624",
