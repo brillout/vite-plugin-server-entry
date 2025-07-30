@@ -103,6 +103,20 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
   }
   return [
     {
+      name: `${pluginName}:config`,
+      apply: 'build',
+      // We need to run this plugin before in order to make isLeaderPluginInstance() work
+      enforce: 'pre',
+      configResolved(configUnresolved: ConfigUnresolved) {
+        assertUsage(
+          typeof configUnresolved.build.ssr !== 'string',
+          "Setting the server build entry over the Vite configuration `build.ssr` (i.e. `--ssr path/to/entry.js`) isn't supported (because of a Vite bug), see workaround at https://github.com/brillout/vite-plugin-server-entry/issues/9#issuecomment-2027641624",
+        )
+        config = resolveConfig(configUnresolved, libraryName, pluginConfigProvidedByLibrary)
+        assert(config._vitePluginServerEntry.libraries.find((l) => l.libraryName === libraryName))
+      },
+    },
+    {
       name: pluginName,
       apply: 'build',
       // We need to run this plugin after other plugin instances, so that assertApiVersions() works also for libraries using older plugin versions
@@ -164,20 +178,6 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
         } else {
           debugLogsBuildtime({ disabled: true, paths: null })
         }
-      },
-    },
-    {
-      name: `${pluginName}:config`,
-      apply: 'build',
-      // We need to run this plugin before in order to make isLeaderPluginInstance() work
-      enforce: 'pre',
-      configResolved(configUnresolved: ConfigUnresolved) {
-        assertUsage(
-          typeof configUnresolved.build.ssr !== 'string',
-          "Setting the server build entry over the Vite configuration `build.ssr` (i.e. `--ssr path/to/entry.js`) isn't supported (because of a Vite bug), see workaround at https://github.com/brillout/vite-plugin-server-entry/issues/9#issuecomment-2027641624",
-        )
-        config = resolveConfig(configUnresolved, libraryName, pluginConfigProvidedByLibrary)
-        assert(config._vitePluginServerEntry.libraries.find((l) => l.libraryName === libraryName))
       },
     },
     {
