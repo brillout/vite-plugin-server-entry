@@ -110,45 +110,45 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
       configResolved: {
         order: 'pre',
         handler(configUnresolved: ConfigUnresolved) {
-        assertUsage(
-          typeof configUnresolved.build.ssr !== 'string',
-          "Setting the server build entry over the Vite configuration `build.ssr` (i.e. `--ssr path/to/entry.js`) isn't supported (because of a Vite bug), see workaround at https://github.com/brillout/vite-plugin-server-entry/issues/9#issuecomment-2027641624",
-        )
-        config = resolveConfig(configUnresolved, libraryName, pluginConfigProvidedByLibrary)
-        assert(config._vitePluginServerEntry.libraries.find((l) => l.libraryName === libraryName))
-      }
-      }
+          assertUsage(
+            typeof configUnresolved.build.ssr !== 'string',
+            "Setting the server build entry over the Vite configuration `build.ssr` (i.e. `--ssr path/to/entry.js`) isn't supported (because of a Vite bug), see workaround at https://github.com/brillout/vite-plugin-server-entry/issues/9#issuecomment-2027641624",
+          )
+          config = resolveConfig(configUnresolved, libraryName, pluginConfigProvidedByLibrary)
+          assert(config._vitePluginServerEntry.libraries.find((l) => l.libraryName === libraryName))
+        },
+      },
     },
     {
       name: pluginName,
       apply: 'build',
       // We need to run this plugin after other plugin instances, so that assertApiVersions() works also for libraries using older plugin versions
       enforce: 'post',
-      configResolved:{
+      configResolved: {
         order: 'post',
         handler() {
-        isClientBuild = !viteIsSSR(config)
-        {
-          const prev = librariesLength
-          librariesLength = config._vitePluginServerEntry.libraries.length
-          assert([undefined, librariesLength].includes(prev))
-        }
-        {
-          const prev = isNotLeaderInstance
-          isNotLeaderInstance = !isLeaderPluginInstance(config, libraryName)
-          assert([undefined, isNotLeaderInstance].includes(prev))
-        }
-        if (skip()) return
+          isClientBuild = !viteIsSSR(config)
+          {
+            const prev = librariesLength
+            librariesLength = config._vitePluginServerEntry.libraries.length
+            assert([undefined, librariesLength].includes(prev))
+          }
+          {
+            const prev = isNotLeaderInstance
+            isNotLeaderInstance = !isLeaderPluginInstance(config, libraryName)
+            assert([undefined, isNotLeaderInstance].includes(prev))
+          }
+          if (skip()) return
 
-        assertApiVersions(config, pluginConfigProvidedByLibrary.libraryName)
+          assertApiVersions(config, pluginConfigProvidedByLibrary.libraryName)
 
-        applyPluginConfigProvidedByUser(config)
+          applyPluginConfigProvidedByUser(config)
 
-        if (!config._vitePluginServerEntry.disableServerEntryEmit) {
-          const serverEntryName = getServerEntryName(config)
-          config.build.rollupOptions.input = injectRollupInputs({ [serverEntryName]: serverEntryVirtualId }, config)
-        }
-      }
+          if (!config._vitePluginServerEntry.disableServerEntryEmit) {
+            const serverEntryName = getServerEntryName(config)
+            config.build.rollupOptions.input = injectRollupInputs({ [serverEntryName]: serverEntryVirtualId }, config)
+          }
+        },
       },
       buildStart() {
         if (skip()) return
