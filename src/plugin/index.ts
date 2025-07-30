@@ -105,7 +105,7 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
     {
       name: `${pluginName}:config`,
       apply: 'build',
-      // We need to run this plugin before in order to make isLeaderPluginInstance() work
+      // We must run the pre-hook configResolved() of *all* libraries before any post-hook configResolved() hook is called (otherwise isLeaderPluginInstance() will miss libraries and won't work)
       enforce: 'pre',
       configResolved(configUnresolved: ConfigUnresolved) {
         assertUsage(
