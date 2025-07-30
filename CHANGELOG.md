@@ -1,3 +1,14 @@
+## [0.7.11](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.10...v0.7.11) (2025-07-30)
+
+
+### Bug Fixes
+
+* clear autoImporter when disabled ([4d22e5a](https://github.com/brillout/vite-plugin-server-entry/commit/4d22e5a4d62988ae896061ee7b1c2eea32f0a0d9))
+* improve skip logic ([8ada57d](https://github.com/brillout/vite-plugin-server-entry/commit/8ada57dda3d3852ae7fe49a7d73d8853458b63f2))
+* make config orchestration more resillient ([5d3e90f](https://github.com/brillout/vite-plugin-server-entry/commit/5d3e90fc03455cd312ba522bed3b719b2d61dda1))
+
+
+
 ## [0.7.10](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.9...v0.7.10) (2025-07-28)
 
 
