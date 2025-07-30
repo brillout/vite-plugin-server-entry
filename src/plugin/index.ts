@@ -110,10 +110,6 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
       configResolved: {
         order: 'pre',
         handler(configUnresolved: ConfigUnresolved) {
-          assertUsage(
-            typeof configUnresolved.build.ssr !== 'string',
-            "Setting the server build entry over the Vite configuration `build.ssr` (i.e. `--ssr path/to/entry.js`) isn't supported (because of a Vite bug), see workaround at https://github.com/brillout/vite-plugin-server-entry/issues/9#issuecomment-2027641624",
-          )
           config = resolveConfig(configUnresolved, libraryName, pluginConfigProvidedByLibrary)
           assert(config._vitePluginServerEntry.libraries.find((l) => l.libraryName === libraryName))
         },
@@ -127,6 +123,10 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
       configResolved: {
         order: 'post',
         handler() {
+          assertUsage(
+            typeof config.build.ssr !== 'string',
+            "Setting the server build entry over the Vite configuration `build.ssr` (i.e. `--ssr path/to/entry.js`) isn't supported (because of a Vite bug), see workaround at https://github.com/brillout/vite-plugin-server-entry/issues/9#issuecomment-2027641624",
+          )
           isClientBuild = !viteIsSSR(config)
           {
             const prev = librariesLength
