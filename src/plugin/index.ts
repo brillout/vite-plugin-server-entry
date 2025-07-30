@@ -96,7 +96,11 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
   let isClientBuild: boolean | undefined
   let isNotLeaderInstance: boolean | undefined
   let librariesLength: undefined | number
-  const skip = () => isNotLeaderInstance || isClientBuild
+  const skip = () => {
+    assert('boolean' === typeof isNotLeaderInstance)
+    assert('boolean' === typeof isClientBuild)
+    return isNotLeaderInstance || isClientBuild
+  }
   return [
     {
       name: pluginName,
