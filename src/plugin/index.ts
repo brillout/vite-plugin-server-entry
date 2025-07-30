@@ -18,6 +18,7 @@ import {
   isNotNullish,
   injectRollupInputs,
   normalizeRollupInput,
+  deepEqual,
 } from './utils.js'
 import path from 'path'
 import { writeFileSync } from 'fs'
@@ -90,9 +91,11 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
   const pluginName =
     `@brillout/vite-plugin-server-entry:${pluginConfigProvidedByLibrary.libraryName.toLowerCase()}` as const
   let config: ConfigResolved
-  let library: Library
+  const { libraryName } = pluginConfigProvidedByLibrary
+  assert(libraryName)
   let isClientBuild: boolean | undefined
   let isNotLeaderInstance: boolean | undefined
+  let librariesLength: undefined | number
   const skip = () => isNotLeaderInstance || isClientBuild
   return [
     {
@@ -101,10 +104,15 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
       // We need to run this plugin after other plugin instances, so that assertApiVersions() works also for libraries using older plugin versions
       enforce: 'post',
       configResolved() {
-        if (isClientBuild) return
+        isClientBuild = !viteIsSSR(config)
+        {
+          const val = librariesLength
+          librariesLength = config._vitePluginServerEntry.libraries.length
+          assert([undefined, librariesLength].includes(val))
+        }
         {
           const val = isNotLeaderInstance
-          isNotLeaderInstance = !isLeaderPluginInstance(config, library)
+          isNotLeaderInstance = !isLeaderPluginInstance(config, libraryName)
           assert([undefined, isNotLeaderInstance].includes(val))
         }
         if (skip()) return
@@ -160,16 +168,12 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
       // We need to run this plugin before in order to make isLeaderPluginInstance() work
       enforce: 'pre',
       configResolved(configUnresolved: ConfigUnresolved) {
-        isClientBuild = !viteIsSSR(configUnresolved)
-        if (skip()) return
-
         assertUsage(
           typeof configUnresolved.build.ssr !== 'string',
           "Setting the server build entry over the Vite configuration `build.ssr` (i.e. `--ssr path/to/entry.js`) isn't supported (because of a Vite bug), see workaround at https://github.com/brillout/vite-plugin-server-entry/issues/9#issuecomment-2027641624",
         )
-        const resolved = resolveConfig(configUnresolved, pluginConfigProvidedByLibrary)
-        config = resolved.config
-        library = resolved.library
+        config = resolveConfig(configUnresolved, libraryName, pluginConfigProvidedByLibrary)
+        assert(config._vitePluginServerEntry.libraries.find((l) => l.libraryName === libraryName))
       },
     },
     {
@@ -208,9 +212,10 @@ type Plugin_ = any
 
 function resolveConfig(
   configUnresolved: ConfigUnresolved,
+  libraryName: string,
   pluginConfigProvidedByLibrary: PluginConfigProvidedByLibrary,
 ) {
-  assert(viteIsSSR(configUnresolved))
+  assert(pluginConfigProvidedByLibrary.libraryName === libraryName)
 
   const pluginConfigResolved: PluginConfigResolved = configUnresolved._vitePluginServerEntry ?? {
     libraries: [],
@@ -219,21 +224,26 @@ function resolveConfig(
     disableAutoImport: false,
     disableServerEntryEmit: false,
   }
-
-  const library = {
-    getServerProductionEntry: pluginConfigProvidedByLibrary.getServerProductionEntry,
-    libraryName: pluginConfigProvidedByLibrary.libraryName,
-    pluginVersion: projectInfo.projectVersion,
-    apiVersion,
-  }
-  pluginConfigResolved.libraries.push(library)
-
   objectAssign(configUnresolved, {
     _vitePluginServerEntry: pluginConfigResolved,
   })
+
+  const libraryNew = {
+    getServerProductionEntry: pluginConfigProvidedByLibrary.getServerProductionEntry,
+    libraryName,
+    pluginVersion: projectInfo.projectVersion,
+    apiVersion,
+  }
+  const libraryFound = pluginConfigResolved.libraries.find((l) => l.libraryName === libraryName)
+  if (!libraryFound) {
+    pluginConfigResolved.libraries.push(libraryNew)
+  } else {
+    assert(deepEqual(libraryNew, libraryFound))
+  }
+
   const config: ConfigResolved = configUnresolved
 
-  return { config, library }
+  return config
 }
 function applyPluginConfigProvidedByUser(config: ConfigResolved & ConfigUnresolved) {
   const pluginConfigResolved: PluginConfigResolved = config._vitePluginServerEntry
@@ -249,10 +259,11 @@ function applyPluginConfigProvidedByUser(config: ConfigResolved & ConfigUnresolv
   }
 }
 
-function isLeaderPluginInstance(config: ConfigResolved, library: Library) {
+function isLeaderPluginInstance(config: ConfigResolved, libraryName: string) {
   const { libraries } = config._vitePluginServerEntry
   const pluginVersionCurrent = projectInfo.projectVersion
-  assert(libraries.includes(library))
+  const library = libraries.find((l) => l.libraryName === libraryName)
+  assert(library)
   const isNotUsingNewestPluginVersion = libraries.some((lib) => {
     // Can be undefined when set by an older @brillout/vite-plugin-dist-importer version
     if (!lib.pluginVersion) return false
