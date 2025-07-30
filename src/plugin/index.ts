@@ -103,7 +103,7 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
   }
   return [
     {
-      name: `${pluginName}:config`,
+      name: `${pluginName}:config:pre`,
       apply: 'build',
       // We must run the pre-hook configResolved() of *all* libraries before any post-hook configResolved() hook is called (otherwise isLeaderPluginInstance() will miss libraries and won't work)
       enforce: 'pre',
@@ -120,7 +120,7 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
       },
     },
     {
-      name: pluginName,
+      name: `${pluginName}:config:post`,
       apply: 'build',
       // We need to run this plugin after other plugin instances, so that assertApiVersions() works also for libraries using older plugin versions
       enforce: 'post',
@@ -150,6 +150,10 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
           }
         },
       },
+    },
+    {
+      name: `${pluginName}:hooks`,
+      apply: 'build',
       buildStart() {
         if (skip()) return
 
