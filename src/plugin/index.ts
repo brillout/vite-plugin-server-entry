@@ -106,14 +106,14 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
       configResolved() {
         isClientBuild = !viteIsSSR(config)
         {
-          const val = librariesLength
+          const prev = librariesLength
           librariesLength = config._vitePluginServerEntry.libraries.length
-          assert([undefined, librariesLength].includes(val))
+          assert([undefined, librariesLength].includes(prev))
         }
         {
-          const val = isNotLeaderInstance
+          const prev = isNotLeaderInstance
           isNotLeaderInstance = !isLeaderPluginInstance(config, libraryName)
-          assert([undefined, isNotLeaderInstance].includes(val))
+          assert([undefined, isNotLeaderInstance].includes(prev))
         }
         if (skip()) return
 
