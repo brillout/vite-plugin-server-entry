@@ -317,7 +317,7 @@ function setAutoImporter(config: ConfigResolved, entryFileName: string) {
   assertPosixPath(root)
   assert(!isAutoImportDisabled(config))
   assert(!isYarnPnP())
-  writeAutoImporterFile(({ exportStatement, autoImporterFilePathResolved }) =>
+  writeAutoImporterFile(({ autoImporterFilePathResolved, exportStatement }) =>
     [
       `${exportStatement}status = 'SET';`,
       `${exportStatement}pluginVersion = ${JSON.stringify(projectInfo.projectVersion)};`,
@@ -489,7 +489,7 @@ function getServerEntryName(config: ConfigResolved) {
 }
 
 function writeAutoImporterFile(
-  getFileContent: (args: { exportStatement: string; autoImporterFilePathResolved: string }) => string,
+  getFileContent: (args: { autoImporterFilePathResolved: string; exportStatement: string }) => string,
 ) {
   {
     const { isCJS } = analyzeDistPath(autoImporterFilePath)
@@ -500,7 +500,7 @@ function writeAutoImporterFile(
   const autoImporterFilePathCjs = autoImporterFilePath.replace('/dist/esm/', '/dist/cjs/')
   ;[autoImporterFilePathEsm, autoImporterFilePathCjs].forEach((autoImporterFilePathResolved) => {
     const { exportStatement } = analyzeDistPath(autoImporterFilePathResolved)
-    const fileContent = getFileContent({ exportStatement, autoImporterFilePathResolved })
+    const fileContent = getFileContent({ autoImporterFilePathResolved, exportStatement })
     writeFileSync(autoImporterFilePathResolved, fileContent)
   })
 }
