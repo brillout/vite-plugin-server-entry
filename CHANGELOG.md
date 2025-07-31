@@ -1,3 +1,14 @@
+## [0.7.12](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.11...v0.7.12) (2025-07-31)
+
+
+### Bug Fixes
+
+* don't set optimizeDeps if CJS ([3da168b](https://github.com/brillout/vite-plugin-server-entry/commit/3da168ba33608879e5e53109111e9af2a0c8d07d))
+* fix CJS autoImporter.js ([8c9d55b](https://github.com/brillout/vite-plugin-server-entry/commit/8c9d55bcab0a4d6cbe9208bf991061a0e330fc18))
+* fix export statement in autoImporter.js ([56ecee3](https://github.com/brillout/vite-plugin-server-entry/commit/56ecee37ef3f41f65803d38ab9e99fd78e3144e8))
+
+
+
 ## [0.7.11](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.10...v0.7.11) (2025-07-30)
 
 
