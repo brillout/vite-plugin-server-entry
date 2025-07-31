@@ -192,6 +192,8 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
     {
       name: `${pluginName}:optimizeDeps`,
       config() {
+        if (isCJSEnv) return
+
         return {
           ssr: {
             optimizeDeps: {
