@@ -33,8 +33,7 @@ const importMetaUrl: string =
   // trick to avoid `@vercel/ncc` to glob import
   (() => '')()
 const __dirname_ = toPosixPath(path.dirname(fileURLToPath(importMetaUrl)))
-const isCJS = 'import.meta.resolve' === ('require.resolve' as string) // see dist-cjs-fixup.js
-const exportStatement = isCJS ? 'exports.' : 'export const '
+const isCJSEnv = 'import.meta.resolve' === ('require.resolve' as string) // see dist-cjs-fixup.js
 const require_ = createRequire(importMetaUrl)
 
 const autoImporterFilePath = toPosixPath(require_.resolve('../runtime/autoImporter.js'))
@@ -316,7 +315,7 @@ function setAutoImporter(config: ConfigResolved, entryFileName: string) {
   assertPosixPath(root)
   assert(!isAutoImportDisabled(config))
   assert(!isYarnPnP())
-  writeAutoImporterFile((autoImporterFilePathResolved) =>
+  writeAutoImporterFile((exportStatement, autoImporterFilePathResolved) =>
     [
       `${exportStatement}status = 'SET';`,
       `${exportStatement}pluginVersion = ${JSON.stringify(projectInfo.projectVersion)};`,
@@ -335,7 +334,7 @@ function setAutoImporter(config: ConfigResolved, entryFileName: string) {
 function clearAutoImporter(config: ConfigResolved) {
   if (isYarnPnP()) return
   const status: AutoImporterCleared['status'] = isAutoImportDisabled(config) ? 'DISABLED' : 'BUILDING'
-  writeAutoImporterFile(() => [`${exportStatement}status = '${status}';`, ''].join('\n'))
+  writeAutoImporterFile((exportStatement) => [`${exportStatement}status = '${status}';`, ''].join('\n'))
 }
 
 /** Is `semver1` higher than `semver2`?*/
@@ -487,15 +486,33 @@ function getServerEntryName(config: ConfigResolved) {
   return serverEntryName
 }
 
-function writeAutoImporterFile(fileContent: (autoImporterFilePathResolved?: string) => string) {
-  assertPosixPath(autoImporterFilePath)
-  assert(
-    (autoImporterFilePath.split('/dist/esm/').length === 2 && autoImporterFilePath.split('/dist/cjs/').length === 1) ||
-      (autoImporterFilePath.split('/dist/esm/').length === 1 && autoImporterFilePath.split('/dist/cjs/').length === 2),
-  )
+function writeAutoImporterFile(
+  getFileContent: (exportStatement: string, autoImporterFilePathResolved: string) => string,
+) {
+  {
+    const { isCJS } = analyzeDistPath(autoImporterFilePath)
+    assert(isCJS === isCJSEnv)
+  }
+
   const autoImporterFilePathEsm = autoImporterFilePath.replace('/dist/cjs/', '/dist/esm/')
   const autoImporterFilePathCjs = autoImporterFilePath.replace('/dist/esm/', '/dist/cjs/')
   ;[autoImporterFilePathEsm, autoImporterFilePathCjs].forEach((autoImporterFilePathResolved) => {
-    writeFileSync(autoImporterFilePathResolved, fileContent(autoImporterFilePathResolved))
+    const { exportStatement } = analyzeDistPath(autoImporterFilePathResolved)
+    const fileContent = getFileContent(exportStatement, autoImporterFilePathResolved)
+    writeFileSync(autoImporterFilePathResolved, fileContent)
   })
+}
+
+function analyzeDistPath(autoImporterFilePath: string) {
+  assertPosixPath(autoImporterFilePath)
+
+  const isCJS = autoImporterFilePath.includes('/dist/cjs/')
+  const isESM = autoImporterFilePath.includes('/dist/esm/')
+  if (isCJS) assert(autoImporterFilePath.split('/dist/cjs/').length === 2)
+  if (isESM) assert(autoImporterFilePath.split('/dist/esm/').length === 2)
+  assert(isCJS || isESM)
+  assert(!(isCJS && isESM))
+
+  const exportStatement = isCJS ? 'exports.' : 'export const '
+  return { isCJS, exportStatement }
 }
