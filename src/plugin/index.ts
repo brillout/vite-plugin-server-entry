@@ -317,17 +317,17 @@ function setAutoImporter(config: ConfigResolved, entryFileName: string) {
   assertPosixPath(root)
   assert(!isAutoImportDisabled(config))
   assert(!isYarnPnP())
-  writeAutoImporterFile(({ autoImporterFilePathResolved, exportStatement }) =>
+  writeAutoImporterFile(({ autoImporterFilePathResolved, exportStatement, isCJS }) =>
     [
       `${exportStatement}status = 'SET';`,
       `${exportStatement}pluginVersion = ${JSON.stringify(projectInfo.projectVersion)};`,
       `${exportStatement}loadServerEntry = async () => { await import(${JSON.stringify(serverEntryFilePathRelative)}); };`,
       `${exportStatement}paths = {`,
       `  autoImporterFilePathOriginal: ${JSON.stringify(autoImporterFilePathResolved)},`,
-      '  autoImporterFilePathActual: (() => { try { return import.meta.url } catch { return null } })(),',
+      `  autoImporterFilePathActual: (() => { try { return ${isCJS ? '__filename' : 'import.meta.url'} } catch { return null } })(),`,
       `  serverEntryFilePathRelative: ${JSON.stringify(serverEntryFilePathRelative)},`,
       `  serverEntryFilePathOriginal: ${JSON.stringify(serverEntryFilePathAbsolute)},`,
-      `  serverEntryFilePathResolved: () => import.meta.resolve(${JSON.stringify(serverEntryFilePathRelative)}),`,
+      `  serverEntryFilePathResolved: () => ${isCJS ? 'require' : 'import.meta'}.resolve(${JSON.stringify(serverEntryFilePathRelative)}),`,
       '};',
       '',
     ].join('\n'),
@@ -489,7 +489,7 @@ function getServerEntryName(config: ConfigResolved) {
 }
 
 function writeAutoImporterFile(
-  getFileContent: (args: { autoImporterFilePathResolved: string; exportStatement: string }) => string,
+  getFileContent: (args: { autoImporterFilePathResolved: string; exportStatement: string; isCJS: boolean }) => string,
 ) {
   {
     const { isCJS } = analyzeDistPath(autoImporterFilePath)
@@ -499,8 +499,8 @@ function writeAutoImporterFile(
   const autoImporterFilePathEsm = autoImporterFilePath.replace('/dist/cjs/', '/dist/esm/')
   const autoImporterFilePathCjs = autoImporterFilePath.replace('/dist/esm/', '/dist/cjs/')
   ;[autoImporterFilePathEsm, autoImporterFilePathCjs].forEach((autoImporterFilePathResolved) => {
-    const { exportStatement } = analyzeDistPath(autoImporterFilePathResolved)
-    const fileContent = getFileContent({ autoImporterFilePathResolved, exportStatement })
+    const { exportStatement, isCJS } = analyzeDistPath(autoImporterFilePathResolved)
+    const fileContent = getFileContent({ autoImporterFilePathResolved, exportStatement, isCJS })
     writeFileSync(autoImporterFilePathResolved, fileContent)
   })
 }
