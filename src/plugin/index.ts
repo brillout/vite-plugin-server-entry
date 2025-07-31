@@ -317,7 +317,7 @@ function setAutoImporter(config: ConfigResolved, entryFileName: string) {
   assertPosixPath(root)
   assert(!isAutoImportDisabled(config))
   assert(!isYarnPnP())
-  writeAutoImporterFile((exportStatement, autoImporterFilePathResolved) =>
+  writeAutoImporterFile(({ exportStatement, autoImporterFilePathResolved }) =>
     [
       `${exportStatement}status = 'SET';`,
       `${exportStatement}pluginVersion = ${JSON.stringify(projectInfo.projectVersion)};`,
@@ -336,7 +336,7 @@ function setAutoImporter(config: ConfigResolved, entryFileName: string) {
 function clearAutoImporter(config: ConfigResolved) {
   if (isYarnPnP()) return
   const status: AutoImporterCleared['status'] = isAutoImportDisabled(config) ? 'DISABLED' : 'BUILDING'
-  writeAutoImporterFile((exportStatement) => [`${exportStatement}status = '${status}';`, ''].join('\n'))
+  writeAutoImporterFile(({ exportStatement }) => [`${exportStatement}status = '${status}';`, ''].join('\n'))
 }
 
 /** Is `semver1` higher than `semver2`?*/
@@ -489,7 +489,7 @@ function getServerEntryName(config: ConfigResolved) {
 }
 
 function writeAutoImporterFile(
-  getFileContent: (exportStatement: string, autoImporterFilePathResolved: string) => string,
+  getFileContent: (args: { exportStatement: string; autoImporterFilePathResolved: string }) => string,
 ) {
   {
     const { isCJS } = analyzeDistPath(autoImporterFilePath)
@@ -500,7 +500,7 @@ function writeAutoImporterFile(
   const autoImporterFilePathCjs = autoImporterFilePath.replace('/dist/esm/', '/dist/cjs/')
   ;[autoImporterFilePathEsm, autoImporterFilePathCjs].forEach((autoImporterFilePathResolved) => {
     const { exportStatement } = analyzeDistPath(autoImporterFilePathResolved)
-    const fileContent = getFileContent(exportStatement, autoImporterFilePathResolved)
+    const fileContent = getFileContent({ exportStatement, autoImporterFilePathResolved })
     writeFileSync(autoImporterFilePathResolved, fileContent)
   })
 }
