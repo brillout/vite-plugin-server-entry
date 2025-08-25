@@ -94,7 +94,7 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
   assert(libraryName)
   let isNotLeaderInstance: boolean | undefined
   let librariesLength: undefined | number
-  const skip = (viteEnv: Environment) => {
+  const skip = (viteEnv: Environment | undefined) => {
     assert('boolean' === typeof isNotLeaderInstance)
     return isNotLeaderInstance || !isViteServerSide(config, viteEnv)
   }
@@ -134,8 +134,7 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
             isNotLeaderInstance = !isLeaderPluginInstance(config, libraryName)
             assert([undefined, isNotLeaderInstance].includes(prev))
           }
-          if (isNotLeaderInstance) return
-          if (!config.build.ssr) return
+          if (skip(undefined)) return
 
           assertApiVersions(config, pluginConfigProvidedByLibrary.libraryName)
 
