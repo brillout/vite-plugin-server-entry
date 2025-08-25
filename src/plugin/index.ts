@@ -370,7 +370,7 @@ function getOutDir(config: ConfigVite, viteEnv: Environment | undefined): string
   const outDir = !viteEnv
     ? // Vite 5
       config.build.outDir
-    : // Vite 6
+    : // Vite 6 or above
       viteEnv.config.build.outDir
   assert(outDir)
   return outDir
