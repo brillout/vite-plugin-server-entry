@@ -367,8 +367,13 @@ function parseSemver(semver: string): { parts: number[]; isPreRelease: boolean }
 }
 
 function getOutDir(config: ConfigVite, viteEnv: Environment | undefined): string {
-  if (!viteEnv) return config.build.outDir
-  return viteEnv.config.build.outDir
+  const outDir = !viteEnv
+    ? // Vite 5
+      config.build.outDir
+    : // Vite 6
+      viteEnv.config.build.outDir
+  assert(outDir)
+  return outDir
 }
 function getDistServerPathRelative(config: ConfigVite, viteEnv: Environment | undefined) {
   assert(isViteServerSide(config, viteEnv))
