@@ -1,8 +1,9 @@
-import type { Environment } from 'vite'
+export { isViteServerSide }
 
+import type { Environment } from 'vite'
 import { assert } from './assert.js'
 
-export function isViteServerSide(
+function isViteServerSide(
   config: { build?: { ssr?: boolean | string } },
   viteEnv:
     | Environment
