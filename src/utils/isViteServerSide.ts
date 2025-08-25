@@ -7,7 +7,7 @@ function isViteServerSide(
   config: { build?: { ssr?: boolean | string } },
   viteEnv:
     | Environment
-    // Is undefined when using Vite 5
+    // Vite 5
     | undefined,
 ): boolean {
   if (!viteEnv) return !!config?.build?.ssr
