@@ -1,3 +1,12 @@
+## [0.7.13](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.12...v0.7.13) (2025-08-25)
+
+
+### Bug Fixes
+
+* fix server/client env check upon Vite 6 builder API ([#23](https://github.com/brillout/vite-plugin-server-entry/issues/23)) ([2c6d3fb](https://github.com/brillout/vite-plugin-server-entry/commit/2c6d3fb5ccb88cec91b66b19633749449837dc05))
+
+
+
 ## [0.7.12](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.11...v0.7.12) (2025-07-31)
 
 
