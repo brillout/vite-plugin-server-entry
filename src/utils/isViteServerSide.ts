@@ -12,6 +12,6 @@ function isViteServerSide(
 ): boolean {
   if (!viteEnv) return !!config?.build?.ssr
   const { consumer } = viteEnv.config
-  assert(consumer === 'server' || consumer === 'client')
-  return consumer === 'server'
+  assert(typeof consumer === 'string')
+  return consumer !== 'client'
 }
