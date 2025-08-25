@@ -135,6 +135,7 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
             assert([undefined, isNotLeaderInstance].includes(prev))
           }
           if (isNotLeaderInstance) return
+          if (!config.build.ssr) return
 
           assertApiVersions(config, pluginConfigProvidedByLibrary.libraryName)
 
@@ -177,7 +178,7 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
 
         // Write node_modules/@brillout/vite-plugin-server-entry/dist/autoImporter.js
         if (!isAutoImportDisabled(config)) {
-          const entry = findServerEntry(bundle, config.build.outDir)
+          const entry = findServerEntry(bundle, getOutDir(config, this.environment))
           assert(entry)
           const entryFileName = entry.fileName
           if (!entryFileName) assert(false, { entry })
@@ -366,7 +367,11 @@ function parseSemver(semver: string): { parts: number[]; isPreRelease: boolean }
   return { parts, isPreRelease }
 }
 
-function getDistServerPathRelative(config: ConfigVite, viteEnv: Environment) {
+function getOutDir(config: ConfigVite, viteEnv: Environment | undefined): string {
+  if (!viteEnv) return config.build.outDir
+  return viteEnv.config.build.outDir
+}
+function getDistServerPathRelative(config: ConfigVite, viteEnv: Environment | undefined) {
   assert(isViteServerSide(config, viteEnv))
   const { root } = config
   const importerDir = __dirname_
@@ -375,7 +380,7 @@ function getDistServerPathRelative(config: ConfigVite, viteEnv: Environment) {
   assertPosixPath(root)
   assert(isAbsolutePath(root))
   const rootRelative = path.posix.relative(importerDir, root) // To `require()` an absolute path doesn't seem to work on Vercel
-  let { outDir } = config.build
+  let outDir = getOutDir(config, viteEnv)
   // SvelteKit doesn't set config.build.outDir to a posix path
   outDir = toPosixPath(outDir)
   if (isAbsolutePath(outDir)) {
