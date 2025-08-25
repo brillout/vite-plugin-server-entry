@@ -1,3 +1,16 @@
-export function isViteServerSide(config: { build?: { ssr?: boolean | string } }): boolean {
-  return !!config?.build?.ssr
+import type { Environment } from 'vite'
+
+import { assert } from './assert.js'
+
+export function isViteServerSide(
+  config: { build?: { ssr?: boolean | string } },
+  viteEnv:
+    | Environment
+    // Is undefined when using Vite 5
+    | undefined,
+): boolean {
+  if (!viteEnv) return !!config?.build?.ssr
+  const { consumer } = viteEnv.config
+  assert(consumer === 'server' || consumer === 'client')
+  return consumer === 'server'
 }
