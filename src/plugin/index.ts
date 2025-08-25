@@ -124,14 +124,6 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
             typeof config.build.ssr !== 'string',
             "Setting the server build entry over the Vite configuration `build.ssr` (i.e. `--ssr path/to/entry.js`) isn't supported (because of a Vite bug), see workaround at https://github.com/brillout/vite-plugin-server-entry/issues/9#issuecomment-2027641624",
           )
-        }
-      },
-      configEnvironment: {
-        order: 'post',
-        async handler(envName, configEnv) {
-          const { consumer } = configEnv
-          console.log('consumer', consumer)
-          if (configEnv.consumer === 'client') return
           {
             const prev = librariesLength
             librariesLength = config._vitePluginServerEntry.libraries.length
@@ -150,9 +142,7 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
 
           if (!config._vitePluginServerEntry.disableServerEntryEmit) {
             const serverEntryName = getServerEntryName(config)
-            configEnv.build ??= {}
-            configEnv.build.rollupOptions ??= {}
-            configEnv.build.rollupOptions.input = injectRollupInputs({ [serverEntryName]: serverEntryVirtualId }, config)
+            config.build.rollupOptions.input = injectRollupInputs({ [serverEntryName]: serverEntryVirtualId }, config)
           }
         },
       },
