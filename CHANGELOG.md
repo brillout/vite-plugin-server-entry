@@ -1,3 +1,12 @@
+## [0.7.14](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.13...v0.7.14) (2025-09-03)
+
+
+### Bug Fixes
+
+* use hook filters ([50e5f31](https://github.com/brillout/vite-plugin-server-entry/commit/50e5f31122ff39dad03c9e6eb286beea551f3b11))
+
+
+
 ## [0.7.13](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.12...v0.7.13) (2025-08-25)
 
 
