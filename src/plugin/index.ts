@@ -151,84 +151,84 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
       name: `${pluginName}:hooks`,
       apply: 'build',
       buildStart: {
-handler() {
-        if (skip(this.environment)) return
+        handler() {
+          if (skip(this.environment)) return
 
-        clearAutoImporter(config)
-      }
-},
+          clearAutoImporter(config)
+        },
+      },
       resolveId: {
-handler(id) {
-        if (skip(this.environment)) return
+        handler(id) {
+          if (skip(this.environment)) return
 
-        if (id === serverEntryVirtualId) {
-          return virtualIdPrefix + serverEntryVirtualId
-        }
-      }
-},
+          if (id === serverEntryVirtualId) {
+            return virtualIdPrefix + serverEntryVirtualId
+          }
+        },
+      },
       load: {
-handler(id) {
-        if (skip(this.environment)) return
+        handler(id) {
+          if (skip(this.environment)) return
 
-        assert(id !== serverEntryVirtualId)
-        if (id === virtualIdPrefix + serverEntryVirtualId) {
-          const serverProductionEntry = getServerProductionEntryAll(config, this.environment)
-          return serverProductionEntry
-        }
-      }
-},
+          assert(id !== serverEntryVirtualId)
+          if (id === virtualIdPrefix + serverEntryVirtualId) {
+            const serverProductionEntry = getServerProductionEntryAll(config, this.environment)
+            return serverProductionEntry
+          }
+        },
+      },
       generateBundle: {
-handler(_rollupOptions, bundle) {
-        if (skip(this.environment)) return
-        if (this.environment && this.environment.name !== 'ssr') return
+        handler(_rollupOptions, bundle) {
+          if (skip(this.environment)) return
+          if (this.environment && this.environment.name !== 'ssr') return
 
-        // Write node_modules/@brillout/vite-plugin-server-entry/dist/autoImporter.js
-        if (!isAutoImportDisabled(config)) {
-          const entry = findServerEntry(bundle, getOutDir(config, this.environment))
-          assert(entry)
-          const entryFileName = entry.fileName
-          if (!entryFileName) assert(false, { entry })
-          setAutoImporter(config, this.environment, entryFileName)
-        } else {
-          debugLogsBuildtime({ disabled: true, paths: null })
-        }
-      }
-},
+          // Write node_modules/@brillout/vite-plugin-server-entry/dist/autoImporter.js
+          if (!isAutoImportDisabled(config)) {
+            const entry = findServerEntry(bundle, getOutDir(config, this.environment))
+            assert(entry)
+            const entryFileName = entry.fileName
+            if (!entryFileName) assert(false, { entry })
+            setAutoImporter(config, this.environment, entryFileName)
+          } else {
+            debugLogsBuildtime({ disabled: true, paths: null })
+          }
+        },
+      },
     },
     {
       name: `${pluginName}:optimizeDeps`,
       config: {
-handler() {
-        //* Not sure if we really need this.
-        if (isCJSEnv) return
-        //*/
+        handler() {
+          //* Not sure if we really need this.
+          if (isCJSEnv) return
+          //*/
 
-        return {
-          ssr: {
-            optimizeDeps: {
-              // Needed for @cloudflare/vite-plugin to avoid following error during SSR optimizeDeps scanning:
-              // ```console
-              // ✘ [ERROR] Could not resolve "../../../../../../../../../examples/react-full/dist/server/entry.mjs"
-              //     ../../node_modules/.pnpm/@brillout+vite-plugin-server-entry@0.7.9/node_modules/@brillout/vite-plugin-server-entry/dist/esm/runtime/autoImporter.js:3:58:
-              //       3 │ export const loadServerEntry = async () => { await import("../../../../../../../../../examples/react-full/dist/server/entry.mjs"); };
-              //         ╵                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-              //
-              // Error: Build failed with 1 error:
-              // ../../node_modules/.pnpm/@brillout+vite-plugin-server-entry@0.7.9/node_modules/@brillout/vite-plugin-server-entry/dist/esm/runtime/autoImporter.js:3:58: ERROR: Could not resolve "../../../../../../../../../examples/react-full/dist/server/entry.mjs"
-              //     at failureErrorWithLog (/home/rom/code/vike/node_modules/.pnpm/esbuild@0.25.4/node_modules/esbuild/lib/main.js:1463:15)
-              //     at /home/rom/code/vike/node_modules/.pnpm/esbuild@0.25.4/node_modules/esbuild/lib/main.js:924:25
-              //     at /home/rom/code/vike/node_modules/.pnpm/esbuild@0.25.4/node_modules/esbuild/lib/main.js:1341:9
-              //     at processTicksAndRejections (node:internal/process/task_queues:105:5) {
-              //   errors: [Getter/Setter],
-              //   warnings: [Getter/Setter]
-              // }
-              // ```
-              exclude: ['@brillout/vite-plugin-server-entry'],
+          return {
+            ssr: {
+              optimizeDeps: {
+                // Needed for @cloudflare/vite-plugin to avoid following error during SSR optimizeDeps scanning:
+                // ```console
+                // ✘ [ERROR] Could not resolve "../../../../../../../../../examples/react-full/dist/server/entry.mjs"
+                //     ../../node_modules/.pnpm/@brillout+vite-plugin-server-entry@0.7.9/node_modules/@brillout/vite-plugin-server-entry/dist/esm/runtime/autoImporter.js:3:58:
+                //       3 │ export const loadServerEntry = async () => { await import("../../../../../../../../../examples/react-full/dist/server/entry.mjs"); };
+                //         ╵                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                //
+                // Error: Build failed with 1 error:
+                // ../../node_modules/.pnpm/@brillout+vite-plugin-server-entry@0.7.9/node_modules/@brillout/vite-plugin-server-entry/dist/esm/runtime/autoImporter.js:3:58: ERROR: Could not resolve "../../../../../../../../../examples/react-full/dist/server/entry.mjs"
+                //     at failureErrorWithLog (/home/rom/code/vike/node_modules/.pnpm/esbuild@0.25.4/node_modules/esbuild/lib/main.js:1463:15)
+                //     at /home/rom/code/vike/node_modules/.pnpm/esbuild@0.25.4/node_modules/esbuild/lib/main.js:924:25
+                //     at /home/rom/code/vike/node_modules/.pnpm/esbuild@0.25.4/node_modules/esbuild/lib/main.js:1341:9
+                //     at processTicksAndRejections (node:internal/process/task_queues:105:5) {
+                //   errors: [Getter/Setter],
+                //   warnings: [Getter/Setter]
+                // }
+                // ```
+                exclude: ['@brillout/vite-plugin-server-entry'],
+              },
             },
-          },
-        }
-      }
-},
+          }
+        },
+      },
     },
   ] as Plugin[]
 }
