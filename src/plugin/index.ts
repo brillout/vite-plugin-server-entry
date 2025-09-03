@@ -19,6 +19,7 @@ import {
   injectRollupInputs,
   normalizeRollupInput,
   deepEqual,
+  escapeRegex,
 } from './utils.js'
 import path from 'path'
 import { writeFileSync } from 'fs'
@@ -158,6 +159,9 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
         },
       },
       resolveId: {
+        filter: {
+          id: new RegExp(`^${escapeRegex(serverEntryVirtualId)}$`),
+        },
         handler(id) {
           if (skip(this.environment)) return
 
@@ -167,6 +171,9 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
         },
       },
       load: {
+        filter: {
+          id: new RegExp(`^${escapeRegex(virtualIdPrefix + serverEntryVirtualId)}$`),
+        },
         handler(id) {
           if (skip(this.environment)) return
 
