@@ -150,19 +150,24 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
     {
       name: `${pluginName}:hooks`,
       apply: 'build',
-      buildStart() {
+      buildStart: {
+handler() {
         if (skip(this.environment)) return
 
         clearAutoImporter(config)
-      },
-      resolveId(id) {
+      }
+},
+      resolveId: {
+handler(id) {
         if (skip(this.environment)) return
 
         if (id === serverEntryVirtualId) {
           return virtualIdPrefix + serverEntryVirtualId
         }
-      },
-      load(id) {
+      }
+},
+      load: {
+handler(id) {
         if (skip(this.environment)) return
 
         assert(id !== serverEntryVirtualId)
@@ -170,8 +175,10 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
           const serverProductionEntry = getServerProductionEntryAll(config, this.environment)
           return serverProductionEntry
         }
-      },
-      generateBundle(_rollupOptions, bundle) {
+      }
+},
+      generateBundle: {
+handler(_rollupOptions, bundle) {
         if (skip(this.environment)) return
         if (this.environment && this.environment.name !== 'ssr') return
 
@@ -185,11 +192,13 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
         } else {
           debugLogsBuildtime({ disabled: true, paths: null })
         }
-      },
+      }
+},
     },
     {
       name: `${pluginName}:optimizeDeps`,
-      config() {
+      config: {
+handler() {
         //* Not sure if we really need this.
         if (isCJSEnv) return
         //*/
@@ -218,7 +227,8 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
             },
           },
         }
-      },
+      }
+},
     },
   ] as Plugin[]
 }
