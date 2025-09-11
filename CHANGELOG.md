@@ -1,3 +1,12 @@
+## [0.7.15](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.14...v0.7.15) (2025-09-11)
+
+
+### Bug Fixes
+
+* fix optimizeDeps for @cloudflare/vite-plugin + unlinked ([e0e9392](https://github.com/brillout/vite-plugin-server-entry/commit/e0e93929a16cc821393ba52196e79a2115f10185))
+
+
+
 ## [0.7.14](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.13...v0.7.14) (2025-09-03)
 
 
