@@ -97,7 +97,8 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
   let librariesLength: undefined | number
   const skip = (viteEnv: Environment | undefined) => {
     assert('boolean' === typeof isNotLeaderInstance)
-    return isNotLeaderInstance || !isViteServerSide(config, viteEnv)
+    const isServerSide = isViteServerSide(config, viteEnv)
+    return isNotLeaderInstance || !isServerSide
   }
   return [
     {
