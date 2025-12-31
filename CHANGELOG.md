@@ -1,3 +1,12 @@
+## [0.7.16](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.15...v0.7.16) (2025-12-31)
+
+
+### Bug Fixes
+
+* write to filesystem only if required ([70a0422](https://github.com/brillout/vite-plugin-server-entry/commit/70a04229174221fed650e4314fe6d358cfca1a71))
+
+
+
 ## [0.7.15](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.14...v0.7.15) (2025-09-11)
 
 
