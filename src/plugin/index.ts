@@ -22,7 +22,7 @@ import {
   escapeRegex,
 } from './utils.js'
 import path from 'path'
-import { writeFileSync } from 'fs'
+import { writeFileSync, readFileSync } from 'fs'
 import type { AutoImporterCleared } from '../runtime/AutoImporter.js'
 import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase.js'
 import { debugLogsBuildtime } from './debugLogsBuildTime.js'
@@ -492,8 +492,13 @@ function writeAutoImporterFile(
   const autoImporterFilePathCjs = autoImporterFilePath.replace('/dist/esm/', '/dist/cjs/')
   ;[autoImporterFilePathEsm, autoImporterFilePathCjs].forEach((autoImporterFilePathResolved) => {
     const { exportStatement, isCJS } = analyzeDistPath(autoImporterFilePathResolved)
-    const fileContent = getFileContent({ autoImporterFilePathResolved, exportStatement, isCJS })
-    writeFileSync(autoImporterFilePathResolved, fileContent)
+    const fileContentNew = getFileContent({ autoImporterFilePathResolved, exportStatement, isCJS })
+    const fileContentOld = readFileSync(autoImporterFilePathResolved, 'utf8')
+    // Write to filesystem only if required
+    // https://github.com/vikejs/vike/issues/3006
+    if (fileContentNew.trim() !== fileContentOld.trim()) {
+      writeFileSync(autoImporterFilePathResolved, fileContentNew)
+    }
   })
 }
 
