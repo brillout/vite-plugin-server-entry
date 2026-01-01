@@ -72,6 +72,8 @@ type Library = {
   getServerProductionEntry: () => string
 }
 
+// TODO: rm dist/cjs
+// TODO: rename ConfigResolved ConfigResolvedPlus
 type ConfigUnresolved = ConfigVite & {
   vitePluginServerEntry?: PluginConfigProvidedByUser
   _vitePluginServerEntry?: PluginConfigResolved
@@ -282,7 +284,7 @@ function getServerProductionEntryAll(config: ConfigResolved, viteEnv: Environmen
       const entryCode = (
         library.getServerProductionEntry ??
         // Support old `getServerProductionEntry()` name: it was previously called `getImporterCode()`.
-        // TODO/api-version-bump: We'll be able to remove this next time we bump `apiVersion`.
+        // TO-DO/api-version-bump: We'll be able to remove this next time we bump `apiVersion`.
         // @ts-expect-error
         library.getImporterCode
       )()
