@@ -299,13 +299,13 @@ function setAutoImporter(config: ConfigResolved, viteEnv: Environment, entryFile
   assertPosixPath(root)
   assert(!isAutoImportDisabled(config))
   assert(!isYarnPnP())
-  writeAutoImporterFile(({ autoImporterFilePathResolved }) =>
+  writeAutoImporterFile(() =>
     [
       "export const status = 'SET';",
       `export const pluginVersion = ${JSON.stringify(projectInfo.projectVersion)};`,
       `export const loadServerEntry = async () => { await import(${JSON.stringify(serverEntryFilePathRelative)}); };`,
       'export const paths = {',
-      `  autoImporterFilePathOriginal: ${JSON.stringify(autoImporterFilePathResolved)},`,
+      `  autoImporterFilePathOriginal: ${JSON.stringify(autoImporterFilePath)},`,
       `  autoImporterFilePathActual: (() => { try { return import.meta.url } catch { return null } })(),`,
       `  serverEntryFilePathRelative: ${JSON.stringify(serverEntryFilePathRelative)},`,
       `  serverEntryFilePathOriginal: ${JSON.stringify(serverEntryFilePathAbsolute)},`,
@@ -479,8 +479,8 @@ function getServerEntryName(config: ConfigResolved) {
   return serverEntryName
 }
 
-function writeAutoImporterFile(getFileContent: (args: { autoImporterFilePathResolved: string }) => string) {
-  const fileContentNew = getFileContent({ autoImporterFilePathResolved: autoImporterFilePath })
+function writeAutoImporterFile(getFileContent: () => string) {
+  const fileContentNew = getFileContent()
   const fileContentOld = readFileSync(autoImporterFilePath, 'utf8')
   // Write to filesystem only if required
   // https://github.com/vikejs/vike/issues/3006
