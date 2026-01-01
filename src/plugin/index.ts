@@ -75,7 +75,6 @@ type Library = {
   getServerProductionEntry: () => string
 }
 
-// TODO: rename ConfigResolved ConfigResolvedPlus
 type ConfigUnresolved = ConfigVite & {
   vitePluginServerEntry?: PluginConfigProvidedByUser
   _vitePluginServerEntry?: PluginConfigResolved
@@ -153,18 +152,13 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
         },
       },
     },
+
+    /* ============= */
+    /* Vritual entry */
+    /* ============= */
     {
       name: `${pluginName}:hooks`,
       apply: 'build',
-      buildStart: {
-        handler() {
-          if (skip(this.environment)) return
-
-          if (!isAutoImportDisabled(config)) {
-            clearAutoImporter()
-          }
-        },
-      },
       resolveId: {
         filter: {
           id: new RegExp(`^${escapeRegex(serverEntryVirtualId)}$`),
@@ -188,6 +182,19 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
           if (id === virtualIdPrefix + serverEntryVirtualId) {
             const serverProductionEntry = getServerProductionEntryAll(config, this.environment)
             return serverProductionEntry
+          }
+        },
+      },
+
+      /* =========== */
+      /* Auto import */
+      /* =========== */
+      buildStart: {
+        handler() {
+          if (skip(this.environment)) return
+
+          if (!isAutoImportDisabled(config)) {
+            clearAutoImporter()
           }
         },
       },
