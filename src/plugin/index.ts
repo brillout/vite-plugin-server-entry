@@ -461,8 +461,7 @@ function errMsgEntryRemoved(entriesMissing: string[], entryKeys: string[], entry
 }
 
 function isAutoImportDisabled(config: ConfigResolved): boolean {
-  const { disableAutoImport } = config._vitePluginServerEntry
-  return isYarnPnP() || disableAutoImport
+  return config._vitePluginServerEntry.disableAutoImport || isYarnPnP()
 }
 
 function getServerEntryName(config: ConfigResolved) {
