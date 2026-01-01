@@ -299,12 +299,12 @@ function setAutoImporter(config: ConfigResolved, viteEnv: Environment, entryFile
   assertPosixPath(root)
   assert(!isAutoImportDisabled(config))
   assert(!isYarnPnP())
-  writeAutoImporterFile(({ autoImporterFilePathResolved, exportStatement }) =>
+  writeAutoImporterFile(({ autoImporterFilePathResolved }) =>
     [
-      `${exportStatement}status = 'SET';`,
-      `${exportStatement}pluginVersion = ${JSON.stringify(projectInfo.projectVersion)};`,
-      `${exportStatement}loadServerEntry = async () => { await import(${JSON.stringify(serverEntryFilePathRelative)}); };`,
-      `${exportStatement}paths = {`,
+      "export const status = 'SET';",
+      `export const pluginVersion = ${JSON.stringify(projectInfo.projectVersion)};`,
+      `export const loadServerEntry = async () => { await import(${JSON.stringify(serverEntryFilePathRelative)}); };`,
+      'export const paths = {',
       `  autoImporterFilePathOriginal: ${JSON.stringify(autoImporterFilePathResolved)},`,
       `  autoImporterFilePathActual: (() => { try { return import.meta.url } catch { return null } })(),`,
       `  serverEntryFilePathRelative: ${JSON.stringify(serverEntryFilePathRelative)},`,
@@ -318,7 +318,7 @@ function setAutoImporter(config: ConfigResolved, viteEnv: Environment, entryFile
 function clearAutoImporter(config: ConfigResolved) {
   if (isYarnPnP()) return
   const status: AutoImporterCleared['status'] = isAutoImportDisabled(config) ? 'DISABLED' : 'BUILDING'
-  writeAutoImporterFile(({ exportStatement }) => [`${exportStatement}status = '${status}';`, ''].join('\n'))
+  writeAutoImporterFile(() => [`export const status = '${status}';`, ''].join('\n'))
 }
 
 /** Is `semver1` higher than `semver2`?*/
@@ -479,11 +479,8 @@ function getServerEntryName(config: ConfigResolved) {
   return serverEntryName
 }
 
-function writeAutoImporterFile(
-  getFileContent: (args: { autoImporterFilePathResolved: string; exportStatement: string }) => string,
-) {
-  const exportStatement = 'export const '
-  const fileContentNew = getFileContent({ autoImporterFilePathResolved: autoImporterFilePath, exportStatement })
+function writeAutoImporterFile(getFileContent: (args: { autoImporterFilePathResolved: string }) => string) {
+  const fileContentNew = getFileContent({ autoImporterFilePathResolved: autoImporterFilePath })
   const fileContentOld = readFileSync(autoImporterFilePath, 'utf8')
   // Write to filesystem only if required
   // https://github.com/vikejs/vike/issues/3006
