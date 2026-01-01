@@ -479,11 +479,11 @@ function getServerEntryName(config: ConfigResolved) {
   return serverEntryName
 }
 
-function writeAutoImporterFile(fileContent: string) {
+function writeAutoImporterFile(fileContentNew: string) {
   const fileContentOld = readFileSync(autoImporterFilePath, 'utf8')
   // Write to filesystem only if required
   // https://github.com/vikejs/vike/issues/3006
-  if (fileContent.trim() !== fileContentOld.trim()) {
-    writeFileSync(autoImporterFilePath, fileContent)
+  if (fileContentNew.trim() !== fileContentOld.trim()) {
+    writeFileSync(autoImporterFilePath, fileContentNew)
   }
 }
