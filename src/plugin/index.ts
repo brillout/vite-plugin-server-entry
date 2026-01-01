@@ -298,7 +298,6 @@ function setAutoImporter(config: ConfigResolved, viteEnv: Environment, entryFile
   const { root } = config
   assertPosixPath(root)
   assert(!isAutoImportDisabled(config))
-  assert(!isYarnPnP())
   writeAutoImporterFile(
     [
       "export const status = 'SET';",
@@ -480,6 +479,7 @@ function getServerEntryName(config: ConfigResolved) {
 }
 
 function writeAutoImporterFile(fileContentNew: string) {
+  assert(!isYarnPnP())
   const fileContentOld = readFileSync(autoImporterFilePath, 'utf8')
   // Write to filesystem only if required
   // https://github.com/vikejs/vike/issues/3006
