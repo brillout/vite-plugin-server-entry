@@ -20,9 +20,10 @@ import {
   normalizeRollupInput,
   deepEqual,
   escapeRegex,
+  getGlobalObject,
 } from './utils.js'
 import path from 'path'
-import { writeFileSync, readFileSync } from 'fs'
+import { writeFileSync } from 'fs'
 import type { AutoImporterCleared } from '../runtime/AutoImporter.js'
 import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase.js'
 import { debugLogsBuildtime } from './debugLogsBuildTime.js'
@@ -34,6 +35,10 @@ const importMetaUrl: string =
   (() => '')()
 const __dirname_ = toPosixPath(path.dirname(fileURLToPath(importMetaUrl)))
 const require_ = createRequire(importMetaUrl)
+
+const globalObject = getGlobalObject('plugin/index.ts', {
+  cannotWriteFilesystem: false,
+})
 
 const autoImporterFilePath = toPosixPath(require_.resolve('../runtime/autoImporter.js'))
 const serverEntryVirtualId = 'virtual:@brillout/vite-plugin-server-entry:serverEntry'
@@ -462,7 +467,7 @@ function errMsgEntryRemoved(entriesMissing: string[], entryKeys: string[], entry
 }
 
 function isAutoImportDisabled(config: ConfigResolved): boolean {
-  return config._vitePluginServerEntry.disableAutoImport || isYarnPnP()
+  return config._vitePluginServerEntry.disableAutoImport || globalObject.cannotWriteFilesystem || isYarnPnP()
 }
 
 function getServerEntryName(config: ConfigResolved) {
@@ -479,10 +484,11 @@ function getServerEntryName(config: ConfigResolved) {
 }
 
 function writeAutoImporterFile(fileContentNew: string) {
-  const fileContentOld = readFileSync(autoImporterFilePath, 'utf8')
-  // Write to filesystem only if required
-  // https://github.com/vikejs/vike/issues/3006
-  if (fileContentNew.trim() !== fileContentOld.trim()) {
+  try {
     writeFileSync(autoImporterFilePath, fileContentNew)
+  } catch {
+    // Cannot write to filesystem when using Bazel
+    // https://github.com/vikejs/vike/issues/3006
+    globalObject.cannotWriteFilesystem = true
   }
 }
