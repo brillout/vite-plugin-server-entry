@@ -29,12 +29,10 @@ import { debugLogsBuildtime } from './debugLogsBuildTime.js'
 import { fileURLToPath } from 'url'
 import { createRequire } from 'module'
 const importMetaUrl: string =
-  // @ts-ignore import.meta is shimmed at dist/cjs by dist-cjs-fixup.js
   import.meta.url +
   // trick to avoid `@vercel/ncc` to glob import
   (() => '')()
 const __dirname_ = toPosixPath(path.dirname(fileURLToPath(importMetaUrl)))
-const isCJSEnv = 'import.meta.resolve' === ('require.resolve' as string) // see dist-cjs-fixup.js
 const require_ = createRequire(importMetaUrl)
 
 const autoImporterFilePath = toPosixPath(require_.resolve('../runtime/autoImporter.js'))
@@ -72,7 +70,6 @@ type Library = {
   getServerProductionEntry: () => string
 }
 
-// TODO: rm dist/cjs
 // TODO: rename ConfigResolved ConfigResolvedPlus
 type ConfigUnresolved = ConfigVite & {
   vitePluginServerEntry?: PluginConfigProvidedByUser
@@ -302,17 +299,17 @@ function setAutoImporter(config: ConfigResolved, viteEnv: Environment, entryFile
   assertPosixPath(root)
   assert(!isAutoImportDisabled(config))
   assert(!isYarnPnP())
-  writeAutoImporterFile(({ autoImporterFilePathResolved, exportStatement, isCJS }) =>
+  writeAutoImporterFile(({ autoImporterFilePathResolved, exportStatement }) =>
     [
       `${exportStatement}status = 'SET';`,
       `${exportStatement}pluginVersion = ${JSON.stringify(projectInfo.projectVersion)};`,
       `${exportStatement}loadServerEntry = async () => { await import(${JSON.stringify(serverEntryFilePathRelative)}); };`,
       `${exportStatement}paths = {`,
       `  autoImporterFilePathOriginal: ${JSON.stringify(autoImporterFilePathResolved)},`,
-      `  autoImporterFilePathActual: (() => { try { return ${isCJS ? '__filename' : 'import.meta.url'} } catch { return null } })(),`,
+      `  autoImporterFilePathActual: (() => { try { return import.meta.url } catch { return null } })(),`,
       `  serverEntryFilePathRelative: ${JSON.stringify(serverEntryFilePathRelative)},`,
       `  serverEntryFilePathOriginal: ${JSON.stringify(serverEntryFilePathAbsolute)},`,
-      `  serverEntryFilePathResolved: () => ${isCJS ? 'require' : 'import.meta'}.resolve(${JSON.stringify(serverEntryFilePathRelative)}),`,
+      `  serverEntryFilePathResolved: () => import.meta.resolve(${JSON.stringify(serverEntryFilePathRelative)}),`,
       '};',
       '',
     ].join('\n'),
@@ -483,37 +480,14 @@ function getServerEntryName(config: ConfigResolved) {
 }
 
 function writeAutoImporterFile(
-  getFileContent: (args: { autoImporterFilePathResolved: string; exportStatement: string; isCJS: boolean }) => string,
+  getFileContent: (args: { autoImporterFilePathResolved: string; exportStatement: string }) => string,
 ) {
-  {
-    const { isCJS } = analyzeDistPath(autoImporterFilePath)
-    assert(isCJS === isCJSEnv)
+  const exportStatement = 'export const '
+  const fileContentNew = getFileContent({ autoImporterFilePathResolved: autoImporterFilePath, exportStatement })
+  const fileContentOld = readFileSync(autoImporterFilePath, 'utf8')
+  // Write to filesystem only if required
+  // https://github.com/vikejs/vike/issues/3006
+  if (fileContentNew.trim() !== fileContentOld.trim()) {
+    writeFileSync(autoImporterFilePath, fileContentNew)
   }
-
-  const autoImporterFilePathEsm = autoImporterFilePath.replace('/dist/cjs/', '/dist/esm/')
-  const autoImporterFilePathCjs = autoImporterFilePath.replace('/dist/esm/', '/dist/cjs/')
-  ;[autoImporterFilePathEsm, autoImporterFilePathCjs].forEach((autoImporterFilePathResolved) => {
-    const { exportStatement, isCJS } = analyzeDistPath(autoImporterFilePathResolved)
-    const fileContentNew = getFileContent({ autoImporterFilePathResolved, exportStatement, isCJS })
-    const fileContentOld = readFileSync(autoImporterFilePathResolved, 'utf8')
-    // Write to filesystem only if required
-    // https://github.com/vikejs/vike/issues/3006
-    if (fileContentNew.trim() !== fileContentOld.trim()) {
-      writeFileSync(autoImporterFilePathResolved, fileContentNew)
-    }
-  })
-}
-
-function analyzeDistPath(autoImporterFilePath: string) {
-  assertPosixPath(autoImporterFilePath)
-
-  const isCJS = autoImporterFilePath.includes('/dist/cjs/')
-  const isESM = autoImporterFilePath.includes('/dist/esm/')
-  if (isCJS) assert(autoImporterFilePath.split('/dist/cjs/').length === 2)
-  if (isESM) assert(autoImporterFilePath.split('/dist/esm/').length === 2)
-  assert(isCJS || isESM)
-  assert(!(isCJS && isESM))
-
-  const exportStatement = isCJS ? 'exports.' : 'export const '
-  return { isCJS, exportStatement }
 }
