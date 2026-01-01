@@ -299,7 +299,7 @@ function setAutoImporter(config: ConfigResolved, viteEnv: Environment, entryFile
   assertPosixPath(root)
   assert(!isAutoImportDisabled(config))
   assert(!isYarnPnP())
-  writeAutoImporterFile(() =>
+  writeAutoImporterFile(
     [
       "export const status = 'SET';",
       `export const pluginVersion = ${JSON.stringify(projectInfo.projectVersion)};`,
@@ -318,7 +318,7 @@ function setAutoImporter(config: ConfigResolved, viteEnv: Environment, entryFile
 function clearAutoImporter(config: ConfigResolved) {
   if (isYarnPnP()) return
   const status: AutoImporterCleared['status'] = isAutoImportDisabled(config) ? 'DISABLED' : 'BUILDING'
-  writeAutoImporterFile(() => [`export const status = '${status}';`, ''].join('\n'))
+  writeAutoImporterFile([`export const status = '${status}';`, ''].join('\n'))
 }
 
 /** Is `semver1` higher than `semver2`?*/
@@ -479,12 +479,11 @@ function getServerEntryName(config: ConfigResolved) {
   return serverEntryName
 }
 
-function writeAutoImporterFile(getFileContent: () => string) {
-  const fileContentNew = getFileContent()
+function writeAutoImporterFile(fileContent: string) {
   const fileContentOld = readFileSync(autoImporterFilePath, 'utf8')
   // Write to filesystem only if required
   // https://github.com/vikejs/vike/issues/3006
-  if (fileContentNew.trim() !== fileContentOld.trim()) {
-    writeFileSync(autoImporterFilePath, fileContentNew)
+  if (fileContent.trim() !== fileContentOld.trim()) {
+    writeFileSync(autoImporterFilePath, fileContent)
   }
 }
