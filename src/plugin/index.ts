@@ -155,7 +155,9 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
         handler() {
           if (skip(this.environment)) return
 
-          clearAutoImporter(config)
+          if (!isAutoImportDisabled(config)) {
+            clearAutoImporter()
+          }
         },
       },
       resolveId: {
@@ -314,9 +316,8 @@ function setAutoImporter(config: ConfigResolved, viteEnv: Environment, entryFile
     ].join('\n'),
   )
 }
-function clearAutoImporter(config: ConfigResolved) {
-  if (isYarnPnP()) return
-  const status: AutoImporterCleared['status'] = isAutoImportDisabled(config) ? 'DISABLED' : 'BUILDING'
+function clearAutoImporter() {
+  const status: AutoImporterCleared['status'] = 'BUILDING'
   writeAutoImporterFile([`export const status = '${status}';`, ''].join('\n'))
 }
 
@@ -478,7 +479,6 @@ function getServerEntryName(config: ConfigResolved) {
 }
 
 function writeAutoImporterFile(fileContentNew: string) {
-  assert(!isYarnPnP())
   const fileContentOld = readFileSync(autoImporterFilePath, 'utf8')
   // Write to filesystem only if required
   // https://github.com/vikejs/vike/issues/3006
