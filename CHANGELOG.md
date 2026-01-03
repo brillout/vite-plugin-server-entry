@@ -1,3 +1,14 @@
+## [0.7.17](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.16...v0.7.17) (2026-01-03)
+
+
+### Bug Fixes
+
+* automatically skip auto import if no filesystem access ([b42d618](https://github.com/brillout/vite-plugin-server-entry/commit/b42d6186c8df547831e2ea6bf640ac83661eecfd))
+* disableAutoImport => don't touch filesystem ([9f6b416](https://github.com/brillout/vite-plugin-server-entry/commit/9f6b4161a6814113a33ae5560f0a353e2b05301f))
+* remove CJS build ([e17b168](https://github.com/brillout/vite-plugin-server-entry/commit/e17b16848fcdf9ed097d477ce1dedbdedc82c195))
+
+
+
 ## [0.7.16](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.15...v0.7.16) (2025-12-31)
 
 
