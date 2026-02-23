@@ -44,7 +44,7 @@ async function importServerProductionEntry(
   let isOutsideOfCwd: boolean | null = null
 
   if (autoImporter.status === 'SET') {
-    // In a monorepo the autoImporter can be that of another project => don't use autoImporter if it's that case
+    // In a monorepo, the autoImporter might belong to another project => don't use it
     isOutsideOfCwd = isServerEntryOutsideOfCwd(autoImporter.paths)
     if (isOutsideOfCwd === false || isOutsideOfCwd === null) {
       try {
@@ -83,7 +83,7 @@ async function importServerProductionEntry(
   }
 }
 
-// dist/server/entry.js may not belong to process.cwd() if e.g. Vike is linked => autoImporter.js can potentially be shared between multiple projects
+// dist/server/entry.js might not belong to process.cwd() in a monorepo => autoImporter.js can be shared between multiple projects
 function isServerEntryOutsideOfCwd(paths: AutoImporterPaths): boolean | null {
   const cwd = getCwdSafe()
 
@@ -96,7 +96,6 @@ function isServerEntryOutsideOfCwd(paths: AutoImporterPaths): boolean | null {
   } catch {
     // serverEntryFilePathResolved() calls import.meta.resolve() / require.resolve()
     // - Edge environments don't support import.meta.resolve() / require.resolve()
-    // - This code block is executed on edge environments that implement a dummy `process.cwd()` e.g. on Cloudflare Workers `process.cwd() === '/'`
     return null
   }
   serverEntryFilePath = removeFilePrefix(serverEntryFilePath)
