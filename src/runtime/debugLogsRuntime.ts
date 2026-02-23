@@ -1,11 +1,11 @@
-export { debugLogsRuntimePre }
+export { debugLogsRuntimeBegin }
 export { debugLogsRuntimePost }
 
 import { getCwdSafe } from '../shared/utils.js'
 import type { AutoImporter } from './AutoImporter.js'
 import { isDebug, logDebug } from '../shared/debug.js'
 
-function debugLogsRuntimePre(autoImporter: AutoImporter): undefined | void {
+function debugLogsRuntimeBegin(autoImporter: AutoImporter): undefined | void {
   if (!isDebug) return
   logDebug('DEBUG_LOGS_RUNTIME [begin]')
   try {

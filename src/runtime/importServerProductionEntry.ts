@@ -3,7 +3,7 @@ export { importServerProductionIndex }
 
 import { getCwdSafe, assertUsage, toPosixPath, assertPosixPath, isWebpackResolve } from './utils.js'
 import type { AutoImporter, AutoImporterPaths } from './AutoImporter.js'
-import { debugLogsRuntimePost, debugLogsRuntimePre } from './debugLogsRuntime.js'
+import { debugLogsRuntimePost, debugLogsRuntimeBegin } from './debugLogsRuntime.js'
 import { isDebug } from '../shared/debug.js'
 import {
   serverEntryFileNameBase,
@@ -37,7 +37,7 @@ async function importServerProductionEntry(
 ): Promise<null | boolean> {
   const autoImporter: AutoImporter = (await import('./autoImporter.js')) as any
 
-  debugLogsRuntimePre(autoImporter)
+  debugLogsRuntimeBegin(autoImporter)
 
   let success = false
   let requireError: unknown
