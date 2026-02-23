@@ -11,7 +11,7 @@ function debugLogsBuildDisabled(): void {
 
 function debugLogsBuildBegin(paths: Record<string, string>): void {
   if (!isDebug) return
-  logDebug('DEBUG_LOGS_BUILD_TIME [begin]')
+  logDebug('DEBUG_LOGS_BUILD_TIME [BEGIN]')
   Object.entries(paths).forEach(([key, val]) => {
     logDebug(key, val)
   })

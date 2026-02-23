@@ -7,7 +7,7 @@ import { isDebug, logDebug } from '../shared/debug.js'
 
 function debugLogsRuntimeBegin(autoImporter: AutoImporter): undefined | void {
   if (!isDebug) return
-  logDebug('DEBUG_LOGS_RUNTIME [begin]')
+  logDebug('DEBUG_LOGS_RUNTIME [BEGIN]')
   try {
     logDebug('process.platform', JSON.stringify(process.platform))
   } catch {
