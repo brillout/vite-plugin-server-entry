@@ -3,7 +3,7 @@ export { importServerProductionIndex }
 
 import { getCwdSafe, assertUsage, toPosixPath, assertPosixPath, isWebpackResolve } from './utils.js'
 import type { AutoImporter, AutoImporterPaths } from './AutoImporter.js'
-import { debugLogsRuntimePost, debugLogsRuntimeBegin } from './debugLogsRuntime.js'
+import { debugLogsRuntimeEnd, debugLogsRuntimeBegin } from './debugLogsRuntime.js'
 import { isDebug } from '../shared/debug.js'
 import {
   serverEntryFileNameBase,
@@ -74,7 +74,7 @@ async function importServerProductionEntry(
   // We don't handle the following case:
   //  - When the user directly imports dist/server/entry.js because we assume that Vike and Telefunc don't call importServerProductionEntry() in that case
 
-  debugLogsRuntimePost({ success, requireError, isOutsideOfCwd, ...args })
+  debugLogsRuntimeEnd({ success, requireError, isOutsideOfCwd, ...args })
   if (args.tolerateDoesNotExist) {
     return success
   } else {

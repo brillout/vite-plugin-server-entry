@@ -1,5 +1,5 @@
 export { debugLogsRuntimeBegin }
-export { debugLogsRuntimePost }
+export { debugLogsRuntimeEnd }
 
 import { getCwdSafe } from '../shared/utils.js'
 import type { AutoImporter } from './AutoImporter.js'
@@ -46,7 +46,7 @@ function debugLogsRuntimeBegin(autoImporter: AutoImporter): undefined | void {
   }
 }
 
-function debugLogsRuntimePost(info: Record<string, unknown>): undefined | void {
+function debugLogsRuntimeEnd(info: Record<string, unknown>): undefined | void {
   if (!isDebug) return
   for (var key in info) logDebug(key, info[key])
   logDebug('DEBUG_LOGS_RUNTIME [end]')
