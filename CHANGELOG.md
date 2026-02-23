@@ -1,3 +1,13 @@
+## [0.7.18](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.17...v0.7.18) (2026-02-23)
+
+
+### Bug Fixes
+
+* more reliable monorepo check ([#27](https://github.com/brillout/vite-plugin-server-entry/issues/27)) ([4c6bfe2](https://github.com/brillout/vite-plugin-server-entry/commit/4c6bfe2df390297ec958b768825ff5711c303236))
+* stop using buggy import.meta.resolve() ([63ac252](https://github.com/brillout/vite-plugin-server-entry/commit/63ac25256588531104d51e40d7a1bb798e89d092))
+
+
+
 ## [0.7.17](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.16...v0.7.17) (2026-01-03)
 
 
