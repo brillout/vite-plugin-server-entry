@@ -49,5 +49,5 @@ function debugLogsRuntimeBegin(autoImporter: AutoImporter): undefined | void {
 function debugLogsRuntimeEnd(info: Record<string, unknown>): undefined | void {
   if (!isDebug) return
   for (var key in info) logDebug(key, info[key])
-  logDebug('DEBUG_LOGS_RUNTIME [end]')
+  logDebug('DEBUG_LOGS_RUNTIME [END]')
 }

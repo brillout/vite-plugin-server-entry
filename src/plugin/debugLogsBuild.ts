@@ -20,5 +20,5 @@ function debugLogsBuildBegin(paths: Record<string, string>): void {
 function debugLogsBuildEnd(autoImporterFileContent: string): void {
   if (!isDebug) return
   logDebug('autoImporter.js', autoImporterFileContent.trim())
-  logDebug('DEBUG_LOGS_BUILD_TIME [end]')
+  logDebug('DEBUG_LOGS_BUILD_TIME [END]')
 }
