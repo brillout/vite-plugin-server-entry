@@ -90,7 +90,7 @@ function isServerEntryOutsideOfCwd(paths: AutoImporterPaths): boolean | null {
   // We cannot check edge environments. Upon edge deployment the server code is usually bundled right after `$ vite build`, so it's unlikley that the resolved serverEntryFilePath doesn't belong to cwd
   if (!cwd) return null
 
-  let serverEntryFilePath = paths.serverEntryFilePathResolved
+  let serverEntryFilePath = paths.serverEntryFilePathAbsolute
 
   if (isWebpackResolve(serverEntryFilePath, cwd)) return null
 
