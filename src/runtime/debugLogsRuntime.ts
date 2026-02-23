@@ -33,6 +33,7 @@ function debugLogsRuntimePre(autoImporter: AutoImporter): undefined | void {
     logDebug('importer.paths.autoImporterFilePathActual', autoImporter.paths.autoImporterFilePathActual)
     logDebug('importer.paths.serverEntryFilePathRelative', autoImporter.paths.serverEntryFilePathRelative)
     logDebug('importer.paths.serverEntryFilePathAbsolute', autoImporter.paths.serverEntryFilePathAbsolute)
+    logDebug('importer.paths.serverEntryFilePathResolved', autoImporter.paths.serverEntryFilePathResolved)
     try {
       logDebug(
         'importer.paths.serverEntryFilePathResolvedRuntime()',

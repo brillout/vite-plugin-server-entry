@@ -21,6 +21,7 @@ import {
   deepEqual,
   escapeRegex,
   getGlobalObject,
+  removeFilePrefix,
 } from './utils.js'
 import path from 'path'
 import { writeFileSync } from 'fs'
@@ -309,6 +310,7 @@ function setAutoImporter(config: ConfigResolved, viteEnv: Environment, entryFile
   const { distServerPathRelative, distServerPathAbsolute } = getDistServerPathRelative(config, viteEnv)
   const serverEntryFilePathRelative = path.posix.join(distServerPathRelative, entryFileName)
   const serverEntryFilePathAbsolute = path.posix.join(distServerPathAbsolute, entryFileName)
+  const serverEntryFilePathResolved = removeFilePrefix(import.meta.resolve(serverEntryFilePathAbsolute))
   const { root } = config
   assertPosixPath(root)
   assert(!isAutoImportDisabled(config))
@@ -322,6 +324,7 @@ function setAutoImporter(config: ConfigResolved, viteEnv: Environment, entryFile
       `  autoImporterFilePathActual: (() => { try { return import.meta.url } catch { return null } })(),`,
       `  serverEntryFilePathRelative: ${JSON.stringify(serverEntryFilePathRelative)},`,
       `  serverEntryFilePathAbsolute: ${JSON.stringify(serverEntryFilePathAbsolute)},`,
+      `  serverEntryFilePathResolved: ${JSON.stringify(serverEntryFilePathResolved)},`,
       `  serverEntryFilePathResolvedRuntime: () => import.meta.resolve(${JSON.stringify(serverEntryFilePathRelative)}),`,
       '};',
       '',
