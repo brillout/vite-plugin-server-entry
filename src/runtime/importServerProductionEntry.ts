@@ -1,7 +1,7 @@
 export { importServerProductionEntry }
 export { importServerProductionIndex }
 
-import { getCwdSafe, assertUsage, toPosixPath, assertPosixPath, isWebpackResolve, removeFilePrefix } from './utils.js'
+import { getCwdSafe, assertUsage, toPosixPath, assertPosixPath, isWebpackResolve } from './utils.js'
 import type { AutoImporter, AutoImporterPaths } from './AutoImporter.js'
 import { debugLogsRuntimePost, debugLogsRuntimePre } from './debugLogsRuntime.js'
 import { isDebug } from '../shared/debug.js'
@@ -90,15 +90,7 @@ function isServerEntryOutsideOfCwd(paths: AutoImporterPaths): boolean | null {
   // We cannot check edge environments. Upon edge deployment the server code is usually bundled right after `$ vite build`, so it's unlikley that the resolved serverEntryFilePath doesn't belong to cwd
   if (!cwd) return null
 
-  let serverEntryFilePath: string
-  try {
-    serverEntryFilePath = paths.serverEntryFilePathResolvedRuntime()
-  } catch {
-    // serverEntryFilePathResolvedRuntime() calls import.meta.resolve() / require.resolve()
-    // - Edge environments don't support import.meta.resolve() / require.resolve()
-    return null
-  }
-  serverEntryFilePath = removeFilePrefix(serverEntryFilePath)
+  let serverEntryFilePath = paths.serverEntryFilePathResolved
 
   if (isWebpackResolve(serverEntryFilePath, cwd)) return null
 
