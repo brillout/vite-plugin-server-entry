@@ -34,10 +34,13 @@ function debugLogsRuntimePre(autoImporter: AutoImporter): undefined | void {
     logDebug('importer.paths.serverEntryFilePathRelative', autoImporter.paths.serverEntryFilePathRelative)
     logDebug('importer.paths.serverEntryFilePathAbsolute', autoImporter.paths.serverEntryFilePathAbsolute)
     try {
-      logDebug('importer.paths.serverEntryFilePathResolved()', autoImporter.paths.serverEntryFilePathResolved())
+      logDebug(
+        'importer.paths.serverEntryFilePathResolvedRuntime()',
+        autoImporter.paths.serverEntryFilePathResolvedRuntime(),
+      )
     } catch (err) {
-      logDebug('importer.paths.serverEntryFilePathResolved() error:', err)
-      logDebug('importer.paths.serverEntryFilePathResolved()', 'ERRORED')
+      logDebug('importer.paths.serverEntryFilePathResolvedRuntime() error:', err)
+      logDebug('importer.paths.serverEntryFilePathResolvedRuntime()', 'ERRORED')
     }
   }
 }

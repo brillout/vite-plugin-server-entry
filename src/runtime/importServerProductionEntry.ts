@@ -92,9 +92,9 @@ function isServerEntryOutsideOfCwd(paths: AutoImporterPaths): boolean | null {
 
   let serverEntryFilePath: string
   try {
-    serverEntryFilePath = paths.serverEntryFilePathResolved()
+    serverEntryFilePath = paths.serverEntryFilePathResolvedRuntime()
   } catch {
-    // serverEntryFilePathResolved() calls import.meta.resolve() / require.resolve()
+    // serverEntryFilePathResolvedRuntime() calls import.meta.resolve() / require.resolve()
     // - Edge environments don't support import.meta.resolve() / require.resolve()
     return null
   }

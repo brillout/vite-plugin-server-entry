@@ -16,5 +16,5 @@ export type AutoImporterPaths = {
   autoImporterFilePathActual: string
   serverEntryFilePathRelative: string
   serverEntryFilePathAbsolute: string
-  serverEntryFilePathResolved: () => string
+  serverEntryFilePathResolvedRuntime: () => string
 }

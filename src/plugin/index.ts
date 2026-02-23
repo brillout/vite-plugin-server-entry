@@ -322,7 +322,7 @@ function setAutoImporter(config: ConfigResolved, viteEnv: Environment, entryFile
       `  autoImporterFilePathActual: (() => { try { return import.meta.url } catch { return null } })(),`,
       `  serverEntryFilePathRelative: ${JSON.stringify(serverEntryFilePathRelative)},`,
       `  serverEntryFilePathAbsolute: ${JSON.stringify(serverEntryFilePathAbsolute)},`,
-      `  serverEntryFilePathResolved: () => import.meta.resolve(${JSON.stringify(serverEntryFilePathRelative)}),`,
+      `  serverEntryFilePathResolvedRuntime: () => import.meta.resolve(${JSON.stringify(serverEntryFilePathRelative)}),`,
       '};',
       '',
     ].join('\n'),
