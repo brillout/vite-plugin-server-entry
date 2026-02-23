@@ -27,7 +27,7 @@ import path from 'path'
 import { writeFileSync } from 'fs'
 import type { AutoImporterCleared } from '../runtime/AutoImporter.js'
 import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase.js'
-import { debugLogsBuildtime } from './debugLogsBuildTime.js'
+import { debugLogsBuildBegin, debugLogsBuildEnd, debugLogsBuildDisabled } from './debugLogsBuild.js'
 import { fileURLToPath } from 'url'
 import { createRequire } from 'module'
 const importMetaUrl: string =
@@ -212,7 +212,7 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
             if (!entryFileName) assert(false, { entry })
             setAutoImporter(config, this.environment, entryFileName)
           } else {
-            debugLogsBuildtime({ disabled: true, paths: null })
+            debugLogsBuildDisabled()
           }
         },
       },
@@ -314,22 +314,22 @@ function setAutoImporter(config: ConfigResolved, viteEnv: Environment, entryFile
   const { root } = config
   assertPosixPath(root)
   assert(!isAutoImportDisabled(config))
-  writeAutoImporterFile(
-    [
-      "export const status = 'SET';",
-      `export const pluginVersion = ${JSON.stringify(projectInfo.projectVersion)};`,
-      `export const loadServerEntry = async () => { await import(${JSON.stringify(serverEntryFilePathRelative)}); };`,
-      'export const paths = {',
-      `  autoImporterFilePathOriginal: ${JSON.stringify(autoImporterFilePath)},`,
-      `  autoImporterFilePathActual: (() => { try { return import.meta.url } catch { return null } })(),`,
-      `  serverEntryFilePathRelative: ${JSON.stringify(serverEntryFilePathRelative)},`,
-      `  serverEntryFilePathAbsolute: ${JSON.stringify(serverEntryFilePathAbsolute)},`,
-      `  serverEntryFilePathResolved: ${JSON.stringify(serverEntryFilePathResolved)},`,
-      `  serverEntryFilePathResolvedRuntime: () => import.meta.resolve(${JSON.stringify(serverEntryFilePathRelative)}),`,
-      '};',
-      '',
-    ].join('\n'),
-  )
+  const autoImporterFileContent = [
+    "export const status = 'SET';",
+    `export const pluginVersion = ${JSON.stringify(projectInfo.projectVersion)};`,
+    `export const loadServerEntry = async () => { await import(${JSON.stringify(serverEntryFilePathRelative)}); };`,
+    'export const paths = {',
+    `  autoImporterFilePathOriginal: ${JSON.stringify(autoImporterFilePath)},`,
+    `  autoImporterFilePathActual: (() => { try { return import.meta.url } catch { return null } })(),`,
+    `  serverEntryFilePathRelative: ${JSON.stringify(serverEntryFilePathRelative)},`,
+    `  serverEntryFilePathAbsolute: ${JSON.stringify(serverEntryFilePathAbsolute)},`,
+    `  serverEntryFilePathResolved: ${JSON.stringify(serverEntryFilePathResolved)},`,
+    `  serverEntryFilePathResolvedRuntime: () => import.meta.resolve(${JSON.stringify(serverEntryFilePathRelative)}),`,
+    '};',
+    '',
+  ].join('\n')
+  debugLogsBuildEnd(autoImporterFileContent)
+  writeAutoImporterFile(autoImporterFileContent)
 }
 function clearAutoImporter() {
   const status: AutoImporterCleared['status'] = 'BUILDING'
@@ -390,10 +390,7 @@ function getDistServerPathRelative(config: ConfigVite, viteEnv: Environment | un
   }
   const distServerPathRelative = path.posix.join(rootRelative, outDir)
   const distServerPathAbsolute = path.posix.join(root, outDir)
-  debugLogsBuildtime({
-    disabled: false,
-    paths: { importerDir, root, rootRelative, outDir, distServerPathRelative, distServerPathAbsolute },
-  })
+  debugLogsBuildBegin({ importerDir, root, rootRelative, outDir, distServerPathRelative, distServerPathAbsolute })
   return { distServerPathRelative, distServerPathAbsolute }
 }
 
