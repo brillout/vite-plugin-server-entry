@@ -1,3 +1,13 @@
+## [0.7.19](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.18...v0.7.19) (2026-06-13)
+
+
+### Bug Fixes
+
+* add trailing separator to cwd in isServerEntryOutsideOfCwd (fix [#29](https://github.com/brillout/vite-plugin-server-entry/issues/29)) ([4d26bf0](https://github.com/brillout/vite-plugin-server-entry/commit/4d26bf0f0f2e542218970913ad8e9e3919256fdd))
+* improve jsdoc ([d8ecbd5](https://github.com/brillout/vite-plugin-server-entry/commit/d8ecbd5f1f207d4d6950e6306164232a4c3fcf33))
+
+
+
 ## [0.7.18](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.17...v0.7.18) (2026-02-23)
 
 
