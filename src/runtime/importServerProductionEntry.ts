@@ -100,5 +100,5 @@ function isServerEntryOutsideOfCwd(paths: AutoImporterPaths): boolean | null {
 
   serverEntryFilePath = toPosixPath(serverEntryFilePath)
   assertPosixPath(cwd)
-  return !serverEntryFilePath.startsWith(cwd)
+  return !serverEntryFilePath.startsWith(cwd.endsWith('/') ? cwd : cwd + '/')
 }
