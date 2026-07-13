@@ -1,10 +1,9 @@
 export { importServerProductionEntry }
 export { importServerProductionIndex }
 
-import { getCwdSafe, assertUsage, toPosixPath, assertPosixPath, isWebpackResolve } from './utils.js'
+import { getCwdSafe, assertUsage, assertWarning, toPosixPath, assertPosixPath, isWebpackResolve } from './utils.js'
 import type { AutoImporter, AutoImporterPaths } from './AutoImporter.js'
 import { debugLogsRuntimeEnd, debugLogsRuntimeBegin } from './debugLogsRuntime.js'
-import { isDebug } from '../shared/debug.js'
 import {
   serverEntryFileNameBase,
   serverEntryFileNameBaseAlternative,
@@ -55,11 +54,13 @@ async function importServerProductionEntry(
         await autoImporter.loadServerEntry()
         success = true
       } catch (err) {
-        if (!isDebug) {
-          throw err
-        } else {
-          requireError = err
-        }
+        // Don't crash: the autoImporter can legitimately point to a server entry that doesn't exist anymore:
+        //  - Vike removes dist/server/ after pre-rendering fully pre-renderable apps
+        //  - The build output was removed (e.g. `$ git clean`) or belongs to a stale branch
+        //  - In a monorepo, the autoImporter can have been (over)written by another project sharing node_modules
+        // => fall back to crawling outDir below (and let the caller's own fallback kick in, e.g. Telefunc's
+        //    telefunction registration).
+        requireError = err
       }
     }
   }
@@ -75,6 +76,8 @@ async function importServerProductionEntry(
     }
   }
 
+  warnRequireError(requireError, success)
+
   // We don't handle the following case:
   //  - When the user directly imports dist/server/entry.js because we assume that Vike and Telefunc don't call importServerProductionEntry() in that case
 
@@ -85,6 +88,24 @@ async function importServerProductionEntry(
     assertUsage(success, wrongUsageNotBuilt)
     return null
   }
+}
+
+let requireErrorAlreadyWarned = false
+function warnRequireError(requireError: unknown, success: boolean) {
+  if (!requireError) return
+  // importServerProductionEntry() can be called over and over again (e.g. Telefunc calls it upon each HTTP request) => warn only once
+  if (requireErrorAlreadyWarned) return
+  requireErrorAlreadyWarned = true
+  assertWarning(
+    false,
+    [
+      "The server production entry auto-import points to a file that couldn't be loaded",
+      success
+        ? '(recovered by crawling the build output directory instead)'
+        : '— (re-)build your app to fix the auto-import',
+      `— load failure: ${String(requireError)}`,
+    ].join(' '),
+  )
 }
 
 // dist/server/entry.js might not belong to process.cwd() in a monorepo => autoImporter.js can be shared between multiple projects
