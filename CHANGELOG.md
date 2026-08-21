@@ -1,3 +1,12 @@
+## [0.7.20](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.19...v0.7.20) (2026-08-21)
+
+
+### Bug Fixes
+
+* write-then-rename autoImporter.js ([#30](https://github.com/brillout/vite-plugin-server-entry/issues/30)) ([f6cd46f](https://github.com/brillout/vite-plugin-server-entry/commit/f6cd46f6bdf80123388dc7741a7a128d049336ef))
+
+
+
 ## [0.7.19](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.18...v0.7.19) (2026-06-13)
 
 
