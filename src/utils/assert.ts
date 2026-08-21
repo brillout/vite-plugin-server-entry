@@ -48,6 +48,7 @@ function assertUsage(condition: unknown, errorMessage: string): asserts conditio
   throw usageError
 }
 
+/*
 export { assertWarning }
 const warningPrefix = `${logLabel}[Warning]` as const
 function assertWarning(condition: unknown, errorMessage: string): void {
@@ -57,3 +58,4 @@ function assertWarning(condition: unknown, errorMessage: string): void {
   const msg = `${warningPrefix} ${errorMessage}`
   console.warn(msg)
 }
+*/
