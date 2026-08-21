@@ -495,7 +495,10 @@ function writeAutoImporterFile(fileContentNew: string) {
     // other projects on the same machine. rename() only replaces the directory entry (breaking the hard
     // link) and leaves the store file untouched. It's also atomic: a concurrently running server never
     // observes a half-written autoImporter.js.
-    const filePathTmp = `${autoImporterFilePath}.${process.pid}.tmp`
+    // The temporary file name is randomized: concurrent builds (e.g. a monorepo building several projects
+    // at once) share the same installed autoImporter.js, and they may even share `process.pid` (worker
+    // threads) => a fixed name would let one build rename() the half-written file of another.
+    const filePathTmp = `${autoImporterFilePath}.${Math.random().toString(36).slice(2)}.tmp`
     writeFileSync(filePathTmp, fileContentNew)
     renameSync(filePathTmp, autoImporterFilePath)
   } catch {
