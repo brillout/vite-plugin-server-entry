@@ -1,6 +1,5 @@
 export { serverProductionEntryPlugin }
 export { serverEntryVirtualId }
-export { clearAutoImporters }
 export type { PluginConfigProvidedByUser as VitePluginServerEntryOptions }
 
 import type { Plugin, ResolvedConfig as ConfigVite, Environment } from 'vite'
@@ -331,21 +330,6 @@ function setAutoImporter(config: ConfigResolved, viteEnv: Environment, entryFile
 function clearAutoImporter() {
   const status: AutoImporterCleared['status'] = 'BUILDING'
   writeAutoImporterFile([`export const status = '${status}';`, ''].join('\n'))
-}
-
-/**
- * Reset the autoImporter.js file to its initial `status: 'UNSET'` state, so that the runtime falls back to
- * crawling `outDir` (or to the caller's own fallback, e.g. Telefunc's telefunction registration).
- *
- * Meant to be called by libraries that remove the built server entry after `$ vite build` — for example Vike,
- * which removes `dist/server/` after pre-rendering fully pre-renderable apps. Without this, the autoImporter
- * keeps pointing to the removed server entry.
- */
-function clearAutoImporters(options: { reason?: string } = {}): void {
-  const status: AutoImporterCleared['status'] = 'UNSET'
-  writeAutoImporterFile(
-    [...(options.reason ? [`// ${options.reason}`] : []), `export const status = '${status}';`, ''].join('\n'),
-  )
 }
 
 /** Is `semver1` higher than `semver2`?*/
