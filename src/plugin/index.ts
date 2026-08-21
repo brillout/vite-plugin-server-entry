@@ -21,6 +21,7 @@ import {
   deepEqual,
   escapeRegex,
   getGlobalObject,
+  genRandomId,
 } from './utils.js'
 import path from 'path'
 import { writeFileSync, renameSync } from 'fs'
@@ -498,7 +499,7 @@ function writeAutoImporterFile(fileContentNew: string) {
     // The temporary file name is randomized: concurrent builds (e.g. a monorepo building several projects
     // at once) share the same installed autoImporter.js, and they may even share `process.pid` (worker
     // threads) => a fixed name would let one build rename() the half-written file of another.
-    const filePathTmp = `${autoImporterFilePath}.${Math.random().toString(36).slice(2)}.tmp`
+    const filePathTmp = `${autoImporterFilePath}.${genRandomId()}.tmp`
     writeFileSync(filePathTmp, fileContentNew)
     renameSync(filePathTmp, autoImporterFilePath)
   } catch {
