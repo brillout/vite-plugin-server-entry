@@ -28,11 +28,13 @@ import { writeFileSync, renameSync } from 'fs'
 import type { AutoImporterCleared } from '../runtime/AutoImporter.js'
 import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase.js'
 import { debugLogsBuildBegin, debugLogsBuildEnd, debugLogsBuildDisabled } from './debugLogsBuild.js'
+import { fileURLToPath } from 'url'
 import { createRequire } from 'module'
 const importMetaUrl: string =
   import.meta.url +
   // trick to avoid `@vercel/ncc` to glob import
   (() => '')()
+const __dirname_ = toPosixPath(path.dirname(fileURLToPath(importMetaUrl)))
 const require_ = createRequire(importMetaUrl)
 
 const globalObject = getGlobalObject('plugin/index.ts', {
@@ -72,11 +74,6 @@ type Library = {
   apiVersion: number
   pluginVersion: string
   getServerProductionEntry: () => string
-  // The autoImporter.js file of the library's own @brillout/vite-plugin-server-entry copy (each library
-  // resolves its own copy, e.g. telefunc/node_modules/... and vike/node_modules/... are distinct files).
-  // `undefined` when the library uses an older plugin version — its copy is then left untouched and its
-  // runtime falls back to crawling outDir.
-  autoImporterFilePath?: string
 }
 
 type ConfigUnresolved = ConfigVite & {
@@ -198,7 +195,7 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
           if (skip(this.environment)) return
 
           if (!isAutoImportDisabled(config)) {
-            clearAutoImporter(config)
+            clearAutoImporter()
           }
         },
       },
@@ -248,7 +245,6 @@ function resolveConfig(
     libraryName,
     pluginVersion: projectInfo.projectVersion,
     apiVersion,
-    autoImporterFilePath,
   }
   const libraryFound = pluginConfigResolved.libraries.find((l) => l.libraryName === libraryName)
   if (!libraryFound) {
@@ -311,62 +307,45 @@ function getServerProductionEntryAll(config: ConfigResolved, viteEnv: Environmen
 }
 
 function setAutoImporter(config: ConfigResolved, viteEnv: Environment, entryFileName: string) {
+  const { distServerPathRelative, distServerPathAbsolute } = getDistServerPathRelative(config, viteEnv)
+  const serverEntryFilePathRelative = path.posix.join(distServerPathRelative, entryFileName)
+  const serverEntryFilePathAbsolute = path.posix.join(distServerPathAbsolute, entryFileName)
   const { root } = config
   assertPosixPath(root)
   assert(!isAutoImportDisabled(config))
-  writeAutoImporterFiles(getAutoImporterFilePaths(config), (autoImporterFilePathTarget) => {
-    // The import inside loadServerEntry() is resolved relative to the target autoImporter.js file, and
-    // each library's plugin copy lives at a different node_modules path => compute the relative path per target.
-    const importerDir = path.posix.dirname(autoImporterFilePathTarget)
-    const { distServerPathRelative, distServerPathAbsolute } = getDistServerPathRelative(config, viteEnv, importerDir)
-    const serverEntryFilePathRelative = path.posix.join(distServerPathRelative, entryFileName)
-    const serverEntryFilePathAbsolute = path.posix.join(distServerPathAbsolute, entryFileName)
-    const autoImporterFileContent = [
-      "export const status = 'SET';",
-      `export const pluginVersion = ${JSON.stringify(projectInfo.projectVersion)};`,
-      `export const loadServerEntry = async () => { await import(${JSON.stringify(serverEntryFilePathRelative)}); };`,
-      'export const paths = {',
-      `  autoImporterFilePathOriginal: ${JSON.stringify(autoImporterFilePathTarget)},`,
-      `  autoImporterFilePathActual: (() => { try { return import.meta.url } catch { return null } })(),`,
-      `  serverEntryFilePathRelative: ${JSON.stringify(serverEntryFilePathRelative)},`,
-      `  serverEntryFilePathAbsolute: ${JSON.stringify(serverEntryFilePathAbsolute)},`,
-      '};',
-      '',
-    ].join('\n')
-    if (autoImporterFilePathTarget === autoImporterFilePath) debugLogsBuildEnd(autoImporterFileContent)
-    return autoImporterFileContent
-  })
+  const autoImporterFileContent = [
+    "export const status = 'SET';",
+    `export const pluginVersion = ${JSON.stringify(projectInfo.projectVersion)};`,
+    `export const loadServerEntry = async () => { await import(${JSON.stringify(serverEntryFilePathRelative)}); };`,
+    'export const paths = {',
+    `  autoImporterFilePathOriginal: ${JSON.stringify(autoImporterFilePath)},`,
+    `  autoImporterFilePathActual: (() => { try { return import.meta.url } catch { return null } })(),`,
+    `  serverEntryFilePathRelative: ${JSON.stringify(serverEntryFilePathRelative)},`,
+    `  serverEntryFilePathAbsolute: ${JSON.stringify(serverEntryFilePathAbsolute)},`,
+    '};',
+    '',
+  ].join('\n')
+  debugLogsBuildEnd(autoImporterFileContent)
+  writeAutoImporterFile(autoImporterFileContent)
 }
-function clearAutoImporter(config: ConfigResolved) {
+function clearAutoImporter() {
   const status: AutoImporterCleared['status'] = 'BUILDING'
-  writeAutoImporterFiles(getAutoImporterFilePaths(config), () => [`export const status = '${status}';`, ''].join('\n'))
+  writeAutoImporterFile([`export const status = '${status}';`, ''].join('\n'))
 }
 
 /**
- * Reset the autoImporter.js file(s) to their initial `status: 'UNSET'` state, so that runtimes fall back to
- * crawling `outDir` (or to their own fallback, e.g. Telefunc's telefunction registration).
+ * Reset the autoImporter.js file to its initial `status: 'UNSET'` state, so that the runtime falls back to
+ * crawling `outDir` (or to the caller's own fallback, e.g. Telefunc's telefunction registration).
  *
  * Meant to be called by libraries that remove the built server entry after `$ vite build` — for example Vike,
  * which removes `dist/server/` after pre-rendering fully pre-renderable apps. Without this, the autoImporter
  * keeps pointing to the removed server entry.
  */
-function clearAutoImporters(options: { viteConfig?: unknown; reason?: string } = {}): void {
-  const config = options.viteConfig as undefined | { _vitePluginServerEntry?: PluginConfigResolved }
+function clearAutoImporters(options: { reason?: string } = {}): void {
   const status: AutoImporterCleared['status'] = 'UNSET'
-  writeAutoImporterFiles(getAutoImporterFilePaths(config), () =>
+  writeAutoImporterFile(
     [...(options.reason ? [`// ${options.reason}`] : []), `export const status = '${status}';`, ''].join('\n'),
   )
-}
-
-/** All autoImporter.js files to keep in sync: our own copy + the copy of each library's plugin instance. */
-function getAutoImporterFilePaths(config: undefined | { _vitePluginServerEntry?: PluginConfigResolved }): string[] {
-  const filePaths = [autoImporterFilePath]
-  config?._vitePluginServerEntry?.libraries.forEach((library) => {
-    if (library.autoImporterFilePath && !filePaths.includes(library.autoImporterFilePath)) {
-      filePaths.push(library.autoImporterFilePath)
-    }
-  })
-  return filePaths
 }
 
 /** Is `semver1` higher than `semver2`?*/
@@ -405,9 +384,10 @@ function getOutDir(config: ConfigVite, viteEnv: Environment | undefined): string
   assert(outDir)
   return outDir
 }
-function getDistServerPathRelative(config: ConfigVite, viteEnv: Environment | undefined, importerDir: string) {
+function getDistServerPathRelative(config: ConfigVite, viteEnv: Environment | undefined) {
   assert(isViteServerSide(config, viteEnv))
   const { root } = config
+  const importerDir = __dirname_
   assertPosixPath(importerDir)
   assert(isAbsolutePath(importerDir))
   assertPosixPath(root)
@@ -522,28 +502,21 @@ function getServerEntryName(config: ConfigResolved) {
   return serverEntryName
 }
 
-function writeAutoImporterFiles(filePaths: string[], getFileContent: (autoImporterFilePathTarget: string) => string) {
-  filePaths.forEach((filePathTarget) => {
-    try {
-      // Write-then-rename instead of writing in place. Package managers with a content-addressable store
-      // (e.g. pnpm) install autoImporter.js as a hard link into their global store — and since the shipped
-      // file is byte-identical across plugin versions, the store file can even be shared across plugin
-      // versions and across unrelated projects. Writing in place would thus mutate the store and poison
-      // other projects on the same machine. rename() only replaces the directory entry (breaking the hard
-      // link) and leaves the store file untouched. It's also atomic: a concurrently running server never
-      // observes a half-written autoImporter.js.
-      const filePathTmp = `${filePathTarget}.${process.pid}.tmp`
-      writeFileSync(filePathTmp, getFileContent(filePathTarget))
-      renameSync(filePathTmp, filePathTarget)
-    } catch {
-      // Cannot write to filesystem when using Bazel
-      // https://github.com/vikejs/vike/issues/3006
-      // Only our own copy determines cannotWriteFilesystem: a foreign library's copy may be unwritable
-      // (e.g. different fs permissions) without the mechanism being broken — its runtime then falls back
-      // to crawling outDir.
-      if (filePathTarget === autoImporterFilePath) {
-        globalObject.cannotWriteFilesystem = true
-      }
-    }
-  })
+function writeAutoImporterFile(fileContentNew: string) {
+  try {
+    // Write-then-rename instead of writing in place. Package managers with a content-addressable store
+    // (e.g. pnpm) install autoImporter.js as a hard link into their global store — and since the shipped
+    // file is byte-identical across plugin versions, the store file can even be shared across plugin
+    // versions and across unrelated projects. Writing in place would thus mutate the store and poison
+    // other projects on the same machine. rename() only replaces the directory entry (breaking the hard
+    // link) and leaves the store file untouched. It's also atomic: a concurrently running server never
+    // observes a half-written autoImporter.js.
+    const filePathTmp = `${autoImporterFilePath}.${process.pid}.tmp`
+    writeFileSync(filePathTmp, fileContentNew)
+    renameSync(filePathTmp, autoImporterFilePath)
+  } catch {
+    // Cannot write to filesystem when using Bazel
+    // https://github.com/vikejs/vike/issues/3006
+    globalObject.cannotWriteFilesystem = true
+  }
 }
