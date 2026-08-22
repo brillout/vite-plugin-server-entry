@@ -51,6 +51,9 @@ const apiVersion = 5
 // Config set by library using @brillout/vite-plugin-server-entry (e.g. Vike or Telefunc)
 type PluginConfigProvidedByLibrary = {
   getServerProductionEntry: () => string
+  // Whether the library removes the server entry file after the app is built — e.g. Vike removes dist/server/ after pre-rendering fully pre-renderable apps (https://vike.dev/prerender#keepDistServer).
+  // The autoImporter is then reset (status 'UNSET') instead of pointing to a file that won't exist at runtime: runtimes fall back gracefully (crawling outDir, or e.g. Telefunc's telefunction registration).
+  getServerEntryWillBeRemoved?: () => boolean | Promise<boolean>
   libraryName: string
 }
 // Config set by:
@@ -74,6 +77,8 @@ type Library = {
   apiVersion: number
   pluginVersion: string
   getServerProductionEntry: () => string
+  // Can be undefined when set by an older plugin version
+  getServerEntryWillBeRemoved?: () => boolean | Promise<boolean>
 }
 
 type ConfigUnresolved = ConfigVite & {
@@ -195,22 +200,29 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
           if (skip(this.environment)) return
 
           if (!isAutoImportDisabled(config)) {
-            clearAutoImporter()
+            clearAutoImporter('BUILDING')
           }
         },
       },
       generateBundle: {
-        handler(_rollupOptions, bundle) {
+        async handler(_rollupOptions, bundle) {
           if (skip(this.environment)) return
           if (this.environment && this.environment.name !== 'ssr') return
 
           // Write node_modules/@brillout/vite-plugin-server-entry/dist/autoImporter.js
           if (!isAutoImportDisabled(config)) {
-            const entry = findServerEntry(bundle, getOutDir(config, this.environment))
-            assert(entry)
-            const entryFileName = entry.fileName
-            if (!entryFileName) assert(false, { entry })
-            setAutoImporter(config, this.environment, entryFileName)
+            if (await serverEntryWillBeRemoved(config)) {
+              // The server entry file won't exist at runtime (e.g. Vike removes dist/server/ after pre-rendering fully pre-renderable apps) => don't point the autoImporter at it. Runtimes then see 'UNSET' and fall back gracefully (crawling outDir, or e.g. Telefunc's telefunction registration) instead of importing a file that doesn't exist anymore.
+              // We write 'UNSET' instead of skipping the write: the autoImporter may still hold the pointer written by a previous build.
+              const autoImporterFileContent = clearAutoImporter('UNSET')
+              debugLogsBuildEnd(autoImporterFileContent)
+            } else {
+              const entry = findServerEntry(bundle, getOutDir(config, this.environment))
+              assert(entry)
+              const entryFileName = entry.fileName
+              if (!entryFileName) assert(false, { entry })
+              setAutoImporter(config, this.environment, entryFileName)
+            }
           } else {
             debugLogsBuildDisabled()
           }
@@ -242,6 +254,7 @@ function resolveConfig(
 
   const libraryNew = {
     getServerProductionEntry: pluginConfigProvidedByLibrary.getServerProductionEntry,
+    getServerEntryWillBeRemoved: pluginConfigProvidedByLibrary.getServerEntryWillBeRemoved,
     libraryName,
     pluginVersion: projectInfo.projectVersion,
     apiVersion,
@@ -328,9 +341,19 @@ function setAutoImporter(config: ConfigResolved, viteEnv: Environment, entryFile
   debugLogsBuildEnd(autoImporterFileContent)
   writeAutoImporterFile(autoImporterFileContent)
 }
-function clearAutoImporter() {
-  const status: AutoImporterCleared['status'] = 'BUILDING'
-  writeAutoImporterFile([`export const status = '${status}';`, ''].join('\n'))
+function clearAutoImporter(status: AutoImporterCleared['status']): string {
+  const autoImporterFileContent = [`export const status = '${status}';`, ''].join('\n')
+  writeAutoImporterFile(autoImporterFileContent)
+  return autoImporterFileContent
+}
+
+// Whether the server entry file is removed after the app is built. If any library removes it then it's gone for all libraries: the server entry is a single file shared by all libraries (e.g. it contains both Vike's and Telefunc's production entry).
+async function serverEntryWillBeRemoved(config: ConfigResolved): Promise<boolean> {
+  for (const library of config._vitePluginServerEntry.libraries) {
+    // library.getServerEntryWillBeRemoved can be undefined when set by an older plugin version
+    if (await library.getServerEntryWillBeRemoved?.()) return true
+  }
+  return false
 }
 
 /** Is `semver1` higher than `semver2`?*/
