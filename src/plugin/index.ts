@@ -502,6 +502,14 @@ function getServerEntryName(config: ConfigResolved) {
 }
 
 function writeAutoImporterFile(fileContentNew: string) {
+  // Skip the write if the file already has the target content: rewriting it would pointlessly
+  // bump its mtime (potentially triggering file watchers) and break the pnpm store hard link
+  // (see comment below) even though nothing changed.
+  try {
+    if (readFileSync(autoImporterFilePath, 'utf8') === fileContentNew) return
+  } catch {
+    // Cannot read the file (e.g. it doesn't exist) — proceed with writing it.
+  }
   try {
     // Write-then-rename instead of writing in place. Package managers with a content-addressable store
     // (e.g. pnpm) install autoImporter.js as a hard link into their global store — and since the shipped
