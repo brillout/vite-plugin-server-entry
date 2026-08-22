@@ -332,10 +332,9 @@ function setAutoImporter(config: ConfigResolved, viteEnv: Environment, entryFile
   debugLogsBuildEnd(autoImporterFileContent)
   writeAutoImporterFile(autoImporterFileContent)
 }
-function clearAutoImporter(status: AutoImporterCleared['status']): string {
+function clearAutoImporter(status: AutoImporterCleared['status']) {
   const autoImporterFileContent = [`export const status = '${status}';`, ''].join('\n')
   writeAutoImporterFile(autoImporterFileContent)
-  return autoImporterFileContent
 }
 function clearAutoImporterIfNecessary() {
   let autoImporterFileContent: string
