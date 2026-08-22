@@ -337,8 +337,11 @@ function clearAutoImporter(status: AutoImporterCleared['status'], skipWrite?: Sk
   writeAutoImporterFile(autoImporterFileContent, skipWrite)
 }
 function clearAutoImporterIfNecessary() {
-  // Only reset a stale `status = 'SET'` — don't touch the file otherwise
-  clearAutoImporter('UNSET', (fileContentCurrent) => !fileContentCurrent.includes(`status = 'SET'`))
+  clearAutoImporter(
+    'UNSET',
+    // Only reset a stale `status = 'SET'` — don't touch the file otherwise
+    (fileContentCurrent) => !fileContentCurrent.includes(`status = 'SET'`),
+  )
 }
 
 /** Is `semver1` higher than `semver2`?*/
@@ -495,22 +498,22 @@ function getServerEntryName(config: ConfigResolved) {
   return serverEntryName
 }
 
-// Decides, given the current autoImporter.js content, whether the write should be skipped
 type SkipWrite = (fileContentCurrent: string) => boolean
 function writeAutoImporterFile(fileContentNew: string, skipWrite?: SkipWrite) {
-  let fileContentCurrent: string | null = null
-  try {
-    fileContentCurrent = readFileSync(autoImporterFilePath, 'utf8')
-  } catch {
-    // Cannot read the file (e.g. it doesn't exist) — skip the checks below and write.
+  // Only write if necessary
+  {
+    let fileContentCurrent: string | null = null
+    try {
+      fileContentCurrent = readFileSync(autoImporterFilePath, 'utf8')
+    } catch {
+      // Cannot read the file (e.g. it doesn't exist)
+    }
+    if (fileContentCurrent !== null) {
+      if (fileContentCurrent === fileContentNew) return
+      if (skipWrite?.(fileContentCurrent)) return
+    }
   }
-  if (fileContentCurrent !== null) {
-    // Skip the write if the file already has the target content: rewriting it would pointlessly
-    // bump its mtime (potentially triggering file watchers) and break the pnpm store hard link
-    // (see comment below) even though nothing changed.
-    if (fileContentCurrent === fileContentNew) return
-    if (skipWrite?.(fileContentCurrent)) return
-  }
+
   const filePathTmp = `${autoImporterFilePath}.${genRandomId()}.tmp`
   try {
     writeFileSync(filePathTmp, fileContentNew)
@@ -520,6 +523,7 @@ function writeAutoImporterFile(fileContentNew: string, skipWrite?: SkipWrite) {
     globalObject.cannotWriteFilesystem = true
     return
   }
+
   // Write-then-rename instead of writing in place. Package managers with a content-addressable store
   // (e.g. pnpm) install autoImporter.js as a hard link into their global store — and since the shipped
   // file is byte-identical across plugin versions, the store file can even be shared across plugin
