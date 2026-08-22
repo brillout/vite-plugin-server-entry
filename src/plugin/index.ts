@@ -24,7 +24,7 @@ import {
   genRandomId,
 } from './utils.js'
 import path from 'path'
-import { writeFileSync, renameSync } from 'fs'
+import { writeFileSync, renameSync, readFileSync } from 'fs'
 import type { AutoImporterCleared } from '../runtime/AutoImporter.js'
 import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase.js'
 import { debugLogsBuildBegin, debugLogsBuildEnd, debugLogsBuildDisabled } from './debugLogsBuild.js'
@@ -54,10 +54,11 @@ type PluginConfigProvidedByLibrary = {
   libraryName: string
 }
 // Config set by:
-// - vike-server
+// - Vike
 // - End user (although to my knowledge no user is using this)
 type PluginConfigProvidedByUser = {
   inject?: boolean // No functionality whatsoever: only used to communicate between Vike and vike-server.
+  // Fully disable autoImporter.js — i.e. don't set it to import dist/server/entry.js
   disableAutoImport?: boolean
   disableServerEntryEmit?: boolean
 }
@@ -195,7 +196,9 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
           if (skip(this.environment)) return
 
           if (!isAutoImportDisabled(config)) {
-            clearAutoImporter()
+            clearAutoImporter('BUILDING')
+          } else {
+            clearAutoImporterIfNecessary()
           }
         },
       },
@@ -212,6 +215,7 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
             if (!entryFileName) assert(false, { entry })
             setAutoImporter(config, this.environment, entryFileName)
           } else {
+            clearAutoImporterIfNecessary()
             debugLogsBuildDisabled()
           }
         },
@@ -328,9 +332,19 @@ function setAutoImporter(config: ConfigResolved, viteEnv: Environment, entryFile
   debugLogsBuildEnd(autoImporterFileContent)
   writeAutoImporterFile(autoImporterFileContent)
 }
-function clearAutoImporter() {
-  const status: AutoImporterCleared['status'] = 'BUILDING'
-  writeAutoImporterFile([`export const status = '${status}';`, ''].join('\n'))
+function clearAutoImporter(status: AutoImporterCleared['status']) {
+  const autoImporterFileContent = [`export const status = '${status}';`, ''].join('\n')
+  writeAutoImporterFile(autoImporterFileContent)
+}
+function clearAutoImporterIfNecessary() {
+  let autoImporterFileContent: string
+  try {
+    autoImporterFileContent = readFileSync(autoImporterFilePath, 'utf8')
+  } catch {
+    return
+  }
+  if (!autoImporterFileContent.includes(`status = 'SET'`)) return
+  clearAutoImporter('UNSET')
 }
 
 /** Is `semver1` higher than `semver2`?*/
