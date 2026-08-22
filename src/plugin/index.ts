@@ -55,11 +55,10 @@ type PluginConfigProvidedByLibrary = {
 }
 // Config set by:
 // - Vike
-// - vike-server
 // - End user (although to my knowledge no user is using this)
 type PluginConfigProvidedByUser = {
   inject?: boolean // No functionality whatsoever: only used to communicate between Vike and vike-server.
-  // Don't point the autoImporter at the server entry file — e.g. Vike sets it when pre-rendering is going to remove dist/server/ (https://vike.dev/prerender#keepDistServer): runtimes then fall back gracefully (crawling outDir, or e.g. Telefunc's telefunction registration). The autoImporter is also reset if a previous build wrote a pointer; it's never written when it's already reset.
+  // Don't point autoImporter.js at the server entry file
   disableAutoImport?: boolean
   disableServerEntryEmit?: boolean
 }
@@ -338,8 +337,6 @@ function clearAutoImporter(status: AutoImporterCleared['status']): string {
   writeAutoImporterFile(autoImporterFileContent)
   return autoImporterFileContent
 }
-// When auto-import is disabled, ensure the autoImporter doesn't point at a server entry file: a previous build (e.g. before the user enabled pre-rendering) may have written a pointer that would dangle — e.g. Vike removes dist/server/ after pre-rendering fully pre-renderable apps, and any runtime consulting the pointer would then crash with ERR_MODULE_NOT_FOUND (vikejs/vike#3483).
-// We only write when needed: the autoImporter is usually already reset (e.g. as shipped on npm) — in particular, environments where node_modules/ shouldn't (Yarn PnP) or cannot (Bazel) be written to are left untouched.
 function clearAutoImporterIfNecessary() {
   let autoImporterFileContent: string
   try {
@@ -347,7 +344,6 @@ function clearAutoImporterIfNecessary() {
   } catch {
     return
   }
-  // Only autoImporter files that point at a server entry file contain `status = 'SET'` — we don't compare the whole content: the file as shipped on npm is also already reset but isn't byte-equal to what clearAutoImporter() writes.
   if (!autoImporterFileContent.includes(`status = 'SET'`)) return
   clearAutoImporter('UNSET')
 }
