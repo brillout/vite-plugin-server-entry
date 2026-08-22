@@ -1,3 +1,14 @@
+## [0.7.21](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.20...v0.7.21) (2026-08-22)
+
+
+### Bug Fixes
+
+* avoid swallowing unexpected errors ([70eb1d4](https://github.com/brillout/vite-plugin-server-entry/commit/70eb1d4a284a2a6512070205dfb8664cb4968f1d))
+* reset a stale autoImporter when auto-import is disabled ([#36](https://github.com/brillout/vite-plugin-server-entry/issues/36)) ([04d4943](https://github.com/brillout/vite-plugin-server-entry/commit/04d4943f2cfbf61bcb309d0a7874706d6348c1d6))
+* skip writing autoImporter.js when already up-to-date ([#37](https://github.com/brillout/vite-plugin-server-entry/issues/37)) ([4b53feb](https://github.com/brillout/vite-plugin-server-entry/commit/4b53feb16ef6b30239929dfbc6eb80b77ddd41f3))
+
+
+
 ## [0.7.20](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.19...v0.7.20) (2026-08-21)
 
 
