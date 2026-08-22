@@ -24,7 +24,7 @@ import {
   genRandomId,
 } from './utils.js'
 import path from 'path'
-import { writeFileSync, renameSync } from 'fs'
+import { writeFileSync, renameSync, readFileSync } from 'fs'
 import type { AutoImporterCleared } from '../runtime/AutoImporter.js'
 import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase.js'
 import { debugLogsBuildBegin, debugLogsBuildEnd, debugLogsBuildDisabled } from './debugLogsBuild.js'
@@ -59,10 +59,9 @@ type PluginConfigProvidedByLibrary = {
 // - End user (although to my knowledge no user is using this)
 type PluginConfigProvidedByUser = {
   inject?: boolean // No functionality whatsoever: only used to communicate between Vike and vike-server.
+  // Don't point the autoImporter at the server entry file — e.g. Vike sets it when pre-rendering is going to remove dist/server/ (https://vike.dev/prerender#keepDistServer): runtimes then fall back gracefully (crawling outDir, or e.g. Telefunc's telefunction registration). The autoImporter is also reset if a previous build wrote a pointer; it's never written when it's already reset.
   disableAutoImport?: boolean
   disableServerEntryEmit?: boolean
-  // Whether the server entry file is removed after the app is built — e.g. Vike sets it when pre-rendering is going to remove dist/server/ (https://vike.dev/prerender#keepDistServer). The autoImporter is then reset (status 'UNSET') instead of pointing to a file that won't exist at runtime: runtimes fall back gracefully (crawling outDir, or e.g. Telefunc's telefunction registration).
-  serverEntryWillBeRemoved?: boolean
 }
 // The resolved aggregation of the config set by the user, and all the configs set by libraries (e.g. the config set by Vike and the config set by Telefunc).
 type PluginConfigResolved = {
@@ -71,7 +70,6 @@ type PluginConfigResolved = {
   inject: boolean
   disableAutoImport: boolean
   disableServerEntryEmit: boolean
-  serverEntryWillBeRemoved: boolean
 }
 type Library = {
   libraryName: string
@@ -200,6 +198,8 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
 
           if (!isAutoImportDisabled(config)) {
             clearAutoImporter('BUILDING')
+          } else {
+            clearAutoImporterIfNecessary()
           }
         },
       },
@@ -210,19 +210,13 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
 
           // Write node_modules/@brillout/vite-plugin-server-entry/dist/autoImporter.js
           if (!isAutoImportDisabled(config)) {
-            if (config._vitePluginServerEntry.serverEntryWillBeRemoved) {
-              // The server entry file won't exist at runtime (e.g. Vike removes dist/server/ after pre-rendering fully pre-renderable apps) => don't point the autoImporter at it. Runtimes then see 'UNSET' and fall back gracefully (crawling outDir, or e.g. Telefunc's telefunction registration) instead of importing a file that doesn't exist anymore.
-              // We write 'UNSET' instead of skipping the write: the autoImporter may still hold the pointer written by a previous build.
-              const autoImporterFileContent = clearAutoImporter('UNSET')
-              debugLogsBuildEnd(autoImporterFileContent)
-            } else {
-              const entry = findServerEntry(bundle, getOutDir(config, this.environment))
-              assert(entry)
-              const entryFileName = entry.fileName
-              if (!entryFileName) assert(false, { entry })
-              setAutoImporter(config, this.environment, entryFileName)
-            }
+            const entry = findServerEntry(bundle, getOutDir(config, this.environment))
+            assert(entry)
+            const entryFileName = entry.fileName
+            if (!entryFileName) assert(false, { entry })
+            setAutoImporter(config, this.environment, entryFileName)
           } else {
+            clearAutoImporterIfNecessary()
             debugLogsBuildDisabled()
           }
         },
@@ -246,7 +240,6 @@ function resolveConfig(
     inject: false,
     disableAutoImport: false,
     disableServerEntryEmit: false,
-    serverEntryWillBeRemoved: false,
   }
   objectAssign(configUnresolved, {
     _vitePluginServerEntry: pluginConfigResolved,
@@ -280,9 +273,6 @@ function applyPluginConfigProvidedByUser(config: ConfigResolved & ConfigUnresolv
   }
   if (pluginConfigProvidedByUser.disableServerEntryEmit !== undefined) {
     pluginConfigResolved.disableServerEntryEmit = pluginConfigProvidedByUser.disableServerEntryEmit
-  }
-  if (pluginConfigProvidedByUser.serverEntryWillBeRemoved !== undefined) {
-    pluginConfigResolved.serverEntryWillBeRemoved = pluginConfigProvidedByUser.serverEntryWillBeRemoved
   }
 }
 
@@ -347,6 +337,19 @@ function clearAutoImporter(status: AutoImporterCleared['status']): string {
   const autoImporterFileContent = [`export const status = '${status}';`, ''].join('\n')
   writeAutoImporterFile(autoImporterFileContent)
   return autoImporterFileContent
+}
+// When auto-import is disabled, ensure the autoImporter doesn't point at a server entry file: a previous build (e.g. before the user enabled pre-rendering) may have written a pointer that would dangle — e.g. Vike removes dist/server/ after pre-rendering fully pre-renderable apps, and any runtime consulting the pointer would then crash with ERR_MODULE_NOT_FOUND (vikejs/vike#3483).
+// We only write when needed: the autoImporter is usually already reset (e.g. as shipped on npm) — in particular, environments where node_modules/ shouldn't (Yarn PnP) or cannot (Bazel) be written to are left untouched.
+function clearAutoImporterIfNecessary() {
+  let autoImporterFileContent: string
+  try {
+    autoImporterFileContent = readFileSync(autoImporterFilePath, 'utf8')
+  } catch {
+    return
+  }
+  // Only autoImporter files that point at a server entry file contain `status = 'SET'` — we don't compare the whole content: the file as shipped on npm is also already reset but isn't byte-equal to what clearAutoImporter() writes.
+  if (!autoImporterFileContent.includes(`status = 'SET'`)) return
+  clearAutoImporter('UNSET')
 }
 
 /** Is `semver1` higher than `semver2`?*/
