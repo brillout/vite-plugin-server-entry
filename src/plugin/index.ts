@@ -509,7 +509,7 @@ function writeAutoImporterFile(fileContentNew: string, skipWrite?: SkipWrite) {
     // bump its mtime (potentially triggering file watchers) and break the pnpm store hard link
     // (see comment below) even though nothing changed.
     if (fileContentCurrent === fileContentNew) return
-    if (skipWrite && skipWrite(fileContentCurrent)) return
+    if (skipWrite?.(fileContentCurrent)) return
   }
   const filePathTmp = `${autoImporterFilePath}.${genRandomId()}.tmp`
   try {
