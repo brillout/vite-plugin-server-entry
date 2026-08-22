@@ -511,20 +511,21 @@ function writeAutoImporterFile(fileContentNew: string, skipWrite?: SkipWrite) {
     if (fileContentCurrent === fileContentNew) return
     if (skipWrite && skipWrite(fileContentCurrent)) return
   }
+  const filePathTmp = `${autoImporterFilePath}.${genRandomId()}.tmp`
   try {
-    // Write-then-rename instead of writing in place. Package managers with a content-addressable store
-    // (e.g. pnpm) install autoImporter.js as a hard link into their global store — and since the shipped
-    // file is byte-identical across plugin versions, the store file can even be shared across plugin
-    // versions and across unrelated projects. Writing in place would thus mutate the store and poison
-    // other projects on the same machine. rename() only replaces the directory entry (breaking the hard
-    // link) and leaves the store file untouched. It's also atomic: a concurrently running server never
-    // observes a half-written autoImporter.js.
-    const filePathTmp = `${autoImporterFilePath}.${genRandomId()}.tmp`
     writeFileSync(filePathTmp, fileContentNew)
-    renameSync(filePathTmp, autoImporterFilePath)
   } catch {
     // Cannot write to filesystem when using Bazel
     // https://github.com/vikejs/vike/issues/3006
     globalObject.cannotWriteFilesystem = true
+    return
   }
+  // Write-then-rename instead of writing in place. Package managers with a content-addressable store
+  // (e.g. pnpm) install autoImporter.js as a hard link into their global store — and since the shipped
+  // file is byte-identical across plugin versions, the store file can even be shared across plugin
+  // versions and across unrelated projects. Writing in place would thus mutate the store and poison
+  // other projects on the same machine. rename() only replaces the directory entry (breaking the hard
+  // link) and leaves the store file untouched. It's also atomic: a concurrently running server never
+  // observes a half-written autoImporter.js.
+  renameSync(filePathTmp, autoImporterFilePath)
 }
