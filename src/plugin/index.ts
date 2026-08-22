@@ -332,19 +332,13 @@ function setAutoImporter(config: ConfigResolved, viteEnv: Environment, entryFile
   debugLogsBuildEnd(autoImporterFileContent)
   writeAutoImporterFile(autoImporterFileContent)
 }
-function clearAutoImporter(status: AutoImporterCleared['status']) {
+function clearAutoImporter(status: AutoImporterCleared['status'], skipWrite?: SkipWrite) {
   const autoImporterFileContent = [`export const status = '${status}';`, ''].join('\n')
-  writeAutoImporterFile(autoImporterFileContent)
+  writeAutoImporterFile(autoImporterFileContent, skipWrite)
 }
 function clearAutoImporterIfNecessary() {
-  let autoImporterFileContent: string
-  try {
-    autoImporterFileContent = readFileSync(autoImporterFilePath, 'utf8')
-  } catch {
-    return
-  }
-  if (!autoImporterFileContent.includes(`status = 'SET'`)) return
-  clearAutoImporter('UNSET')
+  // Only reset a stale `status = 'SET'` — don't touch the file otherwise
+  clearAutoImporter('UNSET', (fileContentCurrent) => !fileContentCurrent.includes(`status = 'SET'`))
 }
 
 /** Is `semver1` higher than `semver2`?*/
@@ -501,7 +495,22 @@ function getServerEntryName(config: ConfigResolved) {
   return serverEntryName
 }
 
-function writeAutoImporterFile(fileContentNew: string) {
+// Decides, given the current autoImporter.js content, whether the write should be skipped
+type SkipWrite = (fileContentCurrent: string) => boolean
+function writeAutoImporterFile(fileContentNew: string, skipWrite?: SkipWrite) {
+  let fileContentCurrent: string | null = null
+  try {
+    fileContentCurrent = readFileSync(autoImporterFilePath, 'utf8')
+  } catch {
+    // Cannot read the file (e.g. it doesn't exist) — skip the checks below and write.
+  }
+  if (fileContentCurrent !== null) {
+    // Skip the write if the file already has the target content: rewriting it would pointlessly
+    // bump its mtime (potentially triggering file watchers) and break the pnpm store hard link
+    // (see comment below) even though nothing changed.
+    if (fileContentCurrent === fileContentNew) return
+    if (skipWrite?.(fileContentCurrent)) return
+  }
   const filePathTmp = `${autoImporterFilePath}.${genRandomId()}.tmp`
   try {
     writeFileSync(filePathTmp, fileContentNew)
