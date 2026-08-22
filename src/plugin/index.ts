@@ -58,7 +58,7 @@ type PluginConfigProvidedByLibrary = {
 // - End user (although to my knowledge no user is using this)
 type PluginConfigProvidedByUser = {
   inject?: boolean // No functionality whatsoever: only used to communicate between Vike and vike-server.
-  // Don't point autoImporter.js at the server entry file
+  // Fully disable autoImporter.js — i.e. don't set it to import dist/server/entry.js
   disableAutoImport?: boolean
   disableServerEntryEmit?: boolean
 }
