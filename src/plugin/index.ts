@@ -332,19 +332,16 @@ function setAutoImporter(config: ConfigResolved, viteEnv: Environment, entryFile
   debugLogsBuildEnd(autoImporterFileContent)
   writeAutoImporterFile(autoImporterFileContent)
 }
-function clearAutoImporter(status: AutoImporterCleared['status']) {
+function clearAutoImporter(status: AutoImporterCleared['status'], isWriteNecessary?: IsWriteNecessary) {
   const autoImporterFileContent = [`export const status = '${status}';`, ''].join('\n')
-  writeAutoImporterFile(autoImporterFileContent)
+  writeAutoImporterFile(autoImporterFileContent, isWriteNecessary)
 }
 function clearAutoImporterIfNecessary() {
-  let autoImporterFileContent: string
-  try {
-    autoImporterFileContent = readFileSync(autoImporterFilePath, 'utf8')
-  } catch {
-    return
-  }
-  if (!autoImporterFileContent.includes(`status = 'SET'`)) return
-  clearAutoImporter('UNSET')
+  // Only reset a stale `status = 'SET'` — don't touch the file otherwise
+  clearAutoImporter(
+    'UNSET',
+    (fileContentCurrent) => fileContentCurrent !== null && fileContentCurrent.includes(`status = 'SET'`),
+  )
 }
 
 /** Is `semver1` higher than `semver2`?*/
@@ -501,15 +498,20 @@ function getServerEntryName(config: ConfigResolved) {
   return serverEntryName
 }
 
-function writeAutoImporterFile(fileContentNew: string) {
+// Decides, given the current autoImporter.js content (`null` when the file cannot be read), whether the file should be written
+type IsWriteNecessary = (fileContentCurrent: string | null) => boolean
+function writeAutoImporterFile(fileContentNew: string, isWriteNecessary?: IsWriteNecessary) {
+  let fileContentCurrent: string | null = null
+  try {
+    fileContentCurrent = readFileSync(autoImporterFilePath, 'utf8')
+  } catch {
+    // Cannot read the file (e.g. it doesn't exist)
+  }
   // Skip the write if the file already has the target content: rewriting it would pointlessly
   // bump its mtime (potentially triggering file watchers) and break the pnpm store hard link
   // (see comment below) even though nothing changed.
-  try {
-    if (readFileSync(autoImporterFilePath, 'utf8') === fileContentNew) return
-  } catch {
-    // Cannot read the file (e.g. it doesn't exist) — proceed with writing it.
-  }
+  if (fileContentCurrent === fileContentNew) return
+  if (isWriteNecessary && !isWriteNecessary(fileContentCurrent)) return
   try {
     // Write-then-rename instead of writing in place. Package managers with a content-addressable store
     // (e.g. pnpm) install autoImporter.js as a hard link into their global store — and since the shipped
