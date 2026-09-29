@@ -1,3 +1,12 @@
+## [0.7.22](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.21...v0.7.22) (2026-09-29)
+
+
+### Bug Fixes
+
+* emit the server entry upon `builder.sharedConfigBuild: true` ([#38](https://github.com/brillout/vite-plugin-server-entry/issues/38)) ([ba0d3a4](https://github.com/brillout/vite-plugin-server-entry/commit/ba0d3a486ef98dceef289c806c4f48c48b5e7599))
+
+
+
 ## [0.7.21](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.20...v0.7.21) (2026-08-22)
 
 
