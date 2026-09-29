@@ -29,6 +29,7 @@ import type { AutoImporterCleared } from '../runtime/AutoImporter.js'
 import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase.js'
 import { debugLogsBuildBegin, debugLogsBuildEnd, debugLogsBuildDisabled } from './debugLogsBuild.js'
 import { fileURLToPath } from 'url'
+import type { InputOption } from '../utils/injectRollupInputs.js'
 import { createRequire } from 'module'
 const importMetaUrl: string =
   import.meta.url +
@@ -100,7 +101,7 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
   assert(libraryName)
   let isNotLeaderInstance: boolean | undefined
   let librariesLength: undefined | number
-  const skip = (viteEnv: Environment | undefined) => {
+  const skip = (viteEnv: Environment) => {
     assert('boolean' === typeof isNotLeaderInstance)
     const isServerSide = isViteServerSide(config, viteEnv)
     return isNotLeaderInstance || !isServerSide
@@ -141,15 +142,21 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
             isNotLeaderInstance = !isLeaderPluginInstance(config, libraryName)
             assert([undefined, isNotLeaderInstance].includes(prev))
           }
-          if (skip(undefined)) return
+          /* this.environment isn't available in configResolved()
+          if (skip(this.environment)) return
+          //*/
+          if (isNotLeaderInstance) return
+          const serverBuild = getServerBuild(config)
+          if (!serverBuild) return
 
           assertApiVersions(config, pluginConfigProvidedByLibrary.libraryName)
 
           applyPluginConfigProvidedByUser(config)
 
           if (!config._vitePluginServerEntry.disableServerEntryEmit) {
-            const serverEntryName = getServerEntryName(config)
-            config.build.rollupOptions.input = injectRollupInputs({ [serverEntryName]: serverEntryVirtualId }, config)
+            const { rollupOptions } = serverBuild
+            const serverEntryName = getServerEntryName(rollupOptions.input)
+            rollupOptions.input = injectRollupInputs({ [serverEntryName]: serverEntryVirtualId }, rollupOptions.input)
           }
         },
       },
@@ -485,8 +492,18 @@ function isAutoImportDisabled(config: ConfigResolved): boolean {
   return config._vitePluginServerEntry.disableAutoImport || globalObject.cannotWriteFilesystem || isYarnPnP()
 }
 
-function getServerEntryName(config: ConfigResolved) {
-  const entries = normalizeRollupInput(config.build.rollupOptions.input)
+// The build config that should contain the server entry
+function getServerBuild(config: ConfigResolved): ConfigResolved['build'] | null {
+  // Upon `builder.sharedConfigBuild: true` (e.g. set by @vitejs/plugin-rsc) the root `config.build` is used by no environment
+  if (config.builder?.sharedConfigBuild) {
+    // Same as the auto importer: only the `ssr` environment
+    return config.environments.ssr?.build ?? null
+  }
+  return isViteServerSide(config, undefined) ? config.build : null
+}
+
+function getServerEntryName(input: InputOption | undefined) {
+  const entries = normalizeRollupInput(input)
   assert(
     entries[serverEntryFileNameBase] !== serverEntryVirtualId &&
       entries[serverEntryFileNameBaseAlternative] !== serverEntryVirtualId,
