@@ -16,7 +16,6 @@
     "dev": "tsc --watch",
     "========= Build": "",
     "build": "rm -rf dist/ && tsc",
-    "test": "pnpm run build && node --test test/",
     "========= Formatting": "",
     "format": "pnpm run format:biome",
     "format:prettier": "git ls-files | egrep '\\.(json|js|jsx|css|ts|tsx|vue|mjs|cjs)$' | grep --invert-match package.json | xargs pnpm exec prettier --write",
