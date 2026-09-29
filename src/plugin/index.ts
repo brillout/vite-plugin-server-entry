@@ -143,6 +143,9 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
             assert([undefined, isNotLeaderInstance].includes(prev))
           }
           if (isNotLeaderInstance) return
+          /* this.environment isn't available in configResolved()
+          if (skip(this.environment)) return
+          */
           const serverBuild = getServerBuild(config)
           if (!serverBuild) return
 
