@@ -101,7 +101,7 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
   assert(libraryName)
   let isNotLeaderInstance: boolean | undefined
   let librariesLength: undefined | number
-  const skip = (viteEnv: Environment | undefined) => {
+  const skip = (viteEnv: Environment) => {
     assert('boolean' === typeof isNotLeaderInstance)
     const isServerSide = isViteServerSide(config, viteEnv)
     return isNotLeaderInstance || !isServerSide
@@ -144,7 +144,7 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
           }
           /* this.environment isn't available in configResolved()
           if (skip(this.environment)) return
-          */
+          //*/
           if (isNotLeaderInstance) return
           const serverBuild = getServerBuild(config)
           if (!serverBuild) return
