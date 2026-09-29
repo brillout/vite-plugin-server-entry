@@ -1,12 +1,17 @@
 export { injectRollupInputs }
 export { normalizeRollupInput }
+export type { InputOption }
 
-import type { ResolvedConfig } from 'vite'
 import { assert } from './assert.js'
 import { isObject } from './isObject.js'
 
-function injectRollupInputs(inputsNew: Record<string, string>, config: ResolvedConfig): Record<string, string> {
-  const inputsCurrent = normalizeRollupInput(config.build.rollupOptions.input)
+type InputOption = string | string[] | Record<string, string>
+
+function injectRollupInputs(
+  inputsNew: Record<string, string>,
+  inputCurrent: InputOption | undefined,
+): Record<string, string> {
+  const inputsCurrent = normalizeRollupInput(inputCurrent)
   const input = {
     ...inputsNew,
     ...inputsCurrent,
@@ -14,7 +19,7 @@ function injectRollupInputs(inputsNew: Record<string, string>, config: ResolvedC
   return input
 }
 
-function normalizeRollupInput(input?: string | string[] | Record<string, string>): Record<string, string> {
+function normalizeRollupInput(input?: InputOption): Record<string, string> {
   if (!input) {
     return {}
   }
