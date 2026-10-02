@@ -1,3 +1,12 @@
+## [0.7.23](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.22...v0.7.23) (2026-10-02)
+
+
+### Bug Fixes
+
+* add the server entry only to the ssr environment upon `builder.sharedConfigBuild: false` ([#39](https://github.com/brillout/vite-plugin-server-entry/issues/39)) ([0b68c59](https://github.com/brillout/vite-plugin-server-entry/commit/0b68c592d3712c9166c4e883e4261b573ecae4ef))
+
+
+
 ## [0.7.22](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.21...v0.7.22) (2026-09-29)
 
 
