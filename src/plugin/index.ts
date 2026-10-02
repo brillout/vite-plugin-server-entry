@@ -499,7 +499,12 @@ function getServerBuild(config: ConfigResolved): ConfigResolved['build'] | null 
     // Same as the auto importer: only the `ssr` environment
     return config.environments.ssr?.build ?? null
   }
-  return isViteServerSide(config, undefined) ? config.build : null
+  if (!isViteServerSide(config, undefined)) return null
+  // Add the server entry only to the `ssr` environment
+  // - Upon `builder.sharedConfigBuild: false` (Vite's default) the config is resolved once per environment
+  const ssrBuild = config.environments?.ssr?.build
+  if (ssrBuild && config.build.rollupOptions !== ssrBuild.rollupOptions) return null
+  return config.build
 }
 
 function getServerEntryName(input: InputOption | undefined) {
