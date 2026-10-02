@@ -500,7 +500,8 @@ function getServerBuild(config: ConfigResolved): ConfigResolved['build'] | null 
     return config.environments.ssr?.build ?? null
   }
   if (!isViteServerSide(config, undefined)) return null
-  // Upon `builder.sharedConfigBuild: false` (Vite's default) the config is resolved once per environment: only the `ssr` environment gets the entry
+  // Add the server entry only to the `ssr` environment
+  // - Upon `builder.sharedConfigBuild: false` (Vite's default) the config is resolved once per environment
   const ssrBuild = config.environments?.ssr?.build
   if (ssrBuild && config.build.rollupOptions !== ssrBuild.rollupOptions) return null
   return config.build
