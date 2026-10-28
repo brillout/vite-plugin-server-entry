@@ -8,8 +8,8 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "strict": true,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "rootDir": "./src/"
   },
-  "rootDir": "./src/",
   "include": ["src/**/*"]
 }
