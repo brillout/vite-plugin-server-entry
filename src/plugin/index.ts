@@ -146,12 +146,11 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
           if (skip(this.environment)) return
           //*/
           if (isNotLeaderInstance) return
+          applyPluginConfigProvidedByUser(config)
           const serverBuild = getServerBuild(config)
           if (!serverBuild) return
 
           assertApiVersions(config, pluginConfigProvidedByLibrary.libraryName)
-
-          applyPluginConfigProvidedByUser(config)
 
           if (!config._vitePluginServerEntry.disableServerEntryEmit) {
             const { rollupOptions } = serverBuild
@@ -224,6 +223,29 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
           } else {
             clearAutoImporterIfNecessary()
             debugLogsBuildDisabled()
+          }
+        },
+      },
+    },
+    {
+      name: `${pluginName}:autoImporter`,
+      apply: 'build',
+      load: {
+        filter: {
+          id: new RegExp(`^${escapeRegex(autoImporterFilePath)}$`),
+        },
+        handler(id) {
+          if (skip(this.environment)) return
+          if (config._vitePluginServerEntry.disableAutoImport) return
+
+          // Make the bundled autoImporter.js import the server entry
+          // - Upon bundling the runtime (e.g. Cloudflare Workers) autoImporter.js is bundled before generateBundle() sets it
+          if (id === autoImporterFilePath) {
+            return [
+              "export const status = 'BUNDLED';",
+              `export const loadServerEntry = async () => { await import(${JSON.stringify(serverEntryVirtualId)}); };`,
+              '',
+            ].join('\n')
           }
         },
       },

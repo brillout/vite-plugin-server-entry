@@ -47,6 +47,11 @@ async function importServerProductionEntry(
   let requireError: unknown
   let isOutsideOfCwd: boolean | null = null
 
+  if (autoImporter.status === 'BUNDLED') {
+    await autoImporter.loadServerEntry()
+    success = true
+  }
+
   if (autoImporter.status === 'SET') {
     // In a monorepo, the autoImporter might belong to another project => don't use it
     isOutsideOfCwd = isServerEntryOutsideOfCwd(autoImporter.paths)

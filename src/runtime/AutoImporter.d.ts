@@ -6,6 +6,10 @@ export type AutoImporter =
       loadServerEntry: () => Promise<void>
       paths: AutoImporterPaths
     }
+  | {
+      status: 'BUNDLED'
+      loadServerEntry: () => Promise<void>
+    }
 // prettier-ignore
 // biome-ignore format:
 export type AutoImporterCleared =
