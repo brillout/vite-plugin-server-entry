@@ -233,7 +233,7 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
       apply: 'build',
       load: {
         filter: {
-          id: autoImporterFilePathRegex,
+          id: [new RegExp(`^${escapeRegex(autoImporterFilePath)}$`), autoImporterFilePathRegex],
         },
         handler(id) {
           if (skip(this.environment)) return
@@ -242,7 +242,7 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
           // Make the bundled autoImporter.js import the server entry
           // - Upon bundling the runtime (e.g. Cloudflare Workers) autoImporter.js is bundled before generateBundle() sets it
           // - Including the autoImporter.js of other @brillout/vite-plugin-server-entry copies (e.g. if Vike and Telefunc use different versions)
-          if (autoImporterFilePathRegex.test(id)) {
+          if (id === autoImporterFilePath || autoImporterFilePathRegex.test(id)) {
             const { distServerPathAbsolute } = getDistServerPathRelative(config, this.environment)
             const autoImporterFileContent = getAutoImporterFileContent({
               autoImporterFilePathOriginal: id,
