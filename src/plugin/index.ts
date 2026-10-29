@@ -25,7 +25,7 @@ import {
 } from './utils.js'
 import path from 'path'
 import { writeFileSync, renameSync, readFileSync } from 'fs'
-import type { AutoImporterCleared } from '../runtime/AutoImporter.js'
+import type { AutoImporterCleared, AutoImporterPaths } from '../runtime/AutoImporter.js'
 import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase.js'
 import { debugLogsBuildBegin, debugLogsBuildEnd, debugLogsBuildDisabled } from './debugLogsBuild.js'
 import { fileURLToPath } from 'url'
@@ -43,6 +43,7 @@ const globalObject = getGlobalObject('plugin/index.ts', {
 })
 
 const autoImporterFilePath = toPosixPath(require_.resolve('../runtime/autoImporter.js'))
+const autoImporterFilePathRegex = /\/@brillout\/vite-plugin-server-entry\/dist\/esm\/runtime\/autoImporter\.js$/
 const serverEntryVirtualId = 'virtual:@brillout/vite-plugin-server-entry:serverEntry'
 // https://vitejs.dev/guide/api-plugin.html#virtual-modules-convention
 const virtualIdPrefix = '\0'
@@ -232,7 +233,7 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
       apply: 'build',
       load: {
         filter: {
-          id: new RegExp(`^${escapeRegex(autoImporterFilePath)}$`),
+          id: autoImporterFilePathRegex,
         },
         handler(id) {
           if (skip(this.environment)) return
@@ -240,12 +241,17 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
 
           // Make the bundled autoImporter.js import the server entry
           // - Upon bundling the runtime (e.g. Cloudflare Workers) autoImporter.js is bundled before generateBundle() sets it
-          if (id === autoImporterFilePath) {
-            return [
-              "export const status = 'BUNDLED';",
-              `export const loadServerEntry = async () => { await import(${JSON.stringify(serverEntryVirtualId)}); };`,
-              '',
-            ].join('\n')
+          // - Including the autoImporter.js of other @brillout/vite-plugin-server-entry copies (e.g. if Vike and Telefunc use different versions)
+          if (autoImporterFilePathRegex.test(id)) {
+            const { distServerPathAbsolute } = getDistServerPathRelative(config, this.environment)
+            const autoImporterFileContent = getAutoImporterFileContent({
+              autoImporterFilePathOriginal: id,
+              serverEntryFilePathRelative: serverEntryVirtualId,
+              // The entry's file name isn't known before generateBundle()
+              serverEntryFilePathAbsolute: path.posix.join(distServerPathAbsolute, serverEntryFileNameBase),
+            })
+            debugLogsBuildEnd(autoImporterFileContent)
+            return autoImporterFileContent
           }
         },
       },
@@ -346,20 +352,27 @@ function setAutoImporter(config: ConfigResolved, viteEnv: Environment, entryFile
   const { root } = config
   assertPosixPath(root)
   assert(!isAutoImportDisabled(config))
-  const autoImporterFileContent = [
+  const autoImporterFileContent = getAutoImporterFileContent({
+    autoImporterFilePathOriginal: autoImporterFilePath,
+    serverEntryFilePathRelative,
+    serverEntryFilePathAbsolute,
+  })
+  debugLogsBuildEnd(autoImporterFileContent)
+  writeAutoImporterFile(autoImporterFileContent)
+}
+function getAutoImporterFileContent(paths: Omit<AutoImporterPaths, 'autoImporterFilePathActual'>) {
+  return [
     "export const status = 'SET';",
     `export const pluginVersion = ${JSON.stringify(projectInfo.projectVersion)};`,
-    `export const loadServerEntry = async () => { await import(${JSON.stringify(serverEntryFilePathRelative)}); };`,
+    `export const loadServerEntry = async () => { await import(${JSON.stringify(paths.serverEntryFilePathRelative)}); };`,
     'export const paths = {',
-    `  autoImporterFilePathOriginal: ${JSON.stringify(autoImporterFilePath)},`,
+    `  autoImporterFilePathOriginal: ${JSON.stringify(paths.autoImporterFilePathOriginal)},`,
     `  autoImporterFilePathActual: (() => { try { return import.meta.url } catch { return null } })(),`,
-    `  serverEntryFilePathRelative: ${JSON.stringify(serverEntryFilePathRelative)},`,
-    `  serverEntryFilePathAbsolute: ${JSON.stringify(serverEntryFilePathAbsolute)},`,
+    `  serverEntryFilePathRelative: ${JSON.stringify(paths.serverEntryFilePathRelative)},`,
+    `  serverEntryFilePathAbsolute: ${JSON.stringify(paths.serverEntryFilePathAbsolute)},`,
     '};',
     '',
   ].join('\n')
-  debugLogsBuildEnd(autoImporterFileContent)
-  writeAutoImporterFile(autoImporterFileContent)
 }
 function clearAutoImporter(status: AutoImporterCleared['status'], skipWrite?: SkipWrite) {
   const autoImporterFileContent = [`export const status = '${status}';`, ''].join('\n')
