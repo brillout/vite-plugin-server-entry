@@ -116,7 +116,7 @@ For example, in the following, Vike is used with a vanilla Node.js server that i
 - [Vike > Integration > `+server` > Extra control > `+serverEntry.js` => `$ node server/index.js`](https://vike.dev/server#serverentry-js-node-server-index-js)
 
 > [!NOTE]
-> The fundamental problem here is that the user's `server/index.js` (not processed by Vite) cannot magically load the Vite entry of Vike nor of tools like Telefunc — the vanilla Node.js server needs to import the Vite land in one way or another.
+> The fundamental problem here is that the user's `server/index.js` (not processed by Vite) cannot magically load the Vite entry of Vike nor the Vite entry of tools like Telefunc — the vanilla Node.js server needs to import the Vite land in one way or another.
 
 When the server entry is processed by Vite then `@brillout/vite-plugin-server-entry` is useless: using a Vite virtual module is dramatically simpler and fundamentally more reliable.
 
@@ -125,4 +125,4 @@ When the server entry is processed by Vite then `@brillout/vite-plugin-server-en
 >
 > Ideally, in the future (see [`vitejs/ecosystem#19` - Server entry injection](https://github.com/vitejs/ecosystem/issues/19)), Vite natively supports this instead of requiring a tool like `@brillout/vite-plugin-server-entry`. (The fundamental problem here is: how can a tool like Telefunc inject its entry into the server entry defined by a Vite framework like Vike or SvelteKit?)
 >
-> In the short term, this can be a valid reason to use `@brillout/vite-plugin-server-entry` although we encourage to finding solutions only using Vite instead (while nugding the Vite team to work on this problem).
+> In the short term, this can be a valid reason to use `@brillout/vite-plugin-server-entry` although we encourage to find a simpler solution only using Vite instead (while nugding the Vite team to work on this problem).
