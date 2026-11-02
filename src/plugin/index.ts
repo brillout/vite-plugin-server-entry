@@ -369,7 +369,7 @@ function clearAutoImporterIfServerEntryMissing() {
   clearAutoImporter(
     'UNSET',
     // Reset if it imports a missing dist/server/entry.js
-    // - Don't reset if dist/server/entry.js exists — autoImporter.js may still get bundled later, for example: Vitest starts Vite in dev mode => `$ vitest run` between `$ vite build` and `$ wrangler deploy` would otherwise ship a Worker without telefunctions
+    // - Don't reset if dist/server/entry.js exists — autoImporter.js may still get bundled later: for example, Vitest starts Vite in dev mode => `$ vitest run` between `$ vite build` and `$ wrangler deploy` would otherwise ship a Worker without telefunctions
     (fileContentCurrent) => {
       if (!isAutoImporterSet(fileContentCurrent)) return true
       const serverEntryFilePathAbsolute = /serverEntryFilePathAbsolute: (".*"),/.exec(fileContentCurrent)?.[1]
