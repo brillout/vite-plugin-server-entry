@@ -24,7 +24,7 @@ import {
   genRandomId,
 } from './utils.js'
 import path from 'path'
-import { writeFileSync, renameSync, readFileSync } from 'fs'
+import { writeFileSync, renameSync, readFileSync, existsSync } from 'fs'
 import type { AutoImporterCleared } from '../runtime/AutoImporter.js'
 import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase.js'
 import { debugLogsBuildBegin, debugLogsBuildEnd, debugLogsBuildDisabled } from './debugLogsBuild.js'
@@ -228,6 +228,17 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
         },
       },
     },
+    {
+      name: `${pluginName}:dev`,
+      apply: (_, env) => env.command === 'serve' && !env.isPreview,
+      configResolved: {
+        handler() {
+          // Reset autoImporter.js if its server entry was removed
+          // - The dependency optimizer of the dev server fails upon a pointer to a removed server entry
+          clearAutoImporterIfServerEntryMissing()
+        },
+      },
+    },
   ] as Plugin[]
 }
 // Avoid multiple Vite versions mismatch
@@ -348,6 +359,16 @@ function clearAutoImporterIfNecessary() {
     'UNSET',
     // Only reset a stale `status = 'SET'` — don't touch the file otherwise
     (fileContentCurrent) => !fileContentCurrent.includes(`status = 'SET'`),
+  )
+}
+function clearAutoImporterIfServerEntryMissing() {
+  clearAutoImporter(
+    'UNSET',
+    // Keep a pointer to an existing server entry, since autoImporter.js may still get bundled later (e.g. by `$ wrangler deploy`)
+    (fileContentCurrent) => {
+      const serverEntryFilePathAbsolute = /serverEntryFilePathAbsolute: (".*"),/.exec(fileContentCurrent)?.[1]
+      return !serverEntryFilePathAbsolute || existsSync(JSON.parse(serverEntryFilePathAbsolute))
+    },
   )
 }
 
