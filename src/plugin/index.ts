@@ -233,6 +233,8 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
       apply: (_, env) => env.command === 'serve' && !env.isPreview,
       configResolved: {
         handler() {
+          // No skip(): each plugin instance resets its own copy of autoImporter.js
+
           // Reset autoImporter.js if its server entry was removed
           // - The dependency optimizer of the dev server fails upon a pointer to a removed server entry
           clearAutoImporterIfServerEntryMissing()
