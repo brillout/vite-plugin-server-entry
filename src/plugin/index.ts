@@ -373,9 +373,7 @@ function clearAutoImporterIfServerEntryMissing() {
     (fileContentCurrent) => {
       if (!isAutoImporterSet(fileContentCurrent)) return true
       const serverEntryFilePathAbsolute = /serverEntryFilePathAbsolute: (".*"),/.exec(fileContentCurrent)?.[1]
-      assert(serverEntryFilePathAbsolute)
-      assert(isAbsolutePath(serverEntryFilePathAbsolute))
-      assertPosixPath(serverEntryFilePathAbsolute)
+      assertIsValidPath(serverEntryFilePathAbsolute)
       return existsSync(JSON.parse(serverEntryFilePathAbsolute))
     },
   )
@@ -387,6 +385,11 @@ function isAutoImporterSet(fileContentCurrent: string) {
     assert(!fileContentCurrent.includes('SET'))
     return false
   }
+}
+function assertIsValidPath(filePath: string | undefined): asserts filePath {
+  assert(filePath)
+  assert(isAbsolutePath(filePath))
+  assertPosixPath(filePath)
 }
 
 /** Is `semver1` higher than `semver2`?*/
