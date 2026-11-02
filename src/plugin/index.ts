@@ -382,7 +382,7 @@ function isAutoImporterSet(fileContentCurrent: string) {
   if (fileContentCurrent.includes(`status = 'SET'`)) {
     return true
   } else {
-    assert(!fileContentCurrent.includes('SET'))
+    assert(!/\bSET/.test(fileContentCurrent))
     return false
   }
 }
