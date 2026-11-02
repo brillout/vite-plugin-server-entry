@@ -109,7 +109,7 @@ See [How the auto importer works](https://github.com/brillout/vite-plugin-server
 
 ## When to use this
 
-There is only one valid use case for `@brillout/vite-plugin-server-entry`: when the server entry isn't processed by Vite.
+The typical use case for `@brillout/vite-plugin-server-entry` is when the server entry isn't processed by Vite.
 
 For example, in the following, Vike is used with a vanilla Node.js server that isn't processed by Vite:
 - [Vike > API > `renderPage()` > Without `+serverEntry.js`](https://vike.dev/renderPage#without-serverentry-js)
