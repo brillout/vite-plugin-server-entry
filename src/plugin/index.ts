@@ -374,7 +374,6 @@ function clearAutoImporterIfServerEntryMissing() {
       if (!isAutoImporterSet(fileContentCurrent)) return true
       const serverEntryFilePathJson = /serverEntryFilePathRelative: (".*"),/.exec(fileContentCurrent)?.[1]
       assert(serverEntryFilePathJson)
-      // Resolve it as Vite's dependency optimizer does: relative to autoImporter.js
       const serverEntryFilePath = path.posix.join(
         path.posix.dirname(autoImporterFilePath),
         JSON.parse(serverEntryFilePathJson),
