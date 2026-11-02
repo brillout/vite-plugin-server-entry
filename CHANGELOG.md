@@ -1,3 +1,12 @@
+## [0.7.24](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.23...v0.7.24) (2026-11-02)
+
+
+### Bug Fixes
+
+* reset autoImporter.js upon `vite dev` if its server entry is missing ([#42](https://github.com/brillout/vite-plugin-server-entry/issues/42)) ([d4ea186](https://github.com/brillout/vite-plugin-server-entry/commit/d4ea1867571ea8a53abaede2a1a8a29f28b3befd))
+
+
+
 ## [0.7.23](https://github.com/brillout/vite-plugin-server-entry/compare/v0.7.22...v0.7.23) (2026-10-02)
 
 
