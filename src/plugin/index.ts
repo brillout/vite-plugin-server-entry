@@ -24,7 +24,7 @@ import {
   genRandomId,
 } from './utils.js'
 import path from 'path'
-import { writeFileSync, renameSync, readFileSync } from 'fs'
+import { writeFileSync, renameSync, readFileSync, existsSync } from 'fs'
 import type { AutoImporterCleared } from '../runtime/AutoImporter.js'
 import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase.js'
 import { debugLogsBuildBegin, debugLogsBuildEnd, debugLogsBuildDisabled } from './debugLogsBuild.js'
@@ -238,7 +238,7 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
           // Error during dependency optimization: [UNRESOLVED_IMPORT] Could not resolve '…/dist/server/entry.mjs' in …/@brillout/vite-plugin-server-entry/dist/esm/runtime/autoImporter.js
           // ```
           // https://github.com/brillout/vite-plugin-server-entry/pull/42
-          clearAutoImporterIfNecessary()
+          clearAutoImporterIfServerEntryMissing()
         },
       },
     },
@@ -362,6 +362,17 @@ function clearAutoImporterIfNecessary() {
     'UNSET',
     // Only reset a stale `status = 'SET'` — don't touch the file otherwise
     (fileContentCurrent) => !fileContentCurrent.includes(`status = 'SET'`),
+  )
+}
+function clearAutoImporterIfServerEntryMissing() {
+  clearAutoImporter(
+    'UNSET',
+    // Only reset a pointer to a missing server entry
+    // - autoImporter.js may still get bundled later: Vitest starts Vite in dev mode too, so `$ vitest run` between `$ vite build` and `$ wrangler deploy` would otherwise ship a Worker without telefunctions
+    (fileContentCurrent) => {
+      const serverEntryFilePathAbsolute = /serverEntryFilePathAbsolute: (".*"),/.exec(fileContentCurrent)?.[1]
+      return !serverEntryFilePathAbsolute || existsSync(JSON.parse(serverEntryFilePathAbsolute))
+    },
   )
 }
 
