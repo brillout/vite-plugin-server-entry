@@ -2,7 +2,7 @@ export { serverProductionEntryPlugin }
 export { serverEntryVirtualId }
 export type { PluginConfigProvidedByUser as VitePluginServerEntryOptions }
 
-import type { Plugin, ResolvedConfig as ConfigVite, Environment } from 'vite'
+import type { Plugin, ResolvedConfig as ConfigVite, Environment, ConfigEnv } from 'vite'
 import {
   isYarnPnP,
   assert,
@@ -24,7 +24,7 @@ import {
   genRandomId,
 } from './utils.js'
 import path from 'path'
-import { writeFileSync, renameSync, readFileSync } from 'fs'
+import { writeFileSync, renameSync, readFileSync, existsSync } from 'fs'
 import type { AutoImporterCleared } from '../runtime/AutoImporter.js'
 import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase.js'
 import { debugLogsBuildBegin, debugLogsBuildEnd, debugLogsBuildDisabled } from './debugLogsBuild.js'
@@ -228,6 +228,20 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
         },
       },
     },
+    {
+      name: `${pluginName}:dev`,
+      apply: (_, configEnv) => isDev(configEnv),
+      configResolved: {
+        handler() {
+          // Avoid this error:
+          // ```
+          // Error during dependency optimization: [UNRESOLVED_IMPORT] Could not resolve '…/dist/server/entry.mjs' in …/@brillout/vite-plugin-server-entry/dist/esm/runtime/autoImporter.js
+          // ```
+          // https://github.com/brillout/vite-plugin-server-entry/pull/42
+          clearAutoImporterIfServerEntryMissing()
+        },
+      },
+    },
   ] as Plugin[]
 }
 // Avoid multiple Vite versions mismatch
@@ -347,8 +361,40 @@ function clearAutoImporterIfNecessary() {
   clearAutoImporter(
     'UNSET',
     // Only reset a stale `status = 'SET'` — don't touch the file otherwise
-    (fileContentCurrent) => !fileContentCurrent.includes(`status = 'SET'`),
+    (fileContentCurrent) => !isAutoImporterSet(fileContentCurrent),
   )
+}
+function clearAutoImporterIfServerEntryMissing() {
+  // Reset autoImporter.js
+  clearAutoImporter(
+    'UNSET',
+    // Reset if it imports a missing dist/server/entry.js
+    // - Don't reset if dist/server/entry.js exists — autoImporter.js may still get bundled later: for example, Vitest starts Vite in dev mode => `$ vitest run` between `$ vite build` and `$ wrangler deploy` would otherwise ship a Worker without telefunctions
+    (fileContentCurrent) => {
+      if (!isAutoImporterSet(fileContentCurrent)) return true
+      const serverEntryFilePathJson = /serverEntryFilePathRelative: (".*"),/.exec(fileContentCurrent)?.[1]
+      assert(serverEntryFilePathJson)
+      const serverEntryFilePath = path.posix.join(
+        path.posix.dirname(autoImporterFilePath),
+        JSON.parse(serverEntryFilePathJson),
+      )
+      assertIsValidPath(serverEntryFilePath)
+      return existsSync(serverEntryFilePath)
+    },
+  )
+}
+function isAutoImporterSet(fileContentCurrent: string) {
+  if (fileContentCurrent.includes(`status = 'SET'`)) {
+    return true
+  } else {
+    assert(!/\bSET/.test(fileContentCurrent))
+    return false
+  }
+}
+function assertIsValidPath(filePath: string | undefined): asserts filePath {
+  assert(filePath)
+  assert(isAbsolutePath(filePath))
+  assertPosixPath(filePath)
 }
 
 /** Is `semver1` higher than `semver2`?*/
@@ -554,4 +600,10 @@ function writeAutoImporterFile(fileContentNew: string, skipWrite?: SkipWrite) {
   // link) and leaves the store file untouched. It's also atomic: a concurrently running server never
   // observes a half-written autoImporter.js.
   renameSync(filePathTmp, autoImporterFilePath)
+}
+
+function isDev(configEnv: ConfigEnv): boolean {
+  const { isPreview, command } = configEnv
+  assert(typeof isPreview === 'boolean')
+  return command === 'serve' && !isPreview
 }
