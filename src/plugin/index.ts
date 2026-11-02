@@ -370,8 +370,10 @@ function clearAutoImporterIfServerEntryMissing() {
     // Only reset a pointer to a missing server entry
     // - autoImporter.js may still get bundled later: Vitest starts Vite in dev mode too, so `$ vitest run` between `$ vite build` and `$ wrangler deploy` would otherwise ship a Worker without telefunctions
     (fileContentCurrent) => {
+      if (!isAutoImporterSet(fileContentCurrent)) return true
       const serverEntryFilePathAbsolute = /serverEntryFilePathAbsolute: (".*"),/.exec(fileContentCurrent)?.[1]
-      return !serverEntryFilePathAbsolute || existsSync(JSON.parse(serverEntryFilePathAbsolute))
+      assert(serverEntryFilePathAbsolute)
+      return existsSync(JSON.parse(serverEntryFilePathAbsolute))
     },
   )
 }
