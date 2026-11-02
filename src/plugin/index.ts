@@ -361,7 +361,7 @@ function clearAutoImporterIfNecessary() {
   clearAutoImporter(
     'UNSET',
     // Only reset a stale `status = 'SET'` — don't touch the file otherwise
-    (fileContentCurrent) => !fileContentCurrent.includes(`status = 'SET'`),
+    (fileContentCurrent) => !isAutoImporterSet(fileContentCurrent),
   )
 }
 function clearAutoImporterIfServerEntryMissing() {
@@ -374,6 +374,14 @@ function clearAutoImporterIfServerEntryMissing() {
       return !serverEntryFilePathAbsolute || existsSync(JSON.parse(serverEntryFilePathAbsolute))
     },
   )
+}
+function isAutoImporterSet(fileContentCurrent: string) {
+  if (fileContentCurrent.includes(`status = 'SET'`)) {
+    return true
+  } else {
+    assert(!fileContentCurrent.includes('SET'))
+    return false
+  }
 }
 
 /** Is `semver1` higher than `semver2`?*/
