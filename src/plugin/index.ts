@@ -233,10 +233,11 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
       apply: (_, configEnv) => isDev(configEnv),
       configResolved: {
         handler() {
-          // No skip(): each plugin instance resets its own copy of autoImporter.js
-
-          // Reset autoImporter.js
-          // - The dev server never loads the server entry, and its dependency optimizer fails upon a pointer to a removed one
+          // Avoid this error:
+          // ```
+          // Error during dependency optimization: [UNRESOLVED_IMPORT] Could not resolve '…/dist/server/entry.mjs' in …/@brillout/vite-plugin-server-entry/dist/esm/runtime/autoImporter.js
+          // ```
+          // https://github.com/brillout/vite-plugin-server-entry/pull/42
           clearAutoImporterIfNecessary()
         },
       },
