@@ -24,7 +24,7 @@ import {
   genRandomId,
 } from './utils.js'
 import path from 'path'
-import { writeFileSync, renameSync, readFileSync, existsSync } from 'fs'
+import { writeFileSync, renameSync, readFileSync } from 'fs'
 import type { AutoImporterCleared } from '../runtime/AutoImporter.js'
 import { serverEntryFileNameBase, serverEntryFileNameBaseAlternative } from '../shared/serverEntryFileNameBase.js'
 import { debugLogsBuildBegin, debugLogsBuildEnd, debugLogsBuildDisabled } from './debugLogsBuild.js'
@@ -235,9 +235,9 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
         handler() {
           // No skip(): each plugin instance resets its own copy of autoImporter.js
 
-          // Reset autoImporter.js if its server entry was removed
-          // - The dependency optimizer of the dev server fails upon a pointer to a removed server entry
-          clearAutoImporterIfServerEntryMissing()
+          // Reset autoImporter.js
+          // - The dev server never loads the server entry, and its dependency optimizer fails upon a pointer to a removed one
+          clearAutoImporterIfNecessary()
         },
       },
     },
@@ -361,16 +361,6 @@ function clearAutoImporterIfNecessary() {
     'UNSET',
     // Only reset a stale `status = 'SET'` — don't touch the file otherwise
     (fileContentCurrent) => !fileContentCurrent.includes(`status = 'SET'`),
-  )
-}
-function clearAutoImporterIfServerEntryMissing() {
-  clearAutoImporter(
-    'UNSET',
-    // Keep a pointer to an existing server entry, since autoImporter.js may still get bundled later (e.g. by `$ wrangler deploy`)
-    (fileContentCurrent) => {
-      const serverEntryFilePathAbsolute = /serverEntryFilePathAbsolute: (".*"),/.exec(fileContentCurrent)?.[1]
-      return !serverEntryFilePathAbsolute || existsSync(JSON.parse(serverEntryFilePathAbsolute))
-    },
   )
 }
 
