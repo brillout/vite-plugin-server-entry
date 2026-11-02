@@ -2,7 +2,7 @@ export { serverProductionEntryPlugin }
 export { serverEntryVirtualId }
 export type { PluginConfigProvidedByUser as VitePluginServerEntryOptions }
 
-import type { Plugin, ResolvedConfig as ConfigVite, Environment } from 'vite'
+import type { Plugin, ResolvedConfig as ConfigVite, Environment, ConfigEnv } from 'vite'
 import {
   isYarnPnP,
   assert,
@@ -230,7 +230,7 @@ function serverProductionEntryPlugin(pluginConfigProvidedByLibrary: PluginConfig
     },
     {
       name: `${pluginName}:dev`,
-      apply: (_, env) => env.command === 'serve' && !env.isPreview,
+      apply: (_, configEnv) => isDev(configEnv),
       configResolved: {
         handler() {
           // No skip(): each plugin instance resets its own copy of autoImporter.js
@@ -567,4 +567,10 @@ function writeAutoImporterFile(fileContentNew: string, skipWrite?: SkipWrite) {
   // link) and leaves the store file untouched. It's also atomic: a concurrently running server never
   // observes a half-written autoImporter.js.
   renameSync(filePathTmp, autoImporterFilePath)
+}
+
+function isDev(configEnv: ConfigEnv): boolean {
+  const { isPreview, command } = configEnv
+  assert(typeof isPreview === 'boolean')
+  return command === 'serve' && !isPreview
 }
