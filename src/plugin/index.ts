@@ -374,6 +374,8 @@ function clearAutoImporterIfServerEntryMissing() {
       if (!isAutoImporterSet(fileContentCurrent)) return true
       const serverEntryFilePathAbsolute = /serverEntryFilePathAbsolute: (".*"),/.exec(fileContentCurrent)?.[1]
       assert(serverEntryFilePathAbsolute)
+      assert(isAbsolutePath(serverEntryFilePathAbsolute))
+      assertPosixPath(serverEntryFilePathAbsolute)
       return existsSync(JSON.parse(serverEntryFilePathAbsolute))
     },
   )
